@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin - Manage Faculty</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+    .export-bottom { text-align: right; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0; }
+    .btn-export { background: #28a745; padding: 10px 25px; width: auto; }
+    .btn-export:hover { background: #218838; }
+    .search-box { margin-bottom: 20px; padding: 10px; background: #f8f9fa; border-radius: 8px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .search-box input { width: 250px; margin: 0; }
+    .search-box button { width: auto; margin: 0; padding: 10px 20px; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>👑 Admin Panel</h2>
+    <a href="/admin_dashboard">📊 Dashboard</a>
+    <a href="/admin/manage_faculty">👥 Manage Faculty</a>
+    <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
+    <a href="/admin/manage_sessions">📊 Manage Sessions</a>
+    <a href="/admin/system_settings">⚙️ System Settings</a>
+    <a href="/admin/change_password">🔐 Change Password</a>
+    <hr><a href="/logout">🚪 Logout</a>
+</div>
+
+<div class="main">
+    <div class="header" style="background:linear-gradient(135deg,#dc3545,#c82333);">👥 Manage Faculty Members</div>
+
+    <div class="card">
+        <h2>➕ Add New Faculty</h2>
+        <form method="POST" action="/admin/add_faculty">
+            <div class="form-grid">
+                <input type="text" name="faculty_id" placeholder="Faculty ID (e.g., FAC010)" required>
+                <input type="text" name="name" placeholder="Full Name" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <select name="department" required>
+                    <option value="">Select Department</option>
+                    <option value="CSE">Computer Science (CSE)</option>
+                    <option value="IT">Information Technology (IT)</option>
+                    <option value="ECE">Electronics (ECE)</option>
+                    <option value="ME">Mechanical (ME)</option>
+                    <option value="CE">Civil (CE)</option>
+                </select>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="success">➕ Add Faculty</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>📋 Faculty List</h2>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 Search by ID, Name, Email...">
+            <button onclick="searchFaculty()">🔍 Search</button>
+            <button onclick="clearSearch()" style="background:#6c757d;">🗑️ Clear</button>
+        </div>
+        <div class="table-container">
+            <table style="width:100%" id="facultyTable">
+                <thead><tr style="background:#1a3c61; color:white;"><th>Faculty ID</th><th>Name</th><th>Email</th><th>Department</th><th>Actions</th></tr></thead>
+                <tbody>
+                    {% for faculty in faculties %}
+                    <tr>
+                        <td><strong>{{ faculty.faculty_id }}</strong></td>
+                        <td>{{ faculty.name }}</td>
+                        <td>{{ faculty.email }}</td>
+                        <td><span class="badge" style="background:#1a3c61; color:white;">{{ faculty.department }}</span></td>
+                        <td class="action-buttons">
+                            <a href="/admin/edit_faculty/{{ faculty.faculty_id }}"><button class="btn-edit">✏️ Edit</button></a>
+                            <a href="/admin/delete_faculty/{{ faculty.faculty_id }}" onclick="return confirm('Delete this faculty?')"><button class="btn-delete">🗑️ Delete</button></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="export-bottom">
+            <button onclick="exportFacultyList()" class="btn-export">📄 Export Faculty List as PDF</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function searchFaculty() {
+        let input = document.getElementById('searchInput').value.toLowerCase();
+        let rows = document.getElementById('facultyTable').getElementsByTagName('tr');
+        for (let i = 1; i < rows.length; i++) { rows[i].style.display = rows[i].innerText.toLowerCase().includes(input) ? '' : 'none'; }
+    }
+    function clearSearch() { document.getElementById('searchInput').value = ''; searchFaculty(); }
+    function exportFacultyList() { window.location.href = '/export_faculty_pdf'; }
+</script>
+
+</body>
+</html>

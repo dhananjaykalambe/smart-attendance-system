@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin - Faculty Management</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+    }
+    .stats-card {
+        background: #1a3c61;
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+    }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>👑 Admin Panel</h2>
+    <a href="/admin/faculty">👥 Manage Faculty</a>
+    <a href="/admin/students">👨‍🎓 Manage Students</a>
+    <a href="/admin/sessions">📊 View All Sessions</a>
+    <a href="/admin/logout">🚪 Admin Logout</a>
+    <hr style="margin:15px 0; border-color:rgba(255,255,255,0.2);">
+    <a href="/faculty_dashboard">📊 Faculty Dashboard</a>
+    <a href="/">🏠 Home</a>
+</div>
+
+<div class="main">
+    <div class="header admin-header">
+        🔐 Administrator Control Panel
+    </div>
+
+    <div class="stats-grid">
+        <div class="stats-card">
+            <h3>{{ faculties|length }}</h3>
+            <p>Total Faculty</p>
+        </div>
+        <div class="stats-card">
+            <h3>ADMIN123</h3>
+            <p>Admin Key</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>➕ Add New Faculty Member</h2>
+        <form method="POST" action="/admin/add_faculty">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                <input type="text" name="faculty_id" placeholder="Faculty ID (e.g., FAC010)" required>
+                <input type="text" name="name" placeholder="Full Name" required>
+                <input type="email" name="email" placeholder="Email Address" required>
+                <input type="text" name="department" placeholder="Department" required>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" style="background:#28a745;">➕ Add Faculty</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>📋 Existing Faculty Members</h2>
+        <div style="overflow-x:auto;">
+            <table style="width:100%;">
+                <tr style="background:#1a3c61; color:white;">
+                    <th>Faculty ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Action</th>
+                </tr>
+                {% for faculty in faculties %}
+                <tr>
+                    <td><strong>{{ faculty.faculty_id }}</strong></td>
+                    <td>{{ faculty.name }}</td>
+                    <td>{{ faculty.email }}</td>
+                    <td>{{ faculty.department }}</td>
+                    <td>
+                        <a href="/admin/delete_faculty/{{ faculty.faculty_id }}" 
+                           onclick="return confirm('Are you sure?')">
+                            <button class="danger" style="width:auto; padding:5px 15px; background:#dc3545;">🗑️ Delete</button>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>🔐 Security Information</h2>
+        <ul>
+            <li>Admin Key: <strong>ADMIN123</strong> (Keep this secure)</li>
+            <li>Faculty default password: <strong>faculty123</strong></li>
+            <li>Change passwords after first login for security</li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>

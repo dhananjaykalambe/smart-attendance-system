@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Create Session</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>📋 Smart Attendance</h2>
+    <a href="/faculty_dashboard">📊 Dashboard</a>
+    <a href="/create_session">➕ Create Session</a>
+    <a href="/add_student">👥 Manage Students</a>
+    <a href="/students_report">📑 Reports</a>
+    <a href="/attendance">📜 All Attendance</a>
+    <a href="/subject_details">📚 Subjects</a>
+    <a href="/about">ℹ️ About</a>
+    <a href="/logout">🚪 Logout</a>
+</div>
+
+<div class="main">
+    <div class="header">
+        ➕ Create New Attendance Session
+    </div>
+
+    <div class="card">
+        <h2>📝 Session Details</h2>
+        
+        <form method="POST">
+            <label>📚 Select Subject:</label>
+            <div class="subject-buttons">
+                <button type="submit" name="subject" value="ML">🤖 ML</button>
+                <button type="submit" name="subject" value="DS">🗃️ DS</button>
+                <button type="submit" name="subject" value="CD">⚙️ CD</button>
+                <button type="submit" name="subject" value="IPR">📜 IPR</button>
+                <button type="submit" name="subject" value="EOII">📈 EOII</button>
+                <button type="submit" name="subject" value="OE-1">🌍 OE-1</button>
+            </div>
+            
+            <label>⏱️ Session Duration:</label>
+            <select name="duration" required>
+                <option value="1">1 minute (Quick Session)</option>
+                <option value="2">2 minutes</option>
+                <option value="5" selected>5 minutes (Standard)</option>
+                <option value="10">10 minutes</option>
+                <option value="15">15 minutes (Lecture)</option>
+                <option value="30">30 minutes (Long Session)</option>
+            </select>
+            
+            <p style="margin-top: 15px; font-size: 12px; color: #666;">
+                💡 Tip: The QR code will expire after the selected duration. Students must scan within this time.
+            </p>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
