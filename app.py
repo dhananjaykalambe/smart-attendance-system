@@ -357,18 +357,10 @@ def create_session():
         qr_folder = os.path.join("static", "qr_codes")
         os.makedirs(qr_folder, exist_ok=True)
         
-        # FIX: Use environment variable for production URL
-        # For local development, use localhost
-        # For production (Render), use your Render URL
-        import os
-        if os.environ.get('RENDER'):
-            # Running on Render
-            base_url = os.environ.get('BASE_URL', 'https://smart-attendance-system-s73n.onrender.com')
-        else:
-            # Running locally
-            base_url = request.host_url.rstrip('/')
-        
-        url = f"{base_url}/mark?session_id={session_id}&t={timestamp}&h={qr_hash}"
+        # ✅ FIXED - Using your actual Render URL
+        # Change this to your actual Render URL
+        BASE_URL = "https://smart-attendance-system-s73n.onrender.com"
+        url = f"{BASE_URL}/mark?session_id={session_id}&t={timestamp}&h={qr_hash}"
         
         qr_filename = f"qr_{session_id}.png"
         qr_path = os.path.join(qr_folder, qr_filename)
