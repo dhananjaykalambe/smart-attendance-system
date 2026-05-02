@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>System Settings</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>👑 Admin Panel</h2>
+    <a href="/admin_dashboard">📊 Dashboard</a>
+    <a href="/admin/manage_faculty">👥 Manage Faculty</a>
+    <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
+    <a href="/admin/manage_sessions">📊 Manage Sessions</a>
+    <a href="/admin/system_settings">⚙️ System Settings</a>
+    <a href="/admin/change_password">🔐 Change Password</a>
+    <hr><a href="/logout">🚪 Logout</a>
+</div>
+
+<div class="main">
+    <div class="header" style="background:linear-gradient(135deg,#dc3545,#c82333);">⚙️ System Configuration</div>
+
+    {% if message %}
+    <div class="alert alert-success">{{ message }}</div>
+    {% endif %}
+
+    <div class="card">
+        <h2>🏫 College Information</h2>
+        <form method="POST">
+            <div class="form-group"><label>College Name:</label><input type="text" name="college_name" value="{{ settings.college_name }}" required></div>
+            <div class="form-group"><label>College Location:</label><input type="text" name="college_location" value="{{ settings.college_location }}" required></div>
+            <div class="form-group"><label>Academic Year:</label><input type="text" name="academic_year" value="{{ settings.academic_year }}" required></div>
+            
+            <h2 style="margin-top: 30px;">⚙️ Attendance Settings</h2>
+            <div class="form-group"><label>⚠️ Low Attendance Threshold (%):</label><input type="number" name="attendance_threshold" value="{{ settings.attendance_threshold }}" min="0" max="100" required><small>Students below this percentage will receive alerts</small></div>
+            <div class="form-group"><label>⏱️ QR Code Expiry (seconds):</label><input type="number" name="qr_expiry" value="{{ settings.qr_expiry_seconds }}" min="10" max="300" required><small>How long the QR code remains valid after generation</small></div>
+            <div class="form-group"><label>⏰ Default Session Duration (minutes):</label><input type="number" name="session_duration" value="{{ settings.session_duration_minutes }}" min="1" max="60" required><small>Default duration when creating a new session</small></div>
+            
+            <button type="submit" class="success">💾 Save All Settings</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Students Report</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+    .student-row { cursor: pointer; }
+    .student-row:hover { background: #e8f4f8; }
+    .details-row { background: #f9f9f9; display: none; }
+    .details-row.show { display: table-row; }
+    .performance-excellent { color: green; font-weight: bold; }
+    .performance-good { color: #17a2b8; font-weight: bold; }
+    .performance-low { color: red; font-weight: bold; }
+    .export-buttons { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+    .export-btn { padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-pdf { background: #dc3545; color: white; }
+    .btn-all { background: #17a2b8; color: white; }
+    .btn-overall { background: #28a745; color: white; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>📋 Smart Attendance</h2>
+    <a href="/faculty_dashboard">📊 Dashboard</a>
+    <a href="/create_session">➕ Create Session</a>
+    <a href="/add_student">👥 Manage Students</a>
+    <a href="/students_report">📑 Reports</a>
+    <a href="/attendance">📜 All Attendance</a>
+    <a href="/subject_details">📚 Subjects</a>
+    <a href="/about">ℹ️ About</a>
+    <a href="/logout">🚪 Logout</a>
+</div>
+
+<div class="main">
+    <div class="header">📊 Student Performance Report</div>
+
+    <div class="card">
+        <h2>📄 Export Reports</h2>
+        <div class="export-buttons">
+            <a href="/export_all_students_pdf" class="export-btn btn-all">📑 All Students Report</a>
+            <a href="/export_overall_pdf" class="export-btn btn-overall">📊 Overall Report</a>
+            <select id="subjectSelect" style="width: auto; padding: 10px;">
+                <option value="">Select Subject</option>
+                <option value="ML">ML</option><option value="DS">DS</option><option value="CD">CD</option>
+                <option value="IPR">IPR</option><option value="EOII">EOII</option><option value="OE-1">OE-1</option>
+            </select>
+            <button onclick="exportSubject()" class="export-btn btn-pdf" style="background:#fd7e14;">📚 Export Subject</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📈 Overall Class Performance</h2>
+        <div class="stats-grid" style="margin-bottom: 20px;">
+            <div class="stat-card" style="background:#1a3c61;"><h3>{{ data|length }}</h3><p>Total Students</p></div>
+            <div class="stat-card" style="background:#28a745;">
+                <h3>{% set total_percent = 0 %}{% for student in data %}{% set total_percent = total_percent + student.overall_percentage %}{% endfor %}{{ "%.1f"|format(total_percent / data|length if data|length > 0 else 0) }}%</h3>
+                <p>Average Attendance</p>
+            </div>
+            <div class="stat-card" style="background:#17a2b8;">
+                <h3>{% set excellent = data|selectattr('overall_percentage', 'ge', 85)|list|length %}{{ excellent }}</h3>
+                <p>Excellent (≥85%)</p>
+            </div>
+            <div class="stat-card" style="background:#dc3545;">
+                <h3>{% set low = data|selectattr('overall_percentage', 'lt', 75)|list|length %}{{ low }}</h3>
+                <p>Needs Improvement (&lt;75%)</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>👨‍🎓 Student Performance Details</h2>
+        <div class="table-container">
+            <table style="width:100%">
+                <thead><tr style="background:#1a3c61; color:white;"><th>Roll No</th><th>Name</th><th>Branch</th><th>Overall %</th><th>Performance</th><th>Action</th></tr></thead>
+                <tbody>
+                    {% for student in data %}
+                    <tr class="student-row" onclick="toggleDetails('details_{{ loop.index }}')">
+                        <td><strong>{{ student.roll_no }}</strong></td>
+                        <td>{{ student.name }}</td>
+                        <td>{{ student.branch }}</td>
+                        <td class="{% if student.overall_percentage >= 85 %}performance-excellent{% elif student.overall_percentage >= 75 %}performance-good{% else %}performance-low{% endif %}">
+                            {{ student.overall_percentage }}%
+                        </td>
+                        <td>
+                            {% if student.overall_percentage >= 85 %}
+                                <span class="badge badge-success">✅ Excellent</span>
+                            {% elif student.overall_percentage >= 75 %}
+                                <span class="badge badge-info">📊 Good</span>
+                            {% else %}
+                                <span class="badge badge-danger">⚠️ Needs Improvement</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="/export_student_pdf/{{ student.roll_no }}">
+                                <button class="btn-small" style="background:#dc3545;">📄 PDF</button>
+                            </a>
+                         </td>
+                    </tr>
+                    <tr id="details_{{ loop.index }}" class="details-row">
+                        <td colspan="6">
+                            <div style="padding: 15px;">
+                                <h4>📊 Subject-wise Breakdown:</h4>
+                                <div class="table-container">
+                                    <table style="width:100%">
+                                        <thead><tr style="background:#2a5298; color:white;"><th>Subject</th><th>Attended</th><th>Total</th><th>Percentage</th><th>Progress</th></tr></thead>
+                                        <tbody>
+                                            {% for subject in student.subjects %}
+                                            <tr>
+                                                <td>{{ subject.subject }}</td>
+                                                <td>{{ subject.attended }}</td>
+                                                <td>{{ subject.total }}</td>
+                                                <td style="{% if subject.percentage < 75 %}color:red{% elif subject.percentage < 85 %}color:orange{% else %}color:green{% endif %}">{{ subject.percentage }}%</td>
+                                                <td style="width:150px"><div class="progress-bar-container"><div class="progress-bar" style="width: {{ subject.percentage }}%"></div></div></td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleDetails(id) { document.getElementById(id).classList.toggle('show'); }
+    function exportSubject() { const subject = document.getElementById('subjectSelect').value; if (subject) { window.location.href = '/export_subject_pdf/' + subject; } else { alert('Please select a subject'); } }
+</script>
+
+</body>
+</html>

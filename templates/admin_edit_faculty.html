@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Edit Faculty</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>👑 Admin Panel</h2>
+    <a href="/admin_dashboard">📊 Dashboard</a>
+    <a href="/admin/manage_faculty">👥 Manage Faculty</a>
+    <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
+    <a href="/admin/manage_sessions">📊 Manage Sessions</a>
+    <a href="/admin/system_settings">⚙️ System Settings</a>
+    <a href="/admin/change_password">🔐 Change Password</a>
+    <hr><a href="/logout">🚪 Logout</a>
+</div>
+
+<div class="main">
+    <div class="header" style="background:linear-gradient(135deg,#ffc107,#e0a800); color:#333;">✏️ Edit Faculty Information</div>
+
+    <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <h2>Editing: {{ faculty.faculty_id }}</h2>
+        <div class="alert alert-info" style="margin-bottom: 20px;">⚠️ Faculty ID cannot be changed. To change ID, please delete and recreate.</div>
+        
+        <form method="POST">
+            <div class="form-group"><label>Faculty ID:</label><input type="text" value="{{ faculty.faculty_id }}" disabled style="background:#e9ecef;"></div>
+            <div class="form-group"><label>Full Name *</label><input type="text" name="name" value="{{ faculty.name }}" required></div>
+            <div class="form-group"><label>Email Address *</label><input type="email" name="email" value="{{ faculty.email }}" required></div>
+            <div class="form-group">
+                <label>Department *</label>
+                <select name="department" required>
+                    <option value="CSE" {% if faculty.department == 'CSE' %}selected{% endif %}>CSE</option>
+                    <option value="IT" {% if faculty.department == 'IT' %}selected{% endif %}>IT</option>
+                    <option value="ECE" {% if faculty.department == 'ECE' %}selected{% endif %}>ECE</option>
+                    <option value="ME" {% if faculty.department == 'ME' %}selected{% endif %}>ME</option>
+                    <option value="CE" {% if faculty.department == 'CE' %}selected{% endif %}>CE</option>
+                </select>
+            </div>
+            <div class="form-group"><label>New Password (Optional)</label><input type="password" name="password" placeholder="Leave blank to keep current password"><small>Only enter if you want to change the password</small></div>
+            
+            <div class="action-buttons" style="margin-top: 20px;">
+                <button type="submit" class="success" style="flex:1;">💾 Save Changes</button>
+                <a href="/admin/manage_faculty" style="flex:1;"><button type="button" style="background:#6c757d;">❌ Cancel</button></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

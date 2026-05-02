@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Dashboard</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>👑 Admin Panel</h2>
+    <a href="/admin_dashboard">📊 Dashboard</a>
+    <a href="/admin/manage_faculty">👥 Manage Faculty</a>
+    <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
+    <a href="/admin/manage_sessions">📊 Manage Sessions</a>
+    <a href="/admin/system_settings">⚙️ System Settings</a>
+    <a href="/admin/change_password">🔐 Change Password</a>
+    <hr><a href="/logout">🚪 Logout</a>
+</div>
+
+<div class="main">
+    <div class="header" style="background:linear-gradient(135deg,#dc3545,#c82333);">👑 Welcome, {{ name }}! | Admin Dashboard</div>
+
+    <div class="stats-grid">
+        <div class="stat-card" style="background:#1a3c61;"><h3>{{ stats.total_students }}</h3><p>Total Students</p></div>
+        <div class="stat-card" style="background:#17a2b8;"><h3>{{ stats.total_faculty }}</h3><p>Total Faculty</p></div>
+        <div class="stat-card" style="background:#28a745;"><h3>{{ stats.total_sessions }}</h3><p>Total Sessions</p></div>
+        <div class="stat-card" style="background:#ffc107; color:#333;"><h3>{{ stats.total_attendance }}</h3><p>Attendance Records</p></div>
+    </div>
+
+    <div class="card">
+        <h2>📢 Notice Board</h2>
+        <form method="POST" action="/admin/add_notice" style="margin-bottom: 20px;">
+            <div class="form-grid">
+                <input type="text" name="title" placeholder="Notice Title" required>
+                <textarea name="content" placeholder="Notice Content" rows="2" required></textarea>
+                <button type="submit" class="success" style="width: auto;">➕ Add Notice</button>
+            </div>
+        </form>
+        <div class="table-container">
+            <table style="width:100%">
+                <thead><tr style="background:#1a3c61; color:white;"><th>Title</th><th>Content</th><th>Date</th><th>Author</th><th>Action</th></tr></thead>
+                <tbody>
+                    {% for notice in notices %}
+                    <tr>
+                        <td><strong>{{ notice.title }}</strong></td>
+                        <td>{{ notice.content[:50] }}{% if notice.content|length > 50 %}...{% endif %}</td>
+                        <td>{{ notice.created_at.strftime('%d %b %Y') if notice.created_at else 'N/A' }}</td>
+                        <td>{{ notice.author }}</td>
+                        <td><a href="/admin/delete_notice/{{ notice._id }}" onclick="return confirm('Delete this notice?')"><button class="danger btn-small">🗑️ Delete</button></a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🕐 Recent Sessions</h2>
+        <div class="table-container">
+            <table style="width:100%">
+                <thead><tr style="background:#1a3c61; color:white;"><th>Session ID</th><th>Subject</th><th>Start Time</th><th>End Time</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for session in recent_sessions %}
+                    <tr>
+                        <td><code>{{ session.session_id }}</code></td>
+                        <td>{{ session.subject }}</td>
+                        <td>{{ session.start_time.strftime('%Y-%m-%d %H:%M') if session.start_time else 'N/A' }}</td>
+                        <td>{{ session.end_time.strftime('%H:%M') if session.end_time else 'N/A' }}</td>
+                        <td>{% if session.end_time and session.end_time > now %}<span class="badge badge-success">🟢 Active</span>{% else %}<span class="badge badge-danger">🔴 Expired</span>{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
