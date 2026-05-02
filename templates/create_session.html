@@ -2,11 +2,58 @@
 <html>
 <head>
 <title>Create Session</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+    .subject-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+    .subject-card {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        padding: 15px;
+        border-radius: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: transform 0.3s;
+        border: none;
+        width: 100%;
+        margin: 0;
+    }
+    .subject-card:hover {
+        transform: translateY(-3px);
+    }
+    .subject-card.selected {
+        background: linear-gradient(135deg, #1a3c61, #2a5298);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .duration-select {
+        margin: 20px 0;
+    }
+    .create-btn {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        font-size: 18px;
+        padding: 15px;
+        margin-top: 20px;
+    }
+    .error-msg {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        display: none;
+    }
+</style>
 </head>
 <body>
 
-<div class="sidebar">
+<button class="menu-toggle" onclick="toggleSidebar()">☰ Menu</button>
+
+<div class="sidebar" id="sidebar">
     <h2>📋 Smart Attendance</h2>
     <a href="/faculty_dashboard">📊 Dashboard</a>
     <a href="/create_session">➕ Create Session</a>
@@ -26,40 +73,96 @@
     <div class="card">
         <h2>📝 Session Details</h2>
         
-        <form method="POST">
+        <div id="errorMsg" class="error-msg">
+            ⚠️ Please select a subject before creating session
+        </div>
+        
+        <form method="POST" action="/create_session" id="sessionForm">
             <label>📚 Select Subject:</label>
-            <div class="subject-buttons">
-                <button type="submit" name="subject" value="ML">🤖 ML</button>
-                <button type="submit" name="subject" value="DS">🗃️ DS</button>
-                <button type="submit" name="subject" value="CD">⚙️ CD</button>
-                <button type="submit" name="subject" value="IPR">📜 IPR</button>
-                <button type="submit" name="subject" value="EOII">📈 EOII</button>
-                <button type="submit" name="subject" value="OE-1">🌍 OE-1</button>
+            <div class="subject-grid">
+                <button type="submit" name="subject" value="ML" class="subject-card" onclick="selectSubject(this, 'ML')">
+                    🤖 Machine Learning<br><small>(ML)</small>
+                </button>
+                <button type="submit" name="subject" value="DS" class="subject-card" onclick="selectSubject(this, 'DS')">
+                    🗃️ Data Structures<br><small>(DS)</small>
+                </button>
+                <button type="submit" name="subject" value="CD" class="subject-card" onclick="selectSubject(this, 'CD')">
+                    ⚙️ Compiler Design<br><small>(CD)</small>
+                </button>
+                <button type="submit" name="subject" value="IPR" class="subject-card" onclick="selectSubject(this, 'IPR')">
+                    📜 IPR<br><small>(IPR)</small>
+                </button>
+                <button type="submit" name="subject" value="EOII" class="subject-card" onclick="selectSubject(this, 'EOII')">
+                    📈 Economics in IT<br><small>(EOII)</small>
+                </button>
+                <button type="submit" name="subject" value="OE-1" class="subject-card" onclick="selectSubject(this, 'OE-1')">
+                    🌍 Environmental Engg<br><small>(OE-1)</small>
+                </button>
             </div>
             
-            <label>⏱️ Session Duration:</label>
-            <select name="duration" required>
-                <option value="1">1 minute (Quick Session)</option>
-                <option value="2">2 minutes</option>
-                <option value="5" selected>5 minutes (Standard)</option>
-                <option value="10">10 minutes</option>
-                <option value="15">15 minutes (Lecture)</option>
-                <option value="30">30 minutes (Long Session)</option>
-            </select>
+            <div class="duration-select">
+                <label>⏱️ Session Duration:</label>
+                <select name="duration" required>
+                    <option value="1">1 minute (Quick Session)</option>
+                    <option value="2">2 minutes</option>
+                    <option value="5" selected>5 minutes (Standard)</option>
+                    <option value="10">10 minutes</option>
+                    <option value="15">15 minutes (Lecture)</option>
+                    <option value="30">30 minutes (Long Session)</option>
+                </select>
+            </div>
             
-            <p style="margin-top: 15px; font-size: 12px; color: #666;">
-                💡 Tip: The QR code will expire after the selected duration. Students must scan within this time.
-            </p>
+            <input type="hidden" name="selected_subject" id="selected_subject" value="">
+            
+            <button type="button" class="create-btn" onclick="submitSession()">🚀 Generate QR Code</button>
         </form>
+        
+        <p style="margin-top: 15px; font-size: 12px; color: #666; text-align: center;">
+            💡 Tip: Select a subject first, then click "Generate QR Code"
+        </p>
     </div>
 </div>
 
 <script>
+    let currentSubject = null;
+    
+    function selectSubject(button, subject) {
+        // Remove selected class from all buttons
+        document.querySelectorAll('.subject-card').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        
+        // Add selected class to clicked button
+        button.classList.add('selected');
+        
+        // Store selected subject
+        currentSubject = subject;
+        document.getElementById('selected_subject').value = subject;
+        
+        // Hide error message
+        document.getElementById('errorMsg').style.display = 'none';
+    }
+    
+    function submitSession() {
+        if (!currentSubject) {
+            document.getElementById('errorMsg').style.display = 'block';
+            return;
+        }
+        
+        // Create form data and submit
+        const form = document.getElementById('sessionForm');
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'subject';
+        hiddenInput.value = currentSubject;
+        form.appendChild(hiddenInput);
+        form.submit();
+    }
+    
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('open');
     }
     
-    // Close sidebar when clicking a link (on mobile)
     document.querySelectorAll('.sidebar a').forEach(link => {
         link.addEventListener('click', () => {
             if (window.innerWidth <= 768) {
@@ -67,19 +170,7 @@
             }
         });
     });
-    
-    // Close sidebar when clicking outside (on mobile)
-    document.addEventListener('click', function(event) {
-        const sidebar = document.getElementById('sidebar');
-        const menuToggle = document.querySelector('.menu-toggle');
-        if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
-            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
-                sidebar.classList.remove('open');
-            }
-        }
-    });
 </script>
+
 </body>
-<!-- Mobile Menu Toggle Button -->
-<button class="menu-toggle" onclick="toggleSidebar()">☰ Menu</button>
 </html>
