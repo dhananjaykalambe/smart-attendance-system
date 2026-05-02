@@ -357,11 +357,30 @@ def create_session():
         qr_folder = os.path.join("static", "qr_codes")
         os.makedirs(qr_folder, exist_ok=True)
         
-        url = f"{request.host_url}mark?session_id={session_id}&t={timestamp}&h={qr_hash}"
+        # ✅ FIXED - Use environment variable for base URL
+        # Get the base URL from environment or use request.host_url as fallback
+        base_url = os.environ.get('BASE_URL', request.host_url)
+        # Ensure base_url doesn't end with /
+        if base_url.endswith('/'):
+            base_url = base_url[:-1]
+        
+        # Create the full URL for QR code
+        url = f"{base_url}/mark?session_id={session_id}&t={timestamp}&h={qr_hash}"
+        
         qr_filename = f"qr_{session_id}.png"
         qr_path = os.path.join(qr_folder, qr_filename)
         img = qrcode.make(url)
         img.save(qr_path)
+        
+        start_time = datetime.now()
+        end_time = start_time + timedelta(minutes=duration)
+        
+        session_data = {"session_id": session_id, "subject": subject, "start_time": start_time, "end_time": end_time,
+                       "duration": duration, "qr_hash": qr_hash, "qr_filename": qr_filename, "is_active": True,
+                       "created_at": datetime.now(), "created_by": session['user_id']}
+        sessions_col.insert_one(session_data)
+        return render_template("session.html", session_id=session_id, subject=subject, qr=qr_filename, end_time=end_time.isoformat())
+    return render_template("create_session.html")
         
         start_time = datetime.now()
         end_time = start_time + timedelta(minutes=duration)
