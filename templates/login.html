@@ -2,11 +2,25 @@
 <html>
 <head>
 <title>Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+    .login-card {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    @media (max-width: 480px) {
+        .role-btn { padding: 10px; }
+        .role-icon { font-size: 22px; }
+        .role-btn span:last-child { font-size: 12px; }
+    }
+</style>
 </head>
 <body>
 
-<div class="sidebar">
+<button class="menu-toggle" onclick="toggleSidebar()">☰ Menu</button>
+
+<div class="sidebar" id="sidebar">
     <h2>📋 Smart Attendance</h2>
     <a href="/">🏠 Home</a>
     <a href="/login">🔐 Login</a>
@@ -19,7 +33,7 @@
         🎓 Priyadarshini Bhagwati College of Engineering, Nagpur
     </div>
 
-    <div class="card" style="max-width: 500px; margin: 0 auto;">
+    <div class="card login-card">
         <h2 style="text-align: center;">🔐 Login to System</h2>
         
         {% if error %}
@@ -29,13 +43,16 @@
         <form method="POST">
             <div class="role-buttons">
                 <div class="role-btn student" data-role="student" onclick="selectRole('student')">
-                    <span class="role-icon">👨‍🎓</span> Student
+                    <span class="role-icon">👨‍🎓</span>
+                    <span>Student</span>
                 </div>
                 <div class="role-btn faculty" data-role="faculty" onclick="selectRole('faculty')">
-                    <span class="role-icon">👨‍🏫</span> Faculty
+                    <span class="role-icon">👨‍🏫</span>
+                    <span>Faculty</span>
                 </div>
                 <div class="role-btn admin" data-role="admin" onclick="selectRole('admin')">
-                    <span class="role-icon">👑</span> Admin
+                    <span class="role-icon">👑</span>
+                    <span>Admin</span>
                 </div>
             </div>
             
@@ -46,16 +63,28 @@
             <button type="submit">Login →</button>
         </form>
         
-        <div style="margin-top: 20px; font-size: 12px; text-align: center; color: #666;">
+        <div style="margin-top: 15px; font-size: 11px; text-align: center; color: #666;">
             <p><strong>📋 Demo Credentials:</strong></p>
             <p>👨‍🎓 Student: CS001 (No password)</p>
-            <p>👨‍🏫 Faculty: FAC001 / Password: faculty123</p>
-            <p>👑 Admin: ADMIN001 / Password: admin123</p>
+            <p>👨‍🏫 Faculty: FAC001 / faculty123</p>
+            <p>👑 Admin: ADMIN001 / admin123</p>
         </div>
     </div>
 </div>
 
 <script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+    }
+    
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        });
+    });
+    
     function selectRole(role) {
         document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('selected'));
         document.querySelector(`.role-btn.${role}`).classList.add('selected');

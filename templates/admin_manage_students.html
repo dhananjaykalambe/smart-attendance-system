@@ -129,5 +129,32 @@
     function exportStudentList() { window.location.href = '/export_students_pdf'; }
 </script>
 
+<script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+    }
+    
+    // Close sidebar when clicking a link (on mobile)
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        });
+    });
+    
+    // Close sidebar when clicking outside (on mobile)
+    document.addEventListener('click', function(event) {
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.querySelector('.menu-toggle');
+        if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                sidebar.classList.remove('open');
+            }
+        }
+    });
+</script>
 </body>
+<!-- Mobile Menu Toggle Button -->
+<button class="menu-toggle" onclick="toggleSidebar()">☰ Menu</button>
 </html>
