@@ -1,5 +1,5 @@
 # ====================================================================
-# MONGODB CONFIGURATION
+# SMART ATTENDANCE SYSTEM - CONFIGURATION
 # ====================================================================
 
 import os
@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# MongoDB Connection String (Read from environment variable)
+# MongoDB Connection
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
 DB_NAME = os.getenv("DB_NAME", "smart_attendance")
 
@@ -22,7 +22,7 @@ COLLECTIONS = {
     "settings": "settings"
 }
 
-# System Settings
+# Default System Settings
 DEFAULT_SETTINGS = {
     "attendance_threshold": 75,
     "qr_expiry_seconds": 60,
@@ -31,3 +31,7 @@ DEFAULT_SETTINGS = {
     "college_location": "Nagpur",
     "academic_year": "2024-25"
 }
+
+# App Settings
+APP_NAME = "Smart Attendance System"
+APP_VERSION = "2.0.0"

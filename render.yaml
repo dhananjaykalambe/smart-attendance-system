@@ -1,0 +1,14 @@
+# render.yaml
+services:
+  - type: web
+    name: smart-attendance-system
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: DB_NAME
+        value: smart_attendance
+      - key: PYTHON_VERSION
+        value: 3.11.0

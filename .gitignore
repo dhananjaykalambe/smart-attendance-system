@@ -1,7 +1,6 @@
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
 *.so
 .Python
 env/
@@ -27,20 +26,19 @@ wheels/
 instance/
 .webassets-cache
 .env.local
-.env
+
+# Database
+*.db
+*.sqlite
+
+# Static generated files
+static/qr_codes/*.png
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# Database
-*.db
-*.sqlite
-
-# Static files
-static/qr_codes/*.png
 
 # OS
 .DS_Store

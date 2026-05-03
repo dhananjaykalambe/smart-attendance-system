@@ -357,8 +357,7 @@ def create_session():
         qr_folder = os.path.join("static", "qr_codes")
         os.makedirs(qr_folder, exist_ok=True)
         
-        # ✅ FIXED - Using your actual Render URL
-        # Change this to your actual Render URL
+        # Your Render URL
         BASE_URL = "https://smart-attendance-system-s73n.onrender.com"
         url = f"{BASE_URL}/mark?session_id={session_id}&t={timestamp}&h={qr_hash}"
         
@@ -371,19 +370,25 @@ def create_session():
         end_time = start_time + timedelta(minutes=duration)
         
         session_data = {
-            "session_id": session_id, 
-            "subject": subject, 
-            "start_time": start_time, 
+            "session_id": session_id,
+            "subject": subject,
+            "start_time": start_time,
             "end_time": end_time,
-            "duration": duration, 
-            "qr_hash": qr_hash, 
-            "qr_filename": qr_filename, 
+            "duration": duration,
+            "qr_hash": qr_hash,
+            "qr_filename": qr_filename,
             "is_active": True,
-            "created_at": datetime.now(), 
+            "created_at": datetime.now(),
             "created_by": session['user_id']
         }
         sessions_col.insert_one(session_data)
-        return render_template("session.html", session_id=session_id, subject=subject, qr=qr_filename, end_time=end_time.isoformat())
+        
+        # ✅ FIXED: Pass end_time as ISO format string for JavaScript
+        return render_template("session.html", 
+                              session_id=session_id, 
+                              subject=subject, 
+                              qr=qr_filename, 
+                              end_time=end_time.isoformat())
     return render_template("create_session.html")
 
 # ====================================================================
@@ -1239,6 +1244,107 @@ def admin_add_notice():
 def admin_delete_notice(notice_id):
     notices_col.delete_one({"_id": ObjectId(notice_id)})
     return redirect(url_for('admin_dashboard'))
+
+# ====================================================================
+# ADMIN - BULK UPLOAD STUDENTS (Excel/CSV)
+# ====================================================================
+import pandas as pd
+import io
+
+@app.route('/admin/bulk_upload_students', methods=['POST'])
+@login_required
+@admin_required
+def admin_bulk_upload_students():
+    """Bulk upload students from Excel or CSV file"""
+    
+    if 'file' not in request.files:
+        return redirect(url_for('admin_manage_students'))
+    
+    file = request.files['file']
+    if file.filename == '':
+        return redirect(url_for('admin_manage_students'))
+    
+    if not file.filename.endswith(('.xlsx', '.xls', '.csv')):
+        return "❌ Please upload Excel (.xlsx, .xls) or CSV file only", 400
+    
+    try:
+        # Read file based on extension
+        if file.filename.endswith('.csv'):
+            df = pd.read_csv(file)
+        else:
+            df = pd.read_excel(file)
+        
+        # Expected columns
+        expected_columns = ['roll_no', 'name', 'branch']
+        optional_columns = ['year', 'semester', 'email']
+        
+        # Check required columns
+        missing_cols = [col for col in expected_columns if col not in df.columns]
+        if missing_cols:
+            return f"❌ Missing required columns: {', '.join(missing_cols)}. Required: roll_no, name, branch", 400
+        
+        success_count = 0
+        error_count = 0
+        errors = []
+        
+        for idx, row in df.iterrows():
+            try:
+                roll_no = str(row['roll_no']).strip()
+                name = str(row['name']).strip()
+                branch = str(row['branch']).strip()
+                
+                # Skip empty rows
+                if not roll_no or not name or not branch:
+                    continue
+                
+                # Check if student already exists
+                existing = students_col.find_one({"roll_no": roll_no})
+                if existing:
+                    error_count += 1
+                    errors.append(f"Row {idx+2}: Roll number {roll_no} already exists")
+                    continue
+                
+                # Get optional values
+                year = int(row['year']) if 'year' in df.columns and pd.notna(row['year']) else 3
+                semester = int(row['semester']) if 'semester' in df.columns and pd.notna(row['semester']) else 6
+                email = str(row['email']) if 'email' in df.columns and pd.notna(row['email']) else ''
+                
+                student_data = {
+                    "roll_no": roll_no,
+                    "name": name,
+                    "branch": branch,
+                    "year": year,
+                    "semester": semester,
+                    "email": email,
+                    "created_at": datetime.now()
+                }
+                students_col.insert_one(student_data)
+                success_count += 1
+                
+            except Exception as e:
+                error_count += 1
+                errors.append(f"Row {idx+2}: {str(e)}")
+        
+        # Prepare result message
+        message = f"✅ Successfully added {success_count} students."
+        if error_count > 0:
+            message += f" ⚠️ Failed to add {error_count} students."
+            if errors:
+                message += f"<br><br><strong>Errors:</strong><br>{'<br>'.join(errors[:10])}"
+                if len(errors) > 10:
+                    message += f"<br>... and {len(errors)-10} more errors"
+        
+        return f"""
+        <div style="text-align:center; padding:50px; background:white; border-radius:20px; max-width:600px; margin:100px auto;">
+            <div style="font-size:48px;">{'✅' if success_count > 0 else '⚠️'}</div>
+            <h2>Bulk Upload Complete</h2>
+            <p>{message}</p>
+            <a href="/admin/manage_students"><button style="margin-top:20px;">Back to Students</button></a>
+        </div>
+        """
+        
+    except Exception as e:
+        return f"❌ Error reading file: {str(e)}", 400
 
 # ====================================================================
 # STATIC PAGES
