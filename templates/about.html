@@ -23,7 +23,18 @@
 </head>
 <body>
 
-<div class="sidebar">
+<button class="menu-toggle" onclick="toggleSidebar()">
+    <div class="hamburger-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</button>
+
+<!-- ✅ RIGHT HERE - Right after the button -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
     <h2>📋 Smart Attendance</h2>
     {% if session.role == 'faculty' %}
     <a href="/faculty_dashboard">📊 Dashboard</a>
@@ -96,31 +107,32 @@
 </div>
 
 <script>
+    // Mobile Menu Functions
     function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('open');
-    }
-    
-    // Close sidebar when clicking a link (on mobile)
-    document.querySelectorAll('.sidebar a').forEach(link => {
-        link.addEventListener('click', () => {
-            if (window.innerWidth <= 768) {
-                document.getElementById('sidebar').classList.remove('open');
-            }
-        });
-    });
-    
-    // Close sidebar when clicking outside (on mobile)
-    document.addEventListener('click', function(event) {
         const sidebar = document.getElementById('sidebar');
-        const menuToggle = document.querySelector('.menu-toggle');
-        if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
-            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
-                sidebar.classList.remove('open');
-            }
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuBtn = document.querySelector('.menu-toggle');
+        if (sidebar) {
+            sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('active');
+            if (menuBtn) menuBtn.classList.toggle('open');
         }
+    }
+    function closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuBtn = document.querySelector('.menu-toggle');
+        if (sidebar) {
+            sidebar.classList.remove('open');
+            if (overlay) overlay.classList.remove('active');
+            if (menuBtn) menuBtn.classList.remove('open');
+        }
+    }
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
     });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && window.innerWidth <= 768) closeSidebar(); });
+    window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 </body>
-<!-- Mobile Menu Toggle Button -->
-<button class="menu-toggle" onclick="toggleSidebar()">☰ Menu</button>
 </html>

@@ -3,10 +3,81 @@
 <head>
 <title>Session Created</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    .qr-container {
+        background: white;
+        padding: 20px;
+        border-radius: 20px;
+        display: inline-block;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .info-box {
+        background: #e8f4f8;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 20px 0;
+        text-align: left;
+    }
+    .copy-btn {
+        background: #6c757d;
+        padding: 8px 20px;
+        width: auto;
+        margin-left: 10px;
+    }
+    .countdown-container {
+        text-align: center;
+        margin: 20px 0;
+    }
+    .countdown-timer {
+        font-size: 3.5rem;
+        font-weight: bold;
+        font-family: monospace;
+        background: #1a3c61;
+        color: white;
+        display: inline-block;
+        padding: 20px 40px;
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    }
+    .countdown-timer.warning {
+        background: #dc3545;
+        animation: pulse 0.5s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    .status-text {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #666;
+    }
+    @media (max-width: 768px) {
+        .countdown-timer {
+            font-size: 2rem;
+            padding: 15px 25px;
+        }
+        .qr-container img {
+            width: 200px;
+        }
+    }
+</style>
 </head>
 <body>
 
-<div class="sidebar">
+<button class="menu-toggle" onclick="toggleSidebar()">
+    <div class="hamburger-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</button>
+
+<!-- ✅ RIGHT HERE - Right after the button -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
     <h2>📋 Smart Attendance</h2>
     <a href="/faculty_dashboard">📊 Dashboard</a>
     <a href="/create_session">➕ Create Session</a>
@@ -23,82 +94,126 @@
         ✅ Session Created Successfully
     </div>
 
-    <div class="card" style="text-align: center;">
+    <div class="card" style="text-align:center;">
         <h2>📖 Subject: {{ subject }}</h2>
         <h3>🆔 Session ID: {{ session_id }}</h3>
         
-        <div id="countdown" class="countdown">--:--</div>
-        
-        <div style="background: white; padding: 20px; border-radius: 20px; display: inline-block; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-            <img src="{{ url_for('static', filename='qr_codes/' + qr) }}" width="250" style="border-radius: 15px;">
+        <div class="countdown-container">
+            <div class="countdown-timer" id="countdownTimer">--:--</div>
+            <div class="status-text" id="statusText">⏳ Session Active</div>
         </div>
         
-        <div style="background: #e8f4f8; padding: 15px; border-radius: 10px; margin: 20px 0;">
+        <div class="qr-container">
+            <img src="{{ url_for('static', filename='qr_codes/' + qr) }}" width="250" style="border-radius: 15px;" id="qrImage">
+        </div>
+        
+        <div class="info-box">
             <p><strong>📱 How to use:</strong></p>
             <p>1. Students should open the Scan QR page</p>
             <p>2. Scan this QR code using their device camera</p>
             <p>3. Attendance will be automatically marked</p>
+            <p>4. Session expires after the countdown ends</p>
         </div>
         
-        <p style="margin-top: 20px; color: green;">✅ QR is active for the duration shown above</p>
-        <p style="color: red; font-size: 12px;">⚠️ QR expires automatically after the countdown ends</p>
+        <p style="margin-top: 20px; color: green;" id="activeMessage">✅ QR is active for the duration shown above</p>
         
-        <button onclick="window.print()" style="width: auto; padding: 10px 30px; background: #6c757d;">🖨️ Print QR Code</button>
     </div>
 </div>
 
 <script>
-const endTimeStr = "{{ end_time }}";
-const countdownElement = document.getElementById('countdown');
-
-function updateCountdown() {
-    const remaining = Math.max(0, Math.floor((new Date(endTimeStr) - new Date()) / 1000));
+    // Get the end time from Flask
+    const endTimeStr = "{{ end_time }}";
+    console.log("End time from server:", endTimeStr);
     
-    if (remaining <= 0) {
-        countdownElement.innerHTML = "⏰ SESSION EXPIRED";
-        countdownElement.classList.add('warning');
-        return;
+    const countdownElement = document.getElementById('countdownTimer');
+    const statusText = document.getElementById('statusText');
+    const activeMessage = document.getElementById('activeMessage');
+    
+    function updateCountdown() {
+        // Parse the end time
+        const endTime = new Date(endTimeStr);
+        const now = new Date();
+        
+        // Calculate remaining time in seconds
+        const remainingSeconds = Math.max(0, Math.floor((endTime - now) / 1000));
+        
+        console.log("Remaining seconds:", remainingSeconds);
+        
+        if (remainingSeconds <= 0) {
+            // Session expired
+            countdownElement.innerHTML = "00:00";
+            countdownElement.classList.add('warning');
+            statusText.innerHTML = "⏰ SESSION EXPIRED";
+            statusText.style.color = "red";
+            activeMessage.innerHTML = "❌ Session has expired. Please create a new session.";
+            activeMessage.style.color = "red";
+            return;
+        }
+        
+        // Calculate minutes and seconds
+        const minutes = Math.floor(remainingSeconds / 60);
+        const seconds = remainingSeconds % 60;
+        
+        // Format with leading zeros
+        const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        countdownElement.innerHTML = formattedTime;
+        
+        // Add warning class when less than 30 seconds
+        if (remainingSeconds <= 30) {
+            countdownElement.classList.add('warning');
+            statusText.innerHTML = "⚠️ Session expiring soon!";
+            statusText.style.color = "orange";
+        } else {
+            countdownElement.classList.remove('warning');
+            statusText.innerHTML = "⏳ Session Active";
+            statusText.style.color = "#666";
+        }
+        
+        // Update every second
+        setTimeout(updateCountdown, 1000);
     }
     
-    const mins = Math.floor(remaining / 60);
-    const secs = remaining % 60;
-    countdownElement.innerHTML = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+    // Start the countdown immediately
+    updateCountdown();
     
-    if (remaining <= 30) {
-        countdownElement.classList.add('warning');
-    }
-}
-
-updateCountdown();
-setInterval(updateCountdown, 1000);
+    // Also check periodically with setInterval as backup
+    setInterval(function() {
+        const endTime = new Date(endTimeStr);
+        const now = new Date();
+        if (endTime - now <= 0) {
+            location.reload(); // Reload page when expired to show expired state
+        }
+    }, 1000);
 </script>
 
 <script>
+    // Mobile Menu Functions
     function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('open');
-    }
-    
-    // Close sidebar when clicking a link (on mobile)
-    document.querySelectorAll('.sidebar a').forEach(link => {
-        link.addEventListener('click', () => {
-            if (window.innerWidth <= 768) {
-                document.getElementById('sidebar').classList.remove('open');
-            }
-        });
-    });
-    
-    // Close sidebar when clicking outside (on mobile)
-    document.addEventListener('click', function(event) {
         const sidebar = document.getElementById('sidebar');
-        const menuToggle = document.querySelector('.menu-toggle');
-        if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
-            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
-                sidebar.classList.remove('open');
-            }
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuBtn = document.querySelector('.menu-toggle');
+        if (sidebar) {
+            sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('active');
+            if (menuBtn) menuBtn.classList.toggle('open');
         }
+    }
+    function closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuBtn = document.querySelector('.menu-toggle');
+        if (sidebar) {
+            sidebar.classList.remove('open');
+            if (overlay) overlay.classList.remove('active');
+            if (menuBtn) menuBtn.classList.remove('open');
+        }
+    }
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
     });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && window.innerWidth <= 768) closeSidebar(); });
+    window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
+
 </body>
-<!-- Mobile Menu Toggle Button -->
-<button class="menu-toggle" onclick="toggleSidebar()">☰ Menu</button>
 </html>

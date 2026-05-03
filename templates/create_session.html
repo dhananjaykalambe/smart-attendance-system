@@ -7,37 +7,67 @@
 <style>
     .subject-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
         gap: 15px;
         margin: 20px 0;
     }
     .subject-card {
         background: linear-gradient(135deg, #28a745, #20c997);
         color: white;
-        padding: 15px;
-        border-radius: 12px;
+        padding: 18px 12px;
+        border-radius: 16px;
         text-align: center;
         cursor: pointer;
-        transition: transform 0.3s;
+        transition: all 0.3s ease;
         border: none;
         width: 100%;
         margin: 0;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     .subject-card:hover {
-        transform: translateY(-3px);
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     }
     .subject-card.selected {
         background: linear-gradient(135deg, #1a3c61, #2a5298);
         box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        transform: scale(1.02);
+    }
+    .subject-card small {
+        font-size: 11px;
+        opacity: 0.9;
     }
     .duration-select {
-        margin: 20px 0;
+        margin: 25px 0;
+    }
+    .duration-select label {
+        font-weight: 600;
+        color: #1a3c61;
+        display: block;
+        margin-bottom: 8px;
+    }
+    .duration-select select {
+        width: 100%;
+        padding: 12px 15px;
+        border-radius: 12px;
+        border: 2px solid #e0e0e0;
+        font-size: 14px;
+        background: white;
+        cursor: pointer;
     }
     .create-btn {
         background: linear-gradient(135deg, #28a745, #20c997);
         font-size: 18px;
         padding: 15px;
         margin-top: 20px;
+        font-weight: bold;
+        border-radius: 50px;
+        box-shadow: 0 4px 15px rgba(40,167,69,0.3);
+    }
+    .create-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40,167,69,0.4);
     }
     .error-msg {
         background: #f8d7da;
@@ -46,12 +76,34 @@
         border-radius: 8px;
         margin-bottom: 15px;
         display: none;
+        border-left: 4px solid #dc3545;
+    }
+    .info-tip {
+        background: #e8f4f8;
+        padding: 12px;
+        border-radius: 10px;
+        text-align: center;
+        margin-top: 20px;
+    }
+    .info-tip p {
+        margin: 0;
+        font-size: 13px;
+        color: #1a3c61;
     }
 </style>
 </head>
 <body>
 
-<button class="menu-toggle" onclick="toggleSidebar()">☰ Menu</button>
+<button class="menu-toggle" onclick="toggleSidebar()">
+    <div class="hamburger-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</button>
+
+<!-- ✅ RIGHT HERE - Right after the button -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
     <h2>📋 Smart Attendance</h2>
@@ -66,7 +118,7 @@
 </div>
 
 <div class="main">
-    <div class="header">
+    <div class="header" style="background: linear-gradient(135deg, #28a745, #20c997);">
         ➕ Create New Attendance Session
     </div>
 
@@ -117,9 +169,9 @@
             <button type="button" class="create-btn" onclick="submitSession()">🚀 Generate QR Code</button>
         </form>
         
-        <p style="margin-top: 15px; font-size: 12px; color: #666; text-align: center;">
-            💡 Tip: Select a subject first, then click "Generate QR Code"
-        </p>
+        <div class="info-tip">
+            <p>💡 Tip: Select a subject first, then click "Generate QR Code"</p>
+        </div>
     </div>
 </div>
 
@@ -159,17 +211,35 @@
         form.submit();
     }
     
+</script>
+
+<script>
+    // Mobile Menu Functions
     function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('open');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuBtn = document.querySelector('.menu-toggle');
+        if (sidebar) {
+            sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('active');
+            if (menuBtn) menuBtn.classList.toggle('open');
+        }
     }
-    
+    function closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuBtn = document.querySelector('.menu-toggle');
+        if (sidebar) {
+            sidebar.classList.remove('open');
+            if (overlay) overlay.classList.remove('active');
+            if (menuBtn) menuBtn.classList.remove('open');
+        }
+    }
     document.querySelectorAll('.sidebar a').forEach(link => {
-        link.addEventListener('click', () => {
-            if (window.innerWidth <= 768) {
-                document.getElementById('sidebar').classList.remove('open');
-            }
-        });
+        link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
     });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && window.innerWidth <= 768) closeSidebar(); });
+    window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 
 </body>
