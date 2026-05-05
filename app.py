@@ -108,6 +108,12 @@ def get_settings():
     settings = settings_col.find_one({})
     return settings if settings else DEFAULT_SETTINGS
 
+def get_college_header():
+    settings = get_settings()
+    college_name = settings.get("college_name", "Priyadarshini Bhagwati College of Engineering")
+    college_location = settings.get("college_location", "Nagpur")
+    return f"🎓 {college_name}, {college_location}"
+
 def generate_secure_qr_hash(session_id, timestamp):
     secret = app.secret_key.encode()
     message = f"{session_id}:{timestamp}".encode()
@@ -208,6 +214,60 @@ def admin_required(f):
     return decorated_function
 
 # ====================================================================
+# SIDEBAR HELPER
+# ====================================================================
+
+def get_sidebar_links():
+    """Returns sidebar links based on user role and current page"""
+    role = session.get('role')
+    settings = get_settings()
+    
+    # Common links for all roles
+    common_links = [
+        {"url": "/attendance", "icon": "📜", "text": "Attendance Records"},
+        {"url": "/subject_details", "icon": "📚", "text": "Subject Details"},
+        {"url": "/about", "icon": "ℹ️", "text": "About"}
+    ]
+    
+    if role == 'faculty':
+        main_links = [
+            {"url": "/faculty_dashboard", "icon": "📊", "text": "Dashboard"},
+            {"url": "/create_session", "icon": "➕", "text": "Create Session"},
+            {"url": "/add_student", "icon": "👥", "text": "Manage Students"},
+            {"url": "/students_report", "icon": "📑", "text": "Reports"}
+        ]
+        return {"main": main_links, "common": common_links}
+    
+    elif role == 'admin':
+        main_links = [
+            {"url": "/admin_dashboard", "icon": "👑", "text": "Dashboard"},
+            {"url": "/admin/manage_faculty", "icon": "👥", "text": "Manage Faculty"},
+            {"url": "/admin/manage_students", "icon": "👨‍🎓", "text": "Manage Students"},
+            {"url": "/admin/manage_sessions", "icon": "📊", "text": "Manage Sessions"},
+            {"url": "/admin/system_settings", "icon": "⚙️", "text": "System Settings"},
+            {"url": "/admin/change_password", "icon": "🔐", "text": "Change Password"}
+        ]
+        return {"main": main_links, "common": common_links}
+    
+    elif role == 'student':
+        main_links = [
+            {"url": "/student_dashboard", "icon": "📊", "text": "Dashboard"},
+            {"url": "/scan", "icon": "📷", "text": "Scan QR"}
+        ]
+        return {"main": main_links, "common": common_links}
+    
+    else:
+        # Not logged in
+        main_links = [
+            {"url": "/", "icon": "🏠", "text": "Home"},
+            {"url": "/login", "icon": "🔐", "text": "Login"}
+        ]
+        return {"main": main_links, "common": [
+            {"url": "/subject_details", "icon": "📚", "text": "Subject Details"},
+            {"url": "/about", "icon": "ℹ️", "text": "About"}
+        ]}
+
+# ====================================================================
 # ROUTES
 # ====================================================================
 
@@ -222,11 +282,16 @@ def home():
             return redirect(url_for('student_dashboard'))
     stats = get_dashboard_stats()
     settings = get_settings()
-    return render_template("index.html", stats=stats, settings=settings)
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    return render_template("index.html", stats=stats, settings=settings, sidebar_links=sidebar_links, college_header=college_header)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    
     if request.method == 'POST':
         user_id = request.form['user_id'].strip()
         role = request.form.get('role', 'student')
@@ -263,7 +328,8 @@ def login():
                 session['user_name'] = student['name']
                 session['role'] = 'student'
                 return redirect(url_for('student_dashboard'))
-    return render_template("login.html", error=error)
+    
+    return render_template("login.html", error=error, sidebar_links=sidebar_links, college_header=college_header)
 
 @app.route('/logout')
 def logout():
@@ -306,13 +372,20 @@ def student_dashboard():
     recent_attendance = list(attendance_col.find({"student_id": student_id}).sort("time", -1).limit(10))
     today_sessions = list(sessions_col.find({"end_time": {"$gt": datetime.now()}, "is_active": True}).limit(5))
     
-    return render_template("student_dashboard.html", name=session['user_name'], stats=stats, alerts=alerts, recent_attendance=recent_attendance, today_sessions=today_sessions)
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    
+    return render_template("student_dashboard.html", name=session['user_name'], stats=stats, alerts=alerts, 
+                          recent_attendance=recent_attendance, today_sessions=today_sessions,
+                          sidebar_links=sidebar_links, college_header=college_header)
 
 @app.route('/scan')
 @login_required
 @student_required
 def scan():
-    return render_template("scan.html", name=session['user_name'])
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    return render_template("scan.html", name=session['user_name'], sidebar_links=sidebar_links, college_header=college_header)
 
 # ====================================================================
 # FACULTY ROUTES
@@ -335,15 +408,23 @@ def faculty_dashboard():
         subject_stats.append({"subject": subject, "total": sessions_count, "attended": attended_count, "percentage": percent})
     
     recent_sessions = list(sessions_col.find({}).sort("start_time", -1).limit(10))
+    
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    
     return render_template("faculty_dashboard.html", name=session['user_name'], total_students=total_students, 
                           total_sessions=total_sessions, total_attendance=total_attendance, subject_stats=subject_stats, 
-                          recent_sessions=recent_sessions, now=datetime.now())
+                          recent_sessions=recent_sessions, now=datetime.now(),
+                          sidebar_links=sidebar_links, college_header=college_header)
 
 @app.route('/create_session', methods=['GET', 'POST'])
 @login_required
 @faculty_required
 def create_session():
     settings = get_settings()
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    
     if request.method == 'POST':
         subject = request.form.get('subject')
         duration = int(request.form.get('duration', settings.get("session_duration_minutes", 5)))
@@ -357,8 +438,10 @@ def create_session():
         qr_folder = os.path.join("static", "qr_codes")
         os.makedirs(qr_folder, exist_ok=True)
         
-        # Your Render URL
+        # Your Render URL - Replace with your actual URL if needed
         BASE_URL = "https://smart-attendance-system-s73n.onrender.com"
+        # For local testing, uncomment the line below and comment the above
+        # BASE_URL = request.url_root.rstrip('/')
         url = f"{BASE_URL}/mark?session_id={session_id}&t={timestamp}&h={qr_hash}"
         
         qr_filename = f"qr_{session_id}.png"
@@ -383,13 +466,22 @@ def create_session():
         }
         sessions_col.insert_one(session_data)
         
-        # ✅ FIXED: Pass end_time as ISO format string for JavaScript
+        # Convert to ISO format string for JavaScript
+        end_time_iso = end_time.isoformat()
+        # Also pass timestamp for additional reliability
+        current_timestamp = int(start_time.timestamp())
+        
         return render_template("session.html", 
                               session_id=session_id, 
                               subject=subject, 
                               qr=qr_filename, 
-                              end_time=end_time.isoformat())
-    return render_template("create_session.html")
+                              end_time=end_time_iso,
+                              duration=duration,
+                              current_timestamp=current_timestamp,
+                              sidebar_links=sidebar_links,
+                              college_header=college_header)
+    
+    return render_template("create_session.html", sidebar_links=sidebar_links, college_header=college_header)
 
 # ====================================================================
 # ADD STUDENT (FACULTY) - FIXED
@@ -398,6 +490,9 @@ def create_session():
 @login_required
 @faculty_required
 def add_student():
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    
     if request.method == 'POST':
         roll = request.form['roll']
         name = request.form['name']
@@ -420,7 +515,7 @@ def add_student():
     # Get all students to display in the list
     students = list(students_col.find({}).sort("roll_no", 1))
     
-    return render_template("add_student.html", students=students)
+    return render_template("add_student.html", students=students, sidebar_links=sidebar_links, college_header=college_header)
 
 @app.route('/delete_student/<roll_no>')
 @login_required
@@ -452,28 +547,41 @@ def mark():
             settings = get_settings()
             qr_expiry = settings.get("qr_expiry_seconds", 60)
             if current_time - timestamp_int > qr_expiry:
-                return "❌ QR Code Expired. Please scan again."
+                return "<h2 style='color:red;text-align:center;margin-top:50px;'>❌ QR Code Expired. Please scan again.</h2>"
             if not verify_qr_hash(session_id, qr_timestamp, qr_hash):
-                return "❌ Invalid QR Code. Tampering detected."
-        except:
-            return "❌ Invalid QR Code"
+                return "<h2 style='color:red;text-align:center;margin-top:50px;'>❌ Invalid QR Code. Tampering detected.</h2>"
+        except Exception as e:
+            print(f"QR validation error: {e}")
+            return "<h2 style='color:red;text-align:center;margin-top:50px;'>❌ Invalid QR Code</h2>"
     
     session_data = sessions_col.find_one({"session_id": session_id})
     if not session_data:
-        return "❌ Invalid Session"
-    if not is_session_active(session_data['end_time']):
-        sessions_col.update_one({"session_id": session_id}, {"$set": {"is_active": False}})
-        return "❌ Session Expired"
+        return "<h2 style='color:red;text-align:center;margin-top:50px;'>❌ Invalid Session</h2>"
+    
+    # Check if session is active
+    now = datetime.now()
+    end_time = session_data.get('end_time')
+    
+    if end_time:
+        if now > end_time:
+            sessions_col.update_one({"session_id": session_id}, {"$set": {"is_active": False}})
+            return "<h2 style='color:red;text-align:center;margin-top:50px;'>❌ Session Expired</h2>"
     
     existing = attendance_col.find_one({"student_id": student_id, "session_id": session_id})
     if existing:
-        return "❌ Already Marked"
+        return "<h2 style='color:orange;text-align:center;margin-top:50px;'>⚠️ Already Marked</h2>"
     
     client_ip = get_client_ip()
-    attendance_record = {"student_id": student_id, "session_id": session_id, "subject": session_data['subject'],
-                        "time": datetime.now(), "ip_address": client_ip}
+    attendance_record = {
+        "student_id": student_id, 
+        "session_id": session_id, 
+        "subject": session_data['subject'],
+        "time": datetime.now(), 
+        "ip_address": client_ip
+    }
     attendance_col.insert_one(attendance_record)
-    return "<h2 style='color:green;text-align:center;margin-top:50px;'>✅ Attendance Marked Successfully!</h2>"
+    
+    return "<h2 style='color:green;text-align:center;margin-top:50px;'>✅ Attendance Marked Successfully!<br><br><a href='/student_dashboard' style='color:#1a3c61;'>Go to Dashboard</a></h2>"
 
 # ====================================================================
 # ATTENDANCE & REPORTS
@@ -482,6 +590,9 @@ def mark():
 @app.route('/attendance')
 @login_required
 def attendance():
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    
     if session.get('role') == 'student':
         records = list(attendance_col.find({"student_id": session['user_id']}).sort("time", -1))
     else:
@@ -493,12 +604,15 @@ def attendance():
         enriched_records.append({"roll_no": record['student_id'], "name": student['name'] if student else 'Unknown',
                                 "branch": student['branch'] if student else 'Unknown', "session_id": record['session_id'],
                                 "subject": record['subject'], "time": record['time'].strftime('%Y-%m-%d %H:%M:%S') if record['time'] else 'N/A'})
-    return render_template("attendance.html", data=enriched_records)
+    return render_template("attendance.html", data=enriched_records, sidebar_links=sidebar_links, college_header=college_header)
 
 @app.route('/students_report', methods=['GET', 'POST'])
 @login_required
 @faculty_required
 def students_report():
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    
     students_list = list(students_col.find({}))
     all_sessions = list(sessions_col.find({}))
     
@@ -522,10 +636,11 @@ def students_report():
         overall_percent = round((total_attended_all / total_possible_all) * 100, 2) if total_possible_all > 0 else 0
         report_data.append({"roll_no": student['roll_no'], "name": student['name'], "branch": student['branch'],
                            "overall_percentage": overall_percent, "subjects": student_attendance})
-    return render_template("students_report.html", data=report_data, total_sessions_dict=total_sessions_dict)
+    return render_template("students_report.html", data=report_data, total_sessions_dict=total_sessions_dict,
+                          sidebar_links=sidebar_links, college_header=college_header)
 
 # ====================================================================
-# PDF EXPORT ROUTES - ALL WITH CENTERED HEADER & BOTTOM LEFT TIMESTAMP
+# PDF EXPORT ROUTES - ALL WITH DYNAMIC COLLEGE HEADER
 # ====================================================================
 
 @app.route('/export_report/<session_id>')
@@ -560,11 +675,11 @@ def export_report(session_id):
     elements = []
     settings = get_settings()
     
-    # Centered Header
+    # Centered Header with dynamic college name
     title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'], fontSize=16, alignment=1, textColor=colors.HexColor('#1a3c61'))
     college_style = ParagraphStyle('CollegeName', parent=styles['Normal'], fontSize=14, alignment=1, textColor=colors.HexColor('#2a5298'), fontName='Helvetica-Bold')
     
-    elements.append(Paragraph(settings.get('college_name', 'Smart Attendance System'), college_style))
+    elements.append(Paragraph(settings.get('college_name', 'Priyadarshini Bhagwati College of Engineering'), college_style))
     elements.append(Spacer(1, 6))
     elements.append(Paragraph(f"Attendance Report - {session_data['subject']}", title_style))
     elements.append(Spacer(1, 12))
@@ -645,11 +760,11 @@ def export_student_pdf(roll_no):
     elements = []
     settings = get_settings()
     
-    # Centered Header
+    # Centered Header with dynamic college name
     title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'], fontSize=16, alignment=1, textColor=colors.HexColor('#1a3c61'))
     college_style = ParagraphStyle('CollegeName', parent=styles['Normal'], fontSize=14, alignment=1, textColor=colors.HexColor('#2a5298'), fontName='Helvetica-Bold')
     
-    elements.append(Paragraph(settings.get('college_name', 'Smart Attendance System'), college_style))
+    elements.append(Paragraph(settings.get('college_name', 'Priyadarshini Bhagwati College of Engineering'), college_style))
     elements.append(Spacer(1, 6))
     elements.append(Paragraph("Student Attendance Report", title_style))
     elements.append(Spacer(1, 12))
@@ -749,11 +864,11 @@ def export_all_students_pdf():
     elements = []
     settings = get_settings()
     
-    # Centered Header
+    # Centered Header with dynamic college name
     title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'], fontSize=16, alignment=1, textColor=colors.HexColor('#1a3c61'))
     college_style = ParagraphStyle('CollegeName', parent=styles['Normal'], fontSize=14, alignment=1, textColor=colors.HexColor('#2a5298'), fontName='Helvetica-Bold')
     
-    elements.append(Paragraph(settings.get('college_name', 'Smart Attendance System'), college_style))
+    elements.append(Paragraph(settings.get('college_name', 'Priyadarshini Bhagwati College of Engineering'), college_style))
     elements.append(Spacer(1, 6))
     elements.append(Paragraph("Complete Student Attendance Report", title_style))
     elements.append(Spacer(1, 12))
@@ -807,11 +922,11 @@ def export_subject_pdf(subject):
     elements = []
     settings = get_settings()
     
-    # Centered Header
+    # Centered Header with dynamic college name
     title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'], fontSize=16, alignment=1, textColor=colors.HexColor('#1a3c61'))
     college_style = ParagraphStyle('CollegeName', parent=styles['Normal'], fontSize=14, alignment=1, textColor=colors.HexColor('#2a5298'), fontName='Helvetica-Bold')
     
-    elements.append(Paragraph(settings.get('college_name', 'Smart Attendance System'), college_style))
+    elements.append(Paragraph(settings.get('college_name', 'Priyadarshini Bhagwati College of Engineering'), college_style))
     elements.append(Spacer(1, 6))
     elements.append(Paragraph(f"{subject} - Attendance Report", title_style))
     elements.append(Spacer(1, 12))
@@ -863,11 +978,11 @@ def export_overall_pdf():
     elements = []
     settings = get_settings()
     
-    # Centered Header
+    # Centered Header with dynamic college name
     title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'], fontSize=16, alignment=1, textColor=colors.HexColor('#1a3c61'))
     college_style = ParagraphStyle('CollegeName', parent=styles['Normal'], fontSize=14, alignment=1, textColor=colors.HexColor('#2a5298'), fontName='Helvetica-Bold')
     
-    elements.append(Paragraph(settings.get('college_name', 'Smart Attendance System'), college_style))
+    elements.append(Paragraph(settings.get('college_name', 'Priyadarshini Bhagwati College of Engineering'), college_style))
     elements.append(Spacer(1, 6))
     elements.append(Paragraph("Overall Attendance Report", title_style))
     elements.append(Spacer(1, 12))
@@ -932,11 +1047,11 @@ def export_all_attendance_pdf():
     elements = []
     settings = get_settings()
     
-    # Centered Header
+    # Centered Header with dynamic college name
     title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'], fontSize=16, alignment=1, textColor=colors.HexColor('#1a3c61'))
     college_style = ParagraphStyle('CollegeName', parent=styles['Normal'], fontSize=14, alignment=1, textColor=colors.HexColor('#2a5298'), fontName='Helvetica-Bold')
     
-    elements.append(Paragraph(settings.get('college_name', 'Smart Attendance System'), college_style))
+    elements.append(Paragraph(settings.get('college_name', 'Priyadarshini Bhagwati College of Engineering'), college_style))
     elements.append(Spacer(1, 6))
     elements.append(Paragraph("Complete Attendance Records", title_style))
     elements.append(Spacer(1, 12))
@@ -986,11 +1101,11 @@ def export_faculty_pdf():
     elements = []
     settings = get_settings()
     
-    # Centered Header
+    # Centered Header with dynamic college name
     title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'], fontSize=16, alignment=1, textColor=colors.HexColor('#1a3c61'))
     college_style = ParagraphStyle('CollegeName', parent=styles['Normal'], fontSize=14, alignment=1, textColor=colors.HexColor('#2a5298'), fontName='Helvetica-Bold')
     
-    elements.append(Paragraph(settings.get('college_name', 'Smart Attendance System'), college_style))
+    elements.append(Paragraph(settings.get('college_name', 'Priyadarshini Bhagwati College of Engineering'), college_style))
     elements.append(Spacer(1, 6))
     elements.append(Paragraph("Faculty Directory", title_style))
     elements.append(Spacer(1, 12))
@@ -1041,11 +1156,11 @@ def export_students_pdf():
     elements = []
     settings = get_settings()
     
-    # Centered Header
+    # Centered Header with dynamic college name
     title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'], fontSize=16, alignment=1, textColor=colors.HexColor('#1a3c61'))
     college_style = ParagraphStyle('CollegeName', parent=styles['Normal'], fontSize=14, alignment=1, textColor=colors.HexColor('#2a5298'), fontName='Helvetica-Bold')
     
-    elements.append(Paragraph(settings.get('college_name', 'Smart Attendance System'), college_style))
+    elements.append(Paragraph(settings.get('college_name', 'Priyadarshini Bhagwati College of Engineering'), college_style))
     elements.append(Spacer(1, 6))
     elements.append(Paragraph("Student Directory", title_style))
     elements.append(Spacer(1, 12))
@@ -1083,14 +1198,19 @@ def admin_dashboard():
     stats = get_dashboard_stats()
     recent_sessions = list(sessions_col.find({}).sort("start_time", -1).limit(5))
     all_notices = list(notices_col.find({}).sort("created_at", -1))
-    return render_template("admin_dashboard.html", name=session['user_name'], stats=stats, recent_sessions=recent_sessions, notices=all_notices, now=datetime.now())
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    return render_template("admin_dashboard.html", name=session['user_name'], stats=stats, recent_sessions=recent_sessions, 
+                          notices=all_notices, now=datetime.now(), sidebar_links=sidebar_links, college_header=college_header)
 
 @app.route('/admin/manage_faculty')
 @login_required
 @admin_required
 def admin_manage_faculty():
     faculties = list(faculty_col.find({}).sort("faculty_id", 1))
-    return render_template("admin_manage_faculty.html", faculties=faculties)
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    return render_template("admin_manage_faculty.html", faculties=faculties, sidebar_links=sidebar_links, college_header=college_header)
 
 @app.route('/admin/add_faculty', methods=['POST'])
 @login_required
@@ -1109,13 +1229,16 @@ def admin_add_faculty():
 @admin_required
 def admin_edit_faculty(faculty_id):
     faculty = faculty_col.find_one({"faculty_id": faculty_id})
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    
     if request.method == 'POST':
         updated_data = {"name": request.form['name'], "email": request.form['email'], "department": request.form['department']}
         if request.form.get('password'):
             updated_data["password"] = request.form['password']
         faculty_col.update_one({"faculty_id": faculty_id}, {"$set": updated_data})
         return redirect(url_for('admin_manage_faculty'))
-    return render_template("admin_edit_faculty.html", faculty=faculty)
+    return render_template("admin_edit_faculty.html", faculty=faculty, sidebar_links=sidebar_links, college_header=college_header)
 
 @app.route('/admin/delete_faculty/<faculty_id>')
 @login_required
@@ -1129,7 +1252,9 @@ def admin_delete_faculty(faculty_id):
 @admin_required
 def admin_manage_students():
     students_list = list(students_col.find({}).sort("roll_no", 1))
-    return render_template("admin_manage_students.html", students=students_list)
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    return render_template("admin_manage_students.html", students=students_list, sidebar_links=sidebar_links, college_header=college_header)
 
 @app.route('/admin/add_student', methods=['POST'])
 @login_required
@@ -1149,12 +1274,15 @@ def admin_add_student():
 @admin_required
 def admin_edit_student(roll_no):
     student = students_col.find_one({"roll_no": roll_no})
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    
     if request.method == 'POST':
         updated_data = {"name": request.form['name'], "branch": request.form['branch'], "email": request.form.get('email', ''),
                         "year": int(request.form.get('year', 3)), "semester": int(request.form.get('semester', 6))}
         students_col.update_one({"roll_no": roll_no}, {"$set": updated_data})
         return redirect(url_for('admin_manage_students'))
-    return render_template("admin_edit_student.html", student=student)
+    return render_template("admin_edit_student.html", student=student, sidebar_links=sidebar_links, college_header=college_header)
 
 @app.route('/admin/delete_student/<roll_no>')
 @login_required
@@ -1171,7 +1299,10 @@ def admin_manage_sessions():
     sessions_list = list(sessions_col.find({}).sort("start_time", -1))
     for session in sessions_list:
         session['attendance_count'] = attendance_col.count_documents({"session_id": session['session_id']})
-    return render_template("admin_manage_sessions.html", sessions=sessions_list, now=datetime.now())
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    return render_template("admin_manage_sessions.html", sessions=sessions_list, now=datetime.now(), 
+                          sidebar_links=sidebar_links, college_header=college_header)
 
 @app.route('/admin/view_session/<session_id>')
 @login_required
@@ -1183,7 +1314,10 @@ def admin_view_session(session_id):
         student = students_col.find_one({"roll_no": record['student_id']})
         record['name'] = student['name'] if student else 'Unknown'
         record['branch'] = student['branch'] if student else 'Unknown'
-    return render_template("admin_view_session.html", session=session_data, records=records)
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    return render_template("admin_view_session.html", session=session_data, records=records, 
+                          sidebar_links=sidebar_links, college_header=college_header)
 
 @app.route('/admin/delete_session/<session_id>')
 @login_required
@@ -1198,14 +1332,21 @@ def admin_delete_session(session_id):
 @admin_required
 def admin_system_settings():
     message = None
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    
     if request.method == 'POST':
         settings_col.update_one({}, {"$set": {"attendance_threshold": int(request.form.get('attendance_threshold', 75)),
-                    "qr_expiry_seconds": int(request.form.get('qr_expiry', 60)), "session_duration_minutes": int(request.form.get('session_duration', 5)),
-                    "college_name": request.form.get('college_name'), "college_location": request.form.get('college_location'),
+                    "qr_expiry_seconds": int(request.form.get('qr_expiry', 60)), 
+                    "session_duration_minutes": int(request.form.get('session_duration', 5)),
+                    "college_name": request.form.get('college_name'), 
+                    "college_location": request.form.get('college_location'),
+                    "college_header": request.form.get('college_header'),
                     "academic_year": request.form.get('academic_year')}}, upsert=True)
         message = "✅ Settings updated successfully!"
     settings = get_settings()
-    return render_template("admin_system_settings.html", settings=settings, message=message)
+    return render_template("admin_system_settings.html", settings=settings, message=message, 
+                          sidebar_links=sidebar_links, college_header=college_header)
 
 @app.route('/admin/change_password', methods=['GET', 'POST'])
 @login_required
@@ -1213,6 +1354,9 @@ def admin_system_settings():
 def admin_change_password():
     message = None
     error = None
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    
     if request.method == 'POST':
         current_password = request.form['current_password']
         new_password = request.form['new_password']
@@ -1227,7 +1371,8 @@ def admin_change_password():
         else:
             admins_col.update_one({"admin_id": session['user_id']}, {"$set": {"password": new_password}})
             message = "✅ Password changed successfully!"
-    return render_template("admin_change_password.html", message=message, error=error)
+    return render_template("admin_change_password.html", message=message, error=error, 
+                          sidebar_links=sidebar_links, college_header=college_header)
 
 @app.route('/admin/add_notice', methods=['POST'])
 @login_required
@@ -1352,11 +1497,15 @@ def admin_bulk_upload_students():
 
 @app.route('/subject_details')
 def subject_details():
-    return render_template("subject_details.html")
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    return render_template("subject_details.html", sidebar_links=sidebar_links, college_header=college_header)
 
 @app.route('/about')
 def about():
-    return render_template("about.html")
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    return render_template("about.html", sidebar_links=sidebar_links, college_header=college_header)
 
 # ====================================================================
 # RUN APPLICATION
@@ -1364,7 +1513,7 @@ def about():
 
 if __name__ == "__main__":
     # Get port from environment variable (Render sets this)
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5001))
     
     print("\n" + "=" * 60)
     print("🚀 SMART ATTENDANCE SYSTEM")

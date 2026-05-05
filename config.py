@@ -29,6 +29,7 @@ DEFAULT_SETTINGS = {
     "session_duration_minutes": 5,
     "college_name": "Priyadarshini Bhagwati College of Engineering",
     "college_location": "Nagpur",
+    "college_header": "Smart Attendance System",
     "academic_year": "2024-25"
 }
 
