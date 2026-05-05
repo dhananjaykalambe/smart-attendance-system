@@ -1,39 +1,39 @@
 /* static/style.css */
 /* ====================================================================
-   SMART ATTENDANCE SYSTEM - MODERN DARK/LIGHT HYBRID THEME
+   SMART ATTENDANCE SYSTEM - MODERN LIGHT THEME
    Version: 4.0
    ==================================================================== */
 
-/* CSS Variables - Modern Dark Theme */
+/* CSS Variables - Modern Light Theme */
 :root {
-    --primary: #1a1a2e;
-    --primary-dark: #0f0f1a;
-    --primary-light: #16213e;
-    --accent: #e94560;
-    --accent-hover: #c62a47;
-    --success: #00b4d8;
-    --success-dark: #0096c7;
-    --warning: #f4a261;
-    --warning-dark: #e76f51;
-    --danger: #e76f51;
-    --danger-dark: #d62828;
-    --info: #48cae4;
-    --info-dark: #0096c7;
-    --dark: #0a0a0a;
-    --light: #f8f9fa;
-    --gray: #6c757d;
-    --gray-dark: #343a40;
-    --card-bg: #1e1e2e;
-    --card-bg-hover: #2a2a3e;
-    --text-primary: #e0e0e0;
-    --text-secondary: #a0a0a0;
-    --text-muted: #6c757d;
-    --border-color: #2a2a3e;
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #3b82f6;
+    --accent: #f59e0b;
+    --accent-hover: #d97706;
+    --success: #10b981;
+    --success-dark: #059669;
+    --warning: #f59e0b;
+    --warning-dark: #d97706;
+    --danger: #ef4444;
+    --danger-dark: #dc2626;
+    --info: #06b6d4;
+    --info-dark: #0891b2;
+    --dark: #1f2937;
+    --light: #f9fafb;
+    --gray: #6b7280;
+    --gray-dark: #4b5563;
+    --card-bg: #ffffff;
+    --card-bg-hover: #f8fafc;
+    --text-primary: #1f2937;
+    --text-secondary: #4b5563;
+    --text-muted: #9ca3af;
+    --border-color: #e5e7eb;
     
-    --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
-    --shadow-md: 0 5px 20px rgba(0,0,0,0.4);
-    --shadow-lg: 0 10px 30px rgba(0,0,0,0.5);
-    --shadow-glow: 0 0 15px rgba(233,69,96,0.3);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-glow: 0 0 15px rgba(37, 99, 235, 0.2);
     
     --radius-sm: 8px;
     --radius-md: 12px;
@@ -50,42 +50,42 @@
 
 body {
     font-family: 'Segoe UI', 'Poppins', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
     min-height: 100vh;
     overflow-x: hidden;
     color: var(--text-primary);
 }
 
-/* Scrollbar Styling */
+/* Scrollbar Styling - Light Theme */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--primary-dark);
+    background: #e5e7eb;
     border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--accent);
+    background: var(--primary);
     border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--accent-hover);
+    background: var(--primary-dark);
 }
 
 /* ====================================================================
-   SIDEBAR - Modern Glassmorphism
+   SIDEBAR - Modern Light Glassmorphism
    ==================================================================== */
 
 .sidebar {
     width: 280px;
     height: 100vh;
-    background: linear-gradient(180deg, rgba(26,26,46,0.95) 0%, rgba(15,15,26,0.98) 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%);
     backdrop-filter: blur(10px);
-    color: white;
+    color: var(--dark);
     padding: 25px 20px;
     position: fixed;
     left: 0;
@@ -94,7 +94,7 @@ body {
     box-shadow: var(--shadow-lg);
     z-index: 100;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border-right: 1px solid rgba(233,69,96,0.2);
+    border-right: 1px solid var(--border-color);
 }
 
 .sidebar::-webkit-scrollbar {
@@ -102,11 +102,11 @@ body {
 }
 
 .sidebar::-webkit-scrollbar-track {
-    background: rgba(255,255,255,0.05);
+    background: rgba(0,0,0,0.05);
 }
 
 .sidebar::-webkit-scrollbar-thumb {
-    background: var(--accent);
+    background: var(--primary);
     border-radius: 5px;
 }
 
@@ -114,7 +114,7 @@ body {
     text-align: center;
     margin-bottom: 30px;
     padding-bottom: 15px;
-    border-bottom: 2px solid var(--accent);
+    border-bottom: 2px solid var(--primary);
 }
 
 .sidebar-header h2 {
@@ -124,13 +124,14 @@ body {
     justify-content: center;
     gap: 10px;
     margin: 0;
-    color: var(--accent);
+    color: var(--primary);
 }
 
 .sidebar-header p {
     font-size: 0.7rem;
     opacity: 0.7;
     margin-top: 8px;
+    color: var(--text-secondary);
 }
 
 .sidebar-section {
@@ -141,7 +142,7 @@ body {
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 2px;
-    color: var(--accent);
+    color: var(--primary);
     padding: 10px 18px 5px;
     margin-top: 10px;
 }
@@ -160,25 +161,25 @@ body {
 }
 
 .sidebar a:hover {
-    background: rgba(233,69,96,0.15);
+    background: rgba(37, 99, 235, 0.1);
     transform: translateX(5px);
-    color: var(--accent);
+    color: var(--primary);
 }
 
 .sidebar a.active {
-    background: linear-gradient(90deg, rgba(233,69,96,0.2), transparent);
-    border-left: 3px solid var(--accent);
-    color: var(--accent);
+    background: linear-gradient(90deg, rgba(37, 99, 235, 0.15), transparent);
+    border-left: 3px solid var(--primary);
+    color: var(--primary);
 }
 
 .sidebar-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    background: linear-gradient(90deg, transparent, var(--border-color), transparent);
     margin: 15px 18px;
 }
 
 /* ====================================================================
-   MOBILE MENU TOGGLE
+   MOBILE MENU TOGGLE - Light Theme
    ==================================================================== */
 
 .menu-toggle {
@@ -229,7 +230,7 @@ body {
 }
 
 .menu-toggle:hover {
-    background: var(--accent);
+    background: var(--primary-dark);
     transform: scale(1.02);
 }
 
@@ -240,8 +241,8 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(5px);
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
     z-index: 140;
 }
 
@@ -262,7 +263,7 @@ body {
 }
 
 /* ====================================================================
-   HEADER - Gradient Animation
+   HEADER - Light Theme Gradient
    ==================================================================== */
 
 .header {
@@ -289,31 +290,31 @@ body {
 }
 
 /* ====================================================================
-   CARDS - Glassmorphism Effect
+   CARDS - Light Theme
    ==================================================================== */
 
 .card {
-    background: rgba(30,30,46,0.95);
-    backdrop-filter: blur(10px);
+    background: var(--card-bg);
+    backdrop-filter: none;
     padding: 25px;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
     margin-bottom: 25px;
     transition: var(--transition);
-    border: 1px solid rgba(233,69,96,0.1);
+    border: 1px solid var(--border-color);
 }
 
 .card:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
-    border-color: rgba(233,69,96,0.3);
+    border-color: var(--primary-light);
 }
 
 .card h2 {
-    color: var(--accent);
+    color: var(--primary);
     margin-bottom: 20px;
     font-size: 1.4rem;
-    border-left: 4px solid var(--accent);
+    border-left: 4px solid var(--primary);
     padding-left: 15px;
     display: flex;
     align-items: center;
@@ -322,7 +323,7 @@ body {
 }
 
 /* ====================================================================
-   STATS GRID
+   STATS GRID - Light Theme
    ==================================================================== */
 
 .stats-grid {
@@ -350,7 +351,7 @@ body {
     right: -50%;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle, rgba(233,69,96,0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
 }
 
 .stat-card:hover {
@@ -367,7 +368,7 @@ body {
 
 .stat-card p {
     font-size: 0.85rem;
-    opacity: 0.9;
+    opacity: 0.95;
     position: relative;
     z-index: 1;
 }
@@ -379,7 +380,7 @@ body {
 .stat-card.danger { background: linear-gradient(135deg, var(--danger-dark), var(--danger)); }
 
 /* ====================================================================
-   BUTTONS
+   BUTTONS - Light Theme
    ==================================================================== */
 
 button, .btn {
@@ -404,7 +405,7 @@ button::before, .btn::before {
     left: 50%;
     width: 0;
     height: 0;
-    background: rgba(233,69,96,0.3);
+    background: rgba(255,255,255,0.2);
     border-radius: 50%;
     transform: translate(-50%, -50%);
     transition: width 0.6s, height 0.6s;
@@ -418,7 +419,7 @@ button:hover::before, .btn:hover::before {
 button:hover, .btn:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
-    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
 }
 
 button:active, .btn:active {
@@ -443,7 +444,7 @@ button.warning, .btn-warning { background: linear-gradient(135deg, var(--warning
 .btn-view { background: linear-gradient(135deg, var(--info-dark), var(--info)); }
 
 /* ====================================================================
-   FORMS
+   FORMS - Light Theme
    ==================================================================== */
 
 input, select, textarea {
@@ -454,14 +455,14 @@ input, select, textarea {
     border: 2px solid var(--border-color);
     font-size: 14px;
     transition: var(--transition);
-    background: var(--card-bg);
+    background: var(--light);
     color: var(--text-primary);
 }
 
 input:focus, select:focus, textarea:focus {
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(233,69,96,0.2);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 input::placeholder, textarea::placeholder {
@@ -490,12 +491,12 @@ input::placeholder, textarea::placeholder {
     display: block;
     font-weight: 600;
     margin-bottom: 8px;
-    color: var(--accent);
+    color: var(--primary);
     font-size: 13px;
 }
 
 /* ====================================================================
-   TABLES
+   TABLES - Light Theme
    ==================================================================== */
 
 .table-container {
@@ -533,15 +534,15 @@ td {
 }
 
 tr:hover {
-    background: rgba(233,69,96,0.05);
+    background: rgba(37, 99, 235, 0.05);
 }
 
 tbody tr:nth-child(even) {
-    background: rgba(255,255,255,0.02);
+    background: #f8fafc;
 }
 
 /* ====================================================================
-   BADGES
+   BADGES - Light Theme
    ==================================================================== */
 
 .badge {
@@ -554,16 +555,16 @@ tbody tr:nth-child(even) {
 
 .badge-success { background: linear-gradient(135deg, var(--success-dark), var(--success)); color: white; }
 .badge-danger { background: linear-gradient(135deg, var(--danger-dark), var(--danger)); color: white; }
-.badge-warning { background: linear-gradient(135deg, var(--warning-dark), var(--warning)); color: #333; }
+.badge-warning { background: linear-gradient(135deg, var(--warning-dark), var(--warning)); color: white; }
 .badge-info { background: linear-gradient(135deg, var(--info-dark), var(--info)); color: white; }
 .badge-primary { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; }
 
 /* ====================================================================
-   PROGRESS BAR
+   PROGRESS BAR - Light Theme
    ==================================================================== */
 
 .progress-bar-container {
-    background: rgba(255,255,255,0.1);
+    background: #e5e7eb;
     border-radius: 10px;
     height: 8px;
     overflow: hidden;
@@ -580,7 +581,7 @@ tbody tr:nth-child(even) {
 .progress-bar.warning { background: linear-gradient(90deg, var(--warning), var(--warning-dark)); }
 
 /* ====================================================================
-   ALERTS
+   ALERTS - Light Theme
    ==================================================================== */
 
 .alert {
@@ -593,24 +594,25 @@ tbody tr:nth-child(even) {
     flex-wrap: wrap;
 }
 
-.alert-success { background: rgba(0,180,216,0.1); border-left: 4px solid var(--success); color: var(--success); }
-.alert-danger { background: rgba(231,111,81,0.1); border-left: 4px solid var(--danger); color: var(--danger); }
-.alert-warning { background: rgba(244,162,97,0.1); border-left: 4px solid var(--warning); color: var(--warning); }
-.alert-info { background: rgba(72,202,228,0.1); border-left: 4px solid var(--info); color: var(--info); }
+.alert-success { background: #d1fae5; border-left: 4px solid var(--success); color: #065f46; }
+.alert-danger { background: #fee2e2; border-left: 4px solid var(--danger); color: #991b1b; }
+.alert-warning { background: #fed7aa; border-left: 4px solid var(--warning); color: #92400e; }
+.alert-info { background: #cffafe; border-left: 4px solid var(--info); color: #0e7490; }
 
 /* ====================================================================
-   SEARCH BOX
+   SEARCH BOX - Light Theme
    ==================================================================== */
 
 .search-box {
     margin-bottom: 20px;
     padding: 15px;
-    background: rgba(255,255,255,0.03);
+    background: #f8fafc;
     border-radius: var(--radius-md);
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
     align-items: center;
+    border: 1px solid var(--border-color);
 }
 
 .search-box input {
@@ -632,15 +634,15 @@ tbody tr:nth-child(even) {
 }
 
 /* ====================================================================
-   NOTICE BOARD
+   NOTICE BOARD - Light Theme
    ==================================================================== */
 
 .notice-board-container {
-    background: rgba(30,30,46,0.95);
+    background: var(--card-bg);
     border-radius: var(--radius-lg);
     overflow: hidden;
     margin-bottom: 25px;
-    border: 1px solid rgba(233,69,96,0.2);
+    border: 1px solid var(--border-color);
 }
 
 .notice-header {
@@ -664,12 +666,12 @@ tbody tr:nth-child(even) {
 }
 
 .notice-item:hover {
-    background: rgba(233,69,96,0.05);
+    background: #f8fafc;
 }
 
 .notice-title {
     font-weight: bold;
-    color: var(--accent);
+    color: var(--primary);
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -691,7 +693,7 @@ tbody tr:nth-child(even) {
 }
 
 /* ====================================================================
-   COUNTDOWN TIMER
+   COUNTDOWN TIMER - Light Theme
    ==================================================================== */
 
 .countdown-container {
@@ -737,7 +739,7 @@ tbody tr:nth-child(even) {
 }
 
 @media (max-width: 768px) {
-    .menu-toggle { display: block; z-index: 1000; }
+    .menu-toggle { display: block; z-index: 1000; background: var(--primary); }
     .sidebar { transform: translateX(-100%); width: 280px; z-index: 1001; }
     .sidebar.open { transform: translateX(0); }
     .sidebar-overlay.active { display: block; z-index: 1000; }
@@ -754,6 +756,7 @@ tbody tr:nth-child(even) {
     .notice-title { flex-direction: column; align-items: flex-start; }
     .notice-date { margin-left: 0; }
     .notice-content { margin-left: 0; }
+    .menu-toggle { background: var(--primary); }
 }
 
 @media (max-width: 480px) {
@@ -801,12 +804,28 @@ tbody tr:nth-child(even) {
     display: inline-block;
     width: 20px;
     height: 20px;
-    border: 2px solid rgba(255,255,255,0.3);
+    border: 2px solid rgba(37, 99, 235, 0.3);
     border-radius: 50%;
-    border-top-color: var(--accent);
+    border-top-color: var(--primary);
     animation: spin 1s ease-in-out infinite;
 }
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+/* Additional Light Theme Utilities */
+.bg-light {
+    background: var(--light);
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.shadow-hover:hover {
+    box-shadow: var(--shadow-lg);
 }
