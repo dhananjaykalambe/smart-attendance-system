@@ -39,7 +39,7 @@ body {
 }
 
 /* ====================================================================
-   SIDEBAR - Enhanced with proper mobile support
+   SIDEBAR - Professional & Consistent
    ==================================================================== */
 
 .sidebar {
@@ -70,16 +70,39 @@ body {
     border-radius: 5px;
 }
 
-.sidebar h2 {
+.sidebar-header {
     text-align: center;
     margin-bottom: 30px;
-    font-size: 1.4rem;
     padding-bottom: 15px;
     border-bottom: 2px solid rgba(255,255,255,0.2);
+}
+
+.sidebar-header h2 {
+    font-size: 1.3rem;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
+    margin: 0;
+}
+
+.sidebar-header p {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    margin-top: 8px;
+}
+
+.sidebar-section {
+    margin-bottom: 20px;
+}
+
+.sidebar-section-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.6;
+    padding: 10px 18px 5px;
+    margin-top: 10px;
 }
 
 .sidebar a {
@@ -87,7 +110,7 @@ body {
     align-items: center;
     gap: 12px;
     padding: 12px 18px;
-    margin: 8px 0;
+    margin: 4px 0;
     color: white;
     text-decoration: none;
     border-radius: var(--radius-sm);
@@ -105,8 +128,14 @@ body {
     border-left: 3px solid var(--warning);
 }
 
+.sidebar-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 15px 18px;
+}
+
 /* ====================================================================
-   MOBILE MENU TOGGLE - 3 LINE HAMBURGER
+   MOBILE MENU TOGGLE
    ==================================================================== */
 
 .menu-toggle {
@@ -126,7 +155,6 @@ body {
     transition: var(--transition);
 }
 
-/* Hamburger Icon - 3 Lines */
 .hamburger-icon {
     width: 24px;
     height: 20px;
@@ -145,7 +173,6 @@ body {
     transition: all 0.3s ease;
 }
 
-/* Animation when open - transforms to X */
 .menu-toggle.open .hamburger-icon span:nth-child(1) {
     transform: translateY(8px) rotate(45deg);
 }
@@ -163,7 +190,6 @@ body {
     transform: scale(1.02);
 }
 
-/* Sidebar Overlay */
 .sidebar-overlay {
     display: none;
     position: fixed;
@@ -180,7 +206,7 @@ body {
 }
 
 /* ====================================================================
-   MAIN CONTENT - Desktop First
+   MAIN CONTENT
    ==================================================================== */
 
 .main {
@@ -192,7 +218,7 @@ body {
 }
 
 /* ====================================================================
-   HEADER - Enhanced
+   HEADER
    ==================================================================== */
 
 .header {
@@ -227,7 +253,7 @@ body {
 }
 
 /* ====================================================================
-   CARDS - Enhanced
+   CARDS
    ==================================================================== */
 
 .card {
@@ -258,7 +284,7 @@ body {
 }
 
 /* ====================================================================
-   STATS GRID - Enhanced
+   STATS GRID
    ==================================================================== */
 
 .stats-grid {
@@ -307,7 +333,6 @@ body {
     z-index: 1;
 }
 
-/* Color Variants */
 .stat-card.primary { background: linear-gradient(135deg, var(--primary), var(--primary-light)); }
 .stat-card.success { background: linear-gradient(135deg, var(--success), var(--success-light)); }
 .stat-card.warning { background: linear-gradient(135deg, #fd7e14, var(--warning)); }
@@ -315,7 +340,7 @@ body {
 .stat-card.danger { background: linear-gradient(135deg, var(--danger), #c82333); }
 
 /* ====================================================================
-   BUTTONS - Enhanced
+   BUTTONS
    ==================================================================== */
 
 button, .btn {
@@ -360,18 +385,9 @@ button:active, .btn:active {
     transform: translateY(0);
 }
 
-button.success {
-    background: linear-gradient(135deg, var(--success), var(--success-light));
-}
-
-button.danger {
-    background: linear-gradient(135deg, var(--danger), #c82333);
-}
-
-button.warning {
-    background: linear-gradient(135deg, #fd7e14, var(--warning));
-    color: #333;
-}
+button.success { background: linear-gradient(135deg, var(--success), var(--success-light)); }
+button.danger { background: linear-gradient(135deg, var(--danger), #c82333); }
+button.warning { background: linear-gradient(135deg, #fd7e14, var(--warning)); color: #333; }
 
 .btn-small {
     width: auto;
@@ -381,42 +397,15 @@ button.warning {
     display: inline-block;
 }
 
-.btn-edit {
-    background: var(--warning);
-    color: #333;
-    padding: 5px 12px;
-    font-size: 12px;
-    margin: 0;
-}
-
-.btn-edit:hover {
-    background: #e0a800;
-}
-
-.btn-delete {
-    background: var(--danger);
-    padding: 5px 12px;
-    font-size: 12px;
-    margin: 0;
-}
-
-.btn-delete:hover {
-    background: #c82333;
-}
-
-.btn-view {
-    background: var(--info);
-    padding: 5px 12px;
-    font-size: 12px;
-    margin: 0;
-}
-
-.btn-view:hover {
-    background: #138496;
-}
+.btn-edit { background: var(--warning); color: #333; padding: 5px 12px; font-size: 12px; margin: 0; }
+.btn-edit:hover { background: #e0a800; }
+.btn-delete { background: var(--danger); padding: 5px 12px; font-size: 12px; margin: 0; }
+.btn-delete:hover { background: #c82333; }
+.btn-view { background: var(--info); padding: 5px 12px; font-size: 12px; margin: 0; }
+.btn-view:hover { background: #138496; }
 
 /* ====================================================================
-   FORMS - Enhanced
+   FORMS
    ==================================================================== */
 
 input, select, textarea {
@@ -463,7 +452,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* ====================================================================
-   TABLES - Enhanced with horizontal scroll for mobile
+   TABLES
    ==================================================================== */
 
 .table-container {
@@ -543,13 +532,8 @@ tbody tr:nth-child(even) {
     transition: width 0.5s ease;
 }
 
-.progress-bar.danger {
-    background: linear-gradient(90deg, var(--danger), #c82333);
-}
-
-.progress-bar.warning {
-    background: linear-gradient(90deg, #fd7e14, var(--warning));
-}
+.progress-bar.danger { background: linear-gradient(90deg, var(--danger), #c82333); }
+.progress-bar.warning { background: linear-gradient(90deg, #fd7e14, var(--warning)); }
 
 /* ====================================================================
    ALERTS
@@ -565,29 +549,10 @@ tbody tr:nth-child(even) {
     flex-wrap: wrap;
 }
 
-.alert-success {
-    background: #d4edda;
-    border-left: 4px solid var(--success);
-    color: #155724;
-}
-
-.alert-danger {
-    background: #f8d7da;
-    border-left: 4px solid var(--danger);
-    color: #721c24;
-}
-
-.alert-warning {
-    background: #fff3cd;
-    border-left: 4px solid var(--warning);
-    color: #856404;
-}
-
-.alert-info {
-    background: #d1ecf1;
-    border-left: 4px solid var(--info);
-    color: #0c5460;
-}
+.alert-success { background: #d4edda; border-left: 4px solid var(--success); color: #155724; }
+.alert-danger { background: #f8d7da; border-left: 4px solid var(--danger); color: #721c24; }
+.alert-warning { background: #fff3cd; border-left: 4px solid var(--warning); color: #856404; }
+.alert-info { background: #d1ecf1; border-left: 4px solid var(--info); color: #0c5460; }
 
 /* ====================================================================
    SEARCH BOX
@@ -626,7 +591,7 @@ tbody tr:nth-child(even) {
    NOTICE BOARD
    ==================================================================== */
 
-.notice-board {
+.notice-board-container {
     background: linear-gradient(135deg, #fff8e7, #fff3d4);
     border-radius: var(--radius-lg);
     overflow: hidden;
@@ -681,62 +646,34 @@ tbody tr:nth-child(even) {
 }
 
 /* ====================================================================
-   COUNTDOWN TIMER - Enhanced
+   COUNTDOWN TIMER
    ==================================================================== */
 
-.timer-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: var(--radius-lg);
-    padding: 30px;
+.countdown-container {
     text-align: center;
-    margin-bottom: 25px;
-    box-shadow: var(--shadow-lg);
+    margin: 20px 0;
 }
 
-.circular-timer {
-    position: relative;
-    width: 280px;
-    height: 280px;
-    margin: 20px auto;
-}
-
-.circular-timer svg {
-    width: 100%;
-    height: 100%;
-    transform: rotate(-90deg);
-}
-
-.timer-bg {
-    stroke: rgba(255,255,255,0.2);
-    stroke-width: 8;
-    fill: none;
-}
-
-.timer-progress {
-    stroke: white;
-    stroke-width: 8;
-    fill: none;
-    stroke-linecap: round;
-    transition: stroke-dasharray 1s linear;
-}
-
-.timer-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-}
-
-.timer-minutes {
-    font-size: 48px;
+.countdown-timer {
+    font-size: 3.5rem;
     font-weight: bold;
+    font-family: monospace;
+    background: #1a3c61;
     color: white;
+    display: inline-block;
+    padding: 20px 40px;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
 }
 
-.timer-seconds {
-    font-size: 24px;
-    color: rgba(255,255,255,0.8);
+.countdown-timer.warning {
+    background: #dc3545;
+    animation: pulse 0.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
 }
 
 /* ====================================================================
@@ -773,356 +710,61 @@ tbody tr:nth-child(even) {
 }
 
 /* ====================================================================
-   RESPONSIVE DESIGN - Comprehensive Mobile Support
+   RESPONSIVE DESIGN
    ==================================================================== */
 
-/* Desktop (1025px and above) */
 @media (min-width: 1025px) {
-    .menu-toggle {
-        display: none;
-    }
-    
-    .sidebar {
-        transform: translateX(0) !important;
-    }
-    
-    .sidebar-overlay {
-        display: none !important;
-    }
+    .menu-toggle { display: none; }
+    .sidebar { transform: translateX(0) !important; }
+    .sidebar-overlay { display: none !important; }
 }
 
-/* Tablet (769px to 1024px) */
 @media (min-width: 769px) and (max-width: 1024px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-    }
-    
-    .card {
-        padding: 20px;
-    }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+    .card { padding: 20px; }
 }
 
-/* Mobile Landscape & Portrait (max-width: 768px) */
 @media (max-width: 768px) {
-    .menu-toggle {
-        display: block;
-        z-index: 1000;
-    }
-    
-    .sidebar {
-        transform: translateX(-100%);
-        width: 280px;
-        z-index: 1001;
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .sidebar.open {
-        transform: translateX(0);
-    }
-    
-    .sidebar-overlay.active {
-        display: block;
-        z-index: 1000;
-    }
-    
-    .main {
-        margin-left: 0;
-        width: 100%;
-        padding: 70px 16px 20px 16px;
-    }
-    
-    .stats-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-    
-    .stat-card h3 {
-        font-size: 1.8rem;
-    }
-    
-    .form-row {
-        grid-template-columns: 1fr;
-        gap: 0;
-    }
-    
-    .form-grid {
-        grid-template-columns: 1fr;
-        gap: 0;
-    }
-    
-    .search-box {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .search-box input,
-    .search-box select,
-    .search-box button {
-        width: 100%;
-    }
-    
-    .card h2 {
-        font-size: 1.2rem;
-    }
-    
-    .header {
-        font-size: 0.95rem;
-        padding: 15px 20px;
-    }
-    
-    .circular-timer {
-        width: 220px;
-        height: 220px;
-    }
-    
-    .timer-minutes {
-        font-size: 36px;
-    }
-    
-    .timer-seconds {
-        font-size: 18px;
-    }
-    
-    .action-buttons {
-        flex-direction: column;
-    }
-    
-    .action-buttons button,
-    .action-buttons .btn {
-        width: 100%;
-    }
-    
-    .btn-small {
-        width: auto;
-        padding: 6px 12px;
-    }
-    
-    /* Make action buttons in tables stack on mobile */
-    td .action-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    td .action-buttons a {
-        display: block;
-        width: 100%;
-    }
-    
-    td .action-buttons button {
-        width: 100%;
-    }
-    
-    /* Table responsive adjustments */
-    th, td {
-        padding: 10px 8px;
-        font-size: 11px;
-    }
-    
-    .notice-title {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .notice-date {
-        margin-left: 0;
-    }
-    
-    .notice-content {
-        margin-left: 0;
-    }
+    .menu-toggle { display: block; z-index: 1000; }
+    .sidebar { transform: translateX(-100%); width: 280px; z-index: 1001; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay.active { display: block; z-index: 1000; }
+    .main { margin-left: 0; width: 100%; padding: 70px 16px 20px 16px; }
+    .stats-grid { grid-template-columns: 1fr; gap: 12px; }
+    .stat-card h3 { font-size: 1.8rem; }
+    .form-row, .form-grid { grid-template-columns: 1fr; gap: 0; }
+    .search-box { flex-direction: column; align-items: stretch; }
+    .search-box input, .search-box select, .search-box button { width: 100%; }
+    .card h2 { font-size: 1.2rem; }
+    .header { font-size: 0.95rem; padding: 15px 20px; }
+    .countdown-timer { font-size: 2rem; padding: 15px 25px; }
+    .action-buttons { flex-direction: column; }
+    .action-buttons button, .action-buttons .btn { width: 100%; }
+    td .action-buttons { display: flex; flex-direction: column; gap: 8px; }
+    td .action-buttons a, td .action-buttons button { width: 100%; }
+    th, td { padding: 10px 8px; font-size: 11px; }
+    .notice-title { flex-direction: column; align-items: flex-start; }
+    .notice-date { margin-left: 0; }
+    .notice-content { margin-left: 0; }
 }
 
-/* Small Mobile (max-width: 480px) */
 @media (max-width: 480px) {
-    .main {
-        padding: 65px 12px 16px 12px;
-    }
-    
-    .stats-grid {
-        gap: 10px;
-    }
-    
-    .card {
-        padding: 16px;
-    }
-    
-    .card h2 {
-        font-size: 1.1rem;
-        padding-left: 12px;
-    }
-    
-    th, td {
-        padding: 8px 6px;
-        font-size: 10px;
-    }
-    
-    .badge {
-        padding: 2px 8px;
-        font-size: 10px;
-    }
-    
-    button, .btn {
-        padding: 10px 16px;
-        font-size: 13px;
-    }
-    
-    .btn-small {
-        padding: 4px 10px;
-        font-size: 10px;
-    }
-    
-    .menu-toggle {
-        top: 12px;
-        left: 12px;
-        padding: 8px 10px;
-    }
-    
-    .hamburger-icon {
-        width: 20px;
-        height: 16px;
-    }
-    
-    .header {
-        font-size: 0.85rem;
-        padding: 12px 15px;
-    }
-    
-    .alert {
-        padding: 12px;
-        font-size: 12px;
-    }
-    
-    .export-buttons-container {
-        flex-direction: column;
-    }
-    
-    .export-btn {
-        width: 100%;
-        text-align: center;
-    }
-    
-    .subject-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-    
-    .subject-card {
-        padding: 12px 8px;
-        font-size: 12px;
-    }
-    
-    .subject-card small {
-        font-size: 10px;
-    }
+    .main { padding: 65px 12px 16px 12px; }
+    .card { padding: 16px; }
+    .card h2 { font-size: 1.1rem; padding-left: 12px; }
+    th, td { padding: 8px 6px; font-size: 10px; }
+    .badge { padding: 2px 8px; font-size: 10px; }
+    button, .btn { padding: 10px 16px; font-size: 13px; }
+    .btn-small { padding: 4px 10px; font-size: 10px; }
+    .menu-toggle { top: 12px; left: 12px; padding: 8px 10px; }
+    .hamburger-icon { width: 20px; height: 16px; }
+    .header { font-size: 0.85rem; padding: 12px 15px; }
 }
 
-/* Very Small Mobile (max-width: 360px) */
-@media (max-width: 360px) {
-    .main {
-        padding: 60px 10px 12px 10px;
-    }
-    
-    th, td {
-        padding: 6px 4px;
-        font-size: 9px;
-    }
-    
-    .subject-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .stat-card h3 {
-        font-size: 1.5rem;
-    }
-    
-    .stat-card p {
-        font-size: 0.75rem;
-    }
-}
-
-/* ====================================================================
-   UTILITY CLASSES
-   ==================================================================== */
-
-.text-center {
-    text-align: center;
-}
-
-.text-left {
-    text-align: left;
-}
-
-.text-right {
-    text-align: right;
-}
-
-.mt-1 { margin-top: 5px; }
-.mt-2 { margin-top: 10px; }
-.mt-3 { margin-top: 15px; }
-.mt-4 { margin-top: 20px; }
-.mt-5 { margin-top: 25px; }
-
-.mb-1 { margin-bottom: 5px; }
-.mb-2 { margin-bottom: 10px; }
-.mb-3 { margin-bottom: 15px; }
-.mb-4 { margin-bottom: 20px; }
-.mb-5 { margin-bottom: 25px; }
-
-.hide-on-mobile {
-    display: inline-block;
-}
-
-@media (max-width: 768px) {
-    .hide-on-mobile {
-        display: none;
-    }
-}
-
-.show-on-mobile {
-    display: none;
-}
-
-@media (max-width: 768px) {
-    .show-on-mobile {
-        display: inline-block;
-    }
-}
-
-/* Print styles for PDF export */
 @media print {
-    .menu-toggle,
-    .sidebar,
-    .sidebar-overlay,
-    button,
-    .btn,
-    .action-buttons,
-    .export-buttons,
-    .search-box {
-        display: none !important;
-    }
-    
-    .main {
-        margin-left: 0;
-        width: 100%;
-        padding: 0;
-    }
-    
-    .card {
-        box-shadow: none;
-        border: 1px solid #ddd;
-    }
-    
-    .header {
-        background: #1a3c61;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-    
-    th {
-        background: #1a3c61;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
+    .menu-toggle, .sidebar, .sidebar-overlay, button, .btn, .action-buttons, .export-buttons, .search-box { display: none !important; }
+    .main { margin-left: 0; width: 100%; padding: 0; }
+    .card { box-shadow: none; border: 1px solid #ddd; }
+    .header { background: #1a3c61; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    th { background: #1a3c61; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
