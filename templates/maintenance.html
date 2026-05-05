@@ -1,0 +1,31 @@
+<!-- templates/maintenance.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Maintenance Mode</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .maintenance-container {
+            max-width: 600px;
+            margin: 100px auto;
+            text-align: center;
+        }
+        .maintenance-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main" style="margin-left: 0; width: 100%;">
+        <div class="card maintenance-container">
+            <div class="maintenance-icon">🔧</div>
+            <h1>Under Maintenance</h1>
+            <p>The system is currently undergoing scheduled maintenance.</p>
+            <p>Please check back later.</p>
+            <p class="text-muted" style="margin-top: 30px;">- Smart Attendance Team</p>
+        </div>
+    </div>
+</body>
+</html>

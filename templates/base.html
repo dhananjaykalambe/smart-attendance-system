@@ -1,9 +1,11 @@
+<!-- templates/base.html -->
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>{% block title %}Smart Attendance System{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
@@ -22,7 +24,7 @@
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <h2>📋 Smart Attendance</h2>
-        <p>{{ settings.get('college_name', '')[:30] if settings else 'Attendance System' }}</p>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
     </div>
     
     {% if sidebar_links %}
@@ -57,7 +59,6 @@
             </div>
         {% endif %}
     {% else %}
-        <!-- Fallback sidebar for pages that don't pass sidebar_links -->
         <a href="/">🏠 Home</a>
         <a href="/login">🔐 Login</a>
         <a href="/subject_details">📚 Subjects</a>
@@ -68,14 +69,23 @@
 
 <div class="main">
     <div class="header">
-        {{ college_header if college_header else '🎓 Smart Attendance System' }}
+        {{ college_header if college_header else '🎓 Smart Attendance System v3.0' }}
     </div>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
     
     {% block content %}{% endblock %}
 </div>
 
 <script>
-    // Mobile Menu Functions
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');

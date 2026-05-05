@@ -1,0 +1,70 @@
+<!-- templates/message.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .message-container {
+            max-width: 500px;
+            margin: 100px auto;
+            text-align: center;
+        }
+        .message-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        .message-title {
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        .message-text {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+        .redirect-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: var(--accent);
+            text-decoration: none;
+        }
+        .redirect-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="main" style="margin-left: 0; width: 100%;">
+        <div class="card message-container">
+            <div class="message-icon">
+                {% if type == 'success' %}✅
+                {% elif type == 'error' %}❌
+                {% elif type == 'warning' %}⚠️
+                {% else %}ℹ️
+                {% endif %}
+            </div>
+            <h1 class="message-title">{{ title }}</h1>
+            <p class="message-text">{{ message }}</p>
+            {% if redirect_url %}
+                <p>Redirecting in <span id="countdown">5</span> seconds...</p>
+                <a href="{{ redirect_url }}" class="redirect-link">Click here if not redirected</a>
+                <script>
+                    let seconds = 5;
+                    const countdownEl = document.getElementById('countdown');
+                    const interval = setInterval(() => {
+                        seconds--;
+                        countdownEl.textContent = seconds;
+                        if (seconds <= 0) {
+                            clearInterval(interval);
+                            window.location.href = "{{ redirect_url }}";
+                        }
+                    }, 1000);
+                </script>
+            {% else %}
+                <a href="/" class="redirect-link">Go to Home</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
