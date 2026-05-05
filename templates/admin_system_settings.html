@@ -14,18 +14,32 @@
     </div>
 </button>
 
-<!-- ✅ RIGHT HERE - Right after the button -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <h2>👑 Admin Panel</h2>
-    <a href="/admin_dashboard">📊 Dashboard</a>
-    <a href="/admin/manage_faculty">👥 Manage Faculty</a>
-    <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
-    <a href="/admin/manage_sessions">📊 Manage Sessions</a>
-    <a href="/admin/system_settings">⚙️ System Settings</a>
-    <a href="/admin/change_password">🔐 Change Password</a>
-    <hr><a href="/logout">🚪 Logout</a>
+    <div class="sidebar-header">
+        <h2>👑 Admin Panel</h2>
+        <p>System Configuration</p>
+    </div>
+    
+    {% if sidebar_links %}
+        {% if sidebar_links.main %}
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">MAIN MENU</div>
+                {% for link in sidebar_links.main %}
+                <a href="{{ link.url }}" {% if request.path == link.url %}class="active"{% endif %}>
+                    {{ link.icon }} {{ link.text }}
+                </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endif %}
+    
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">🚪 Logout</a>
+    </div>
 </div>
 
 <div class="main">
@@ -38,17 +52,48 @@
     <div class="card">
         <h2>🏫 College Information</h2>
         <form method="POST">
-            <div class="form-group"><label>College Name:</label><input type="text" name="college_name" value="{{ settings.college_name }}" required></div>
-            <div class="form-group"><label>College Location:</label><input type="text" name="college_location" value="{{ settings.college_location }}" required></div>
-            <div class="form-group"><label>Academic Year:</label><input type="text" name="academic_year" value="{{ settings.academic_year }}" required></div>
+            <div class="form-group">
+                <label>College Name:</label>
+                <input type="text" name="college_name" value="{{ settings.college_name }}" required>
+                <small>This appears in headers and PDF reports</small>
+            </div>
+            <div class="form-group">
+                <label>College Location:</label>
+                <input type="text" name="college_location" value="{{ settings.college_location }}" required>
+            </div>
+            <div class="form-group">
+                <label>Header Display Text:</label>
+                <input type="text" name="college_header" value="{{ settings.get('college_header', settings.college_name) }}" placeholder="Optional custom header">
+                <small>If empty, college name will be used</small>
+            </div>
+            <div class="form-group">
+                <label>Academic Year:</label>
+                <input type="text" name="academic_year" value="{{ settings.academic_year }}" required>
+            </div>
             
             <h2 style="margin-top: 30px;">⚙️ Attendance Settings</h2>
-            <div class="form-group"><label>⚠️ Low Attendance Threshold (%):</label><input type="number" name="attendance_threshold" value="{{ settings.attendance_threshold }}" min="0" max="100" required><small>Students below this percentage will receive alerts</small></div>
-            <div class="form-group"><label>⏱️ QR Code Expiry (seconds):</label><input type="number" name="qr_expiry" value="{{ settings.qr_expiry_seconds }}" min="10" max="300" required><small>How long the QR code remains valid after generation</small></div>
-            <div class="form-group"><label>⏰ Default Session Duration (minutes):</label><input type="number" name="session_duration" value="{{ settings.session_duration_minutes }}" min="1" max="60" required><small>Default duration when creating a new session</small></div>
+            <div class="form-group">
+                <label>⚠️ Low Attendance Threshold (%):</label>
+                <input type="number" name="attendance_threshold" value="{{ settings.attendance_threshold }}" min="0" max="100" required>
+                <small>Students below this percentage will receive alerts</small>
+            </div>
+            <div class="form-group">
+                <label>⏱️ QR Code Expiry (seconds):</label>
+                <input type="number" name="qr_expiry" value="{{ settings.qr_expiry_seconds }}" min="10" max="300" required>
+                <small>How long the QR code remains valid after generation</small>
+            </div>
+            <div class="form-group">
+                <label>⏰ Default Session Duration (minutes):</label>
+                <input type="number" name="session_duration" value="{{ settings.session_duration_minutes }}" min="1" max="60" required>
+                <small>Default duration when creating a new session</small>
+            </div>
             
             <button type="submit" class="success">💾 Save All Settings</button>
         </form>
+        
+        <div class="alert alert-info" style="margin-top: 20px;">
+            <strong>ℹ️ Note:</strong> Changes to college name will reflect immediately in all page headers and PDF reports.
+        </div>
     </div>
 </div>
 
@@ -81,5 +126,4 @@
     window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 </body>
-
 </html>

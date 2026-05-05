@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>{% block title %}Smart Attendance System{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<button class="menu-toggle" onclick="toggleSidebar()">
+    <div class="hamburger-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</button>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', '')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    {% if sidebar_links %}
+        {% if sidebar_links.main %}
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">MAIN MENU</div>
+                {% for link in sidebar_links.main %}
+                <a href="{{ link.url }}" {% if request.path == link.url %}class="active"{% endif %}>
+                    {{ link.icon }} {{ link.text }}
+                </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% if sidebar_links.common %}
+            <div class="sidebar-divider"></div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">GENERAL</div>
+                {% for link in sidebar_links.common %}
+                <a href="{{ link.url }}" {% if request.path == link.url %}class="active"{% endif %}>
+                    {{ link.icon }} {{ link.text }}
+                </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% if session.user_id %}
+            <div class="sidebar-divider"></div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">ACCOUNT</div>
+                <a href="/logout">🚪 Logout</a>
+            </div>
+        {% endif %}
+    {% else %}
+        <!-- Fallback sidebar for pages that don't pass sidebar_links -->
+        <a href="/">🏠 Home</a>
+        <a href="/login">🔐 Login</a>
+        <a href="/subject_details">📚 Subjects</a>
+        <a href="/about">ℹ️ About</a>
+        {% if session.user_id %}<a href="/logout">🚪 Logout</a>{% endif %}
+    {% endif %}
+</div>
+
+<div class="main">
+    <div class="header">
+        {{ college_header if college_header else '🎓 Smart Attendance System' }}
+    </div>
+    
+    {% block content %}{% endblock %}
+</div>
+
+<script>
+    // Mobile Menu Functions
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuBtn = document.querySelector('.menu-toggle');
+        if (sidebar) {
+            sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('active');
+            if (menuBtn) menuBtn.classList.toggle('open');
+        }
+    }
+    
+    function closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuBtn = document.querySelector('.menu-toggle');
+        if (sidebar) {
+            sidebar.classList.remove('open');
+            if (overlay) overlay.classList.remove('active');
+            if (menuBtn) menuBtn.classList.remove('open');
+        }
+    }
+    
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.addEventListener('click', () => { 
+            if (window.innerWidth <= 768) closeSidebar(); 
+        });
+    });
+    
+    document.addEventListener('keydown', (e) => { 
+        if (e.key === 'Escape' && window.innerWidth <= 768) closeSidebar(); 
+    });
+    
+    window.addEventListener('resize', () => { 
+        if (window.innerWidth > 768) closeSidebar(); 
+    });
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

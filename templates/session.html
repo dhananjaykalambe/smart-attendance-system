@@ -51,7 +51,22 @@
     .status-text {
         margin-top: 10px;
         font-size: 14px;
-        color: #666;
+    }
+    .status-text.active {
+        color: #28a745;
+        font-weight: bold;
+    }
+    .status-text.expired {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .qr-url {
+        font-size: 11px;
+        word-break: break-all;
+        background: #f0f0f0;
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 15px;
     }
     @media (max-width: 768px) {
         .countdown-timer {
@@ -74,19 +89,32 @@
     </div>
 </button>
 
-<!-- ✅ RIGHT HERE - Right after the button -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <h2>📋 Smart Attendance</h2>
-    <a href="/faculty_dashboard">📊 Dashboard</a>
-    <a href="/create_session">➕ Create Session</a>
-    <a href="/add_student">👥 Manage Students</a>
-    <a href="/students_report">📑 Reports</a>
-    <a href="/attendance">📜 All Attendance</a>
-    <a href="/subject_details">📚 Subjects</a>
-    <a href="/about">ℹ️ About</a>
-    <a href="/logout">🚪 Logout</a>
+    <div class="sidebar-header">
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', '')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    {% if sidebar_links %}
+        {% if sidebar_links.main %}
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">MAIN MENU</div>
+                {% for link in sidebar_links.main %}
+                <a href="{{ link.url }}" {% if request.path == link.url %}class="active"{% endif %}>
+                    {{ link.icon }} {{ link.text }}
+                </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endif %}
+    
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">🚪 Logout</a>
+    </div>
 </div>
 
 <div class="main">
@@ -104,7 +132,7 @@
         </div>
         
         <div class="qr-container">
-            <img src="{{ url_for('static', filename='qr_codes/' + qr) }}" width="250" style="border-radius: 15px;" id="qrImage">
+            <img src="{{ url_for('static', filename='qr_codes/' + qr) }}" width="250" style="border-radius: 15px;" id="qrImage" alt="QR Code">
         </div>
         
         <div class="info-box">
@@ -115,38 +143,59 @@
             <p>4. Session expires after the countdown ends</p>
         </div>
         
-        <p style="margin-top: 20px; color: green;" id="activeMessage">✅ QR is active for the duration shown above</p>
+        <p style="margin-top: 20px;" id="activeMessage">✅ QR is active for the duration shown above</p>
         
+        <div class="qr-url">
+            <strong>🔗 QR URL (for manual entry):</strong><br>
+            <span id="qrUrl"></span>
+            <button onclick="copyUrl()" class="btn-small" style="width: auto; margin-top: 5px;">📋 Copy URL</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // Get the end time from Flask
+    // Get the end time from Flask - passed as ISO string
     const endTimeStr = "{{ end_time }}";
+    const durationMinutes = {{ duration }};
+    
     console.log("End time from server:", endTimeStr);
+    console.log("Duration:", durationMinutes, "minutes");
+    
+    // Parse the end time
+    let endTime = new Date(endTimeStr);
+    
+    // Validate if endTime is valid
+    if (isNaN(endTime.getTime())) {
+        console.error("Invalid end time:", endTimeStr);
+        // Fallback: Calculate from now + duration
+        endTime = new Date();
+        endTime.setMinutes(endTime.getMinutes() + durationMinutes);
+        console.log("Using calculated end time:", endTime);
+    }
     
     const countdownElement = document.getElementById('countdownTimer');
-    const statusText = document.getElementById('statusText');
-    const activeMessage = document.getElementById('activeMessage');
+    const statusTextSpan = document.getElementById('statusText');
+    const activeMessageSpan = document.getElementById('activeMessage');
     
     function updateCountdown() {
-        // Parse the end time
-        const endTime = new Date(endTimeStr);
         const now = new Date();
         
         // Calculate remaining time in seconds
         const remainingSeconds = Math.max(0, Math.floor((endTime - now) / 1000));
         
+        console.log("Current time:", now.toLocaleTimeString());
+        console.log("End time:", endTime.toLocaleTimeString());
         console.log("Remaining seconds:", remainingSeconds);
         
         if (remainingSeconds <= 0) {
             // Session expired
             countdownElement.innerHTML = "00:00";
             countdownElement.classList.add('warning');
-            statusText.innerHTML = "⏰ SESSION EXPIRED";
-            statusText.style.color = "red";
-            activeMessage.innerHTML = "❌ Session has expired. Please create a new session.";
-            activeMessage.style.color = "red";
+            statusTextSpan.innerHTML = "⏰ SESSION EXPIRED";
+            statusTextSpan.className = "status-text expired";
+            activeMessageSpan.innerHTML = "❌ Session has expired. Please create a new session.";
+            activeMessageSpan.style.color = "red";
+            activeMessageSpan.style.fontWeight = "bold";
             return;
         }
         
@@ -161,29 +210,62 @@
         // Add warning class when less than 30 seconds
         if (remainingSeconds <= 30) {
             countdownElement.classList.add('warning');
-            statusText.innerHTML = "⚠️ Session expiring soon!";
-            statusText.style.color = "orange";
+            statusTextSpan.innerHTML = "⚠️ Session expiring soon!";
+            statusTextSpan.className = "status-text active";
+            statusTextSpan.style.color = "orange";
         } else {
             countdownElement.classList.remove('warning');
-            statusText.innerHTML = "⏳ Session Active";
-            statusText.style.color = "#666";
+            statusTextSpan.innerHTML = "⏳ Session Active";
+            statusTextSpan.className = "status-text active";
+            statusTextSpan.style.color = "#28a745";
         }
         
-        // Update every second
+        // Continue countdown
         setTimeout(updateCountdown, 1000);
     }
     
     // Start the countdown immediately
     updateCountdown();
     
-    // Also check periodically with setInterval as backup
+    // Also check periodically for expiration
     setInterval(function() {
-        const endTime = new Date(endTimeStr);
-        const now = new Date();
-        if (endTime - now <= 0) {
+        if (new Date() >= endTime) {
             location.reload(); // Reload page when expired to show expired state
         }
     }, 1000);
+    
+    // Display QR URL
+    const imgElement = document.getElementById('qrImage');
+    if (imgElement) {
+        const qrUrlDisplay = document.getElementById('qrUrl');
+        if (qrUrlDisplay) {
+            // This is a simplified way - in production you'd want the actual URL
+            qrUrlDisplay.textContent = window.location.origin + "/mark?session_id={{ session_id }}";
+        }
+    }
+    
+    function copyUrl() {
+        const url = window.location.origin + "/mark?session_id={{ session_id }}";
+        navigator.clipboard.writeText(url).then(function() {
+            alert("URL copied to clipboard!");
+        }, function() {
+            alert("Failed to copy URL");
+        });
+    }
+    
+    // Display session expiry message on page load
+    window.addEventListener('load', function() {
+        const now = new Date();
+        if (now >= endTime) {
+            countdownElement.innerHTML = "00:00";
+            countdownElement.classList.add('warning');
+            statusTextSpan.innerHTML = "⏰ SESSION EXPIRED";
+            statusTextSpan.className = "status-text expired";
+            activeMessageSpan.innerHTML = "❌ Session has expired. Please create a new session.";
+            activeMessageSpan.style.color = "red";
+            activeMessageSpan.style.fontWeight = "bold";
+        }
+    });
 </script>
 
 <script>
@@ -198,6 +280,7 @@
             if (menuBtn) menuBtn.classList.toggle('open');
         }
     }
+    
     function closeSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -208,9 +291,11 @@
             if (menuBtn) menuBtn.classList.remove('open');
         }
     }
+    
     document.querySelectorAll('.sidebar a').forEach(link => {
         link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
     });
+    
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && window.innerWidth <= 768) closeSidebar(); });
     window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
