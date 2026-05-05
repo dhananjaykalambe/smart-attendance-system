@@ -22,10 +22,14 @@ wheels/
 .installed.cfg
 *.egg
 
+# Environment variables - ADD THESE LINES
+.env
+.env.local
+.env.*
+
 # Flask
 instance/
 .webassets-cache
-.env.local
 
 # Database
 *.db
