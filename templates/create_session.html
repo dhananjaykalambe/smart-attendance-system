@@ -12,10 +12,10 @@
         margin: 20px 0;
     }
     .subject-card {
-        background: linear-gradient(135deg, #28a745, #20c997);
+        background: linear-gradient(135deg, var(--success), var(--success-dark));
         color: white;
         padding: 18px 12px;
-        border-radius: 16px;
+        border-radius: var(--radius-lg);
         text-align: center;
         cursor: pointer;
         transition: all 0.3s ease;
@@ -23,73 +23,41 @@
         width: 100%;
         margin: 0;
         font-weight: 600;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-shadow: var(--shadow-sm);
     }
     .subject-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        box-shadow: var(--shadow-md);
     }
     .subject-card.selected {
-        background: linear-gradient(135deg, #1a3c61, #2a5298);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        box-shadow: var(--shadow-md);
         transform: scale(1.02);
     }
-    .subject-card small {
-        font-size: 11px;
-        opacity: 0.9;
-    }
-    .duration-select {
-        margin: 25px 0;
-    }
-    .duration-select label {
-        font-weight: 600;
-        color: #1a3c61;
-        display: block;
-        margin-bottom: 8px;
-    }
+    .subject-card small { font-size: 11px; opacity: 0.9; }
+    .duration-select { margin: 25px 0; }
+    .duration-select label { font-weight: 600; color: var(--primary); display: block; margin-bottom: 8px; }
     .duration-select select {
-        width: 100%;
-        padding: 12px 15px;
-        border-radius: 12px;
-        border: 2px solid #e0e0e0;
-        font-size: 14px;
-        background: white;
-        cursor: pointer;
+        width: 100%; padding: 12px 15px; border-radius: var(--radius-md);
+        border: 2px solid var(--border-color); font-size: 14px;
+        background: var(--card-bg); color: var(--text-primary); cursor: pointer;
     }
     .create-btn {
-        background: linear-gradient(135deg, #28a745, #20c997);
-        font-size: 18px;
-        padding: 15px;
-        margin-top: 20px;
-        font-weight: bold;
+        background: linear-gradient(135deg, var(--success), var(--success-dark));
+        font-size: 18px; padding: 15px; margin-top: 20px; font-weight: bold;
         border-radius: 50px;
-        box-shadow: 0 4px 15px rgba(40,167,69,0.3);
     }
-    .create-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(40,167,69,0.4);
-    }
+    .create-btn:hover { background: linear-gradient(135deg, var(--success-dark), var(--success)); }
     .error-msg {
-        background: #f8d7da;
-        color: #721c24;
-        padding: 12px;
-        border-radius: 8px;
-        margin-bottom: 15px;
-        display: none;
-        border-left: 4px solid #dc3545;
+        background: var(--danger-soft); color: var(--danger-dark);
+        padding: 12px; border-radius: var(--radius-md); margin-bottom: 15px;
+        display: none; border-left: 4px solid var(--danger);
     }
     .info-tip {
-        background: #e8f4f8;
-        padding: 12px;
-        border-radius: 10px;
-        text-align: center;
-        margin-top: 20px;
+        background: var(--info-soft); padding: 12px; border-radius: var(--radius-md);
+        text-align: center; margin-top: 20px;
     }
-    .info-tip p {
-        margin: 0;
-        font-size: 13px;
-        color: #1a3c61;
-    }
+    .info-tip p { margin: 0; font-size: 13px; color: var(--info-dark); }
 </style>
 </head>
 <body>
@@ -102,23 +70,40 @@
     </div>
 </button>
 
-<!-- ✅ RIGHT HERE - Right after the button -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <h2>📋 Smart Attendance</h2>
-    <a href="/faculty_dashboard">📊 Dashboard</a>
-    <a href="/create_session">➕ Create Session</a>
-    <a href="/add_student">👥 Manage Students</a>
-    <a href="/students_report">📑 Reports</a>
-    <a href="/attendance">📜 All Attendance</a>
-    <a href="/subject_details">📚 Subjects</a>
-    <a href="/about">ℹ️ About</a>
-    <a href="/logout">🚪 Logout</a>
+    <div class="sidebar-header">
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/faculty_dashboard" {% if request.path == '/faculty_dashboard' %}class="active"{% endif %}>📊 Dashboard</a>
+        <a href="/create_session" {% if request.path == '/create_session' %}class="active"{% endif %}>➕ Create Session</a>
+        <a href="/add_student" {% if request.path == '/add_student' %}class="active"{% endif %}>👥 Manage Students</a>
+        <a href="/students_report" {% if request.path == '/students_report' %}class="active"{% endif %}>📑 Reports</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>📜 All Attendance</a>
+        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>📚 Subjects</a>
+        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>ℹ️ About</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">🚪 Logout</a>
+    </div>
 </div>
 
 <div class="main">
-    <div class="header" style="background: linear-gradient(135deg, #28a745, #20c997);">
+    <div class="header" style="background: linear-gradient(135deg, var(--success), var(--success-dark));">
         ➕ Create New Attendance Session
     </div>
 
@@ -132,22 +117,22 @@
         <form method="POST" action="/create_session" id="sessionForm">
             <label>📚 Select Subject:</label>
             <div class="subject-grid">
-                <button type="submit" name="subject" value="ML" class="subject-card" onclick="selectSubject(this, 'ML')">
+                <button type="button" value="ML" class="subject-card" onclick="selectSubject(this, 'ML')">
                     🤖 Machine Learning<br><small>(ML)</small>
                 </button>
-                <button type="submit" name="subject" value="DS" class="subject-card" onclick="selectSubject(this, 'DS')">
+                <button type="button" value="DS" class="subject-card" onclick="selectSubject(this, 'DS')">
                     🗃️ Data Structures<br><small>(DS)</small>
                 </button>
-                <button type="submit" name="subject" value="CD" class="subject-card" onclick="selectSubject(this, 'CD')">
+                <button type="button" value="CD" class="subject-card" onclick="selectSubject(this, 'CD')">
                     ⚙️ Compiler Design<br><small>(CD)</small>
                 </button>
-                <button type="submit" name="subject" value="IPR" class="subject-card" onclick="selectSubject(this, 'IPR')">
+                <button type="button" value="IPR" class="subject-card" onclick="selectSubject(this, 'IPR')">
                     📜 IPR<br><small>(IPR)</small>
                 </button>
-                <button type="submit" name="subject" value="EOII" class="subject-card" onclick="selectSubject(this, 'EOII')">
+                <button type="button" value="EOII" class="subject-card" onclick="selectSubject(this, 'EOII')">
                     📈 Economics in IT<br><small>(EOII)</small>
                 </button>
-                <button type="submit" name="subject" value="OE-1" class="subject-card" onclick="selectSubject(this, 'OE-1')">
+                <button type="button" value="OE-1" class="subject-card" onclick="selectSubject(this, 'OE-1')">
                     🌍 Environmental Engg<br><small>(OE-1)</small>
                 </button>
             </div>
@@ -179,19 +164,12 @@
     let currentSubject = null;
     
     function selectSubject(button, subject) {
-        // Remove selected class from all buttons
         document.querySelectorAll('.subject-card').forEach(btn => {
             btn.classList.remove('selected');
         });
-        
-        // Add selected class to clicked button
         button.classList.add('selected');
-        
-        // Store selected subject
         currentSubject = subject;
         document.getElementById('selected_subject').value = subject;
-        
-        // Hide error message
         document.getElementById('errorMsg').style.display = 'none';
     }
     
@@ -200,8 +178,6 @@
             document.getElementById('errorMsg').style.display = 'block';
             return;
         }
-        
-        // Create form data and submit
         const form = document.getElementById('sessionForm');
         const hiddenInput = document.createElement('input');
         hiddenInput.type = 'hidden';
@@ -210,11 +186,9 @@
         form.appendChild(hiddenInput);
         form.submit();
     }
-    
 </script>
 
 <script>
-    // Mobile Menu Functions
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -241,6 +215,5 @@
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && window.innerWidth <= 768) closeSidebar(); });
     window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
-
 </body>
 </html>

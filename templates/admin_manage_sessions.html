@@ -14,29 +14,51 @@
     </div>
 </button>
 
-<!-- ✅ RIGHT HERE - Right after the button -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <h2>👑 Admin Panel</h2>
-    <a href="/admin_dashboard">📊 Dashboard</a>
-    <a href="/admin/manage_faculty">👥 Manage Faculty</a>
-    <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
-    <a href="/admin/manage_sessions">📊 Manage Sessions</a>
-    <a href="/admin/system_settings">⚙️ System Settings</a>
-    <a href="/admin/change_password">🔐 Change Password</a>
-    <hr><a href="/logout">🚪 Logout</a>
+    <div class="sidebar-header">
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/admin_dashboard">👑 Admin Dashboard</a>
+        <a href="/admin/manage_faculty">👥 Manage Faculty</a>
+        <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
+        <a href="/admin/manage_sessions" class="active">📊 Manage Sessions</a>
+        <a href="/admin/system_settings">⚙️ System Settings</a>
+        <a href="/admin/change_password">🔐 Change Password</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance">📜 All Attendance</a>
+        <a href="/subject_details">📚 Subjects</a>
+        <a href="/about">ℹ️ About</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">🚪 Logout</a>
+    </div>
 </div>
 
 <div class="main">
-    <div class="header" style="background:linear-gradient(135deg,#dc3545,#c82333);">📊 Manage All Sessions</div>
+    <div class="header" style="background: linear-gradient(135deg, var(--danger), var(--danger-dark));">
+        📊 Manage All Sessions
+    </div>
 
     <div class="card">
         <h2>📋 All Sessions</h2>
         <div class="table-container">
             <table style="width:100%">
                 <thead>
-                    <tr style="background:#1a3c61; color:white;">
+                    <tr>
                         <th>Session ID</th><th>Subject</th><th>Start Time</th><th>End Time</th><th>Duration</th><th>Attendance</th><th>Status</th><th>Actions</th>
                     </tr>
                 </thead>
@@ -44,11 +66,11 @@
                     {% for session in sessions %}
                     <tr>
                         <td><code>{{ session.session_id }}</code></td>
-                        <td><strong>{{ session.subject }}</strong></td>
+                        <td><span class="badge badge-primary">{{ session.subject }}</span></td>
                         <td>{{ session.start_time.strftime('%Y-%m-%d %H:%M') if session.start_time else 'N/A' }}</td>
                         <td>{{ session.end_time.strftime('%H:%M') if session.end_time else 'N/A' }}</td>
                         <td>{{ session.duration }} min</td>
-                        <td>{{ session.attendance_count }} students</td>
+                        <td><span class="badge badge-info">{{ session.attendance_count }} students</span></td>
                         <td>
                             {% if session.end_time and session.end_time > now %}
                                 <span class="badge badge-success">🟢 Active</span>
@@ -57,8 +79,8 @@
                             {% endif %}
                         </td>
                         <td class="action-buttons">
-                            <a href="/admin/view_session/{{ session.session_id }}"><button class="btn-small" style="background:#17a2b8;">👁️ View</button></a>
-                            <a href="/admin/delete_session/{{ session.session_id }}" onclick="return confirm('Delete this session?')"><button class="btn-small" style="background:#dc3545;">🗑️ Delete</button></a>
+                            <a href="/admin/view_session/{{ session.session_id }}"><button class="btn-small" style="background: linear-gradient(135deg, var(--info), var(--info-dark));">👁️ View</button></a>
+                            <a href="/admin/delete_session/{{ session.session_id }}" onclick="return confirm('Delete this session?')"><button class="btn-small" style="background: linear-gradient(135deg, var(--danger), var(--danger-dark));">🗑️ Delete</button></a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -72,7 +94,6 @@
 </div>
 
 <script>
-    // Mobile Menu Functions
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -100,5 +121,4 @@
     window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 </body>
-
 </html>

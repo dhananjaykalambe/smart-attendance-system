@@ -14,42 +14,78 @@
     </div>
 </button>
 
-<!-- ✅ RIGHT HERE - Right after the button -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <h2>📋 Smart Attendance</h2>
+    <div class="sidebar-header">
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
     {% if session.role == 'faculty' %}
-    <a href="/faculty_dashboard">📊 Dashboard</a>
-    <a href="/create_session">➕ Create Session</a>
-    <a href="/add_student">👥 Manage Students</a>
-    <a href="/students_report">📑 Reports</a>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/faculty_dashboard">📊 Dashboard</a>
+        <a href="/create_session">➕ Create Session</a>
+        <a href="/add_student">👥 Manage Students</a>
+        <a href="/students_report">📑 Reports</a>
+    </div>
     {% elif session.role == 'admin' %}
-    <a href="/admin_dashboard">👑 Admin Dashboard</a>
-    <a href="/admin/manage_faculty">👥 Manage Faculty</a>
-    <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
-    <a href="/admin/manage_sessions">📊 Manage Sessions</a>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/admin_dashboard">👑 Admin Dashboard</a>
+        <a href="/admin/manage_faculty">👥 Manage Faculty</a>
+        <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
+        <a href="/admin/manage_sessions">📊 Manage Sessions</a>
+        <a href="/admin/system_settings">⚙️ System Settings</a>
+        <a href="/admin/change_password">🔐 Change Password</a>
+    </div>
     {% elif session.role == 'student' %}
-    <a href="/student_dashboard">📊 Dashboard</a>
-    <a href="/scan">📷 Scan QR</a>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/student_dashboard">📊 Dashboard</a>
+        <a href="/scan">📷 Scan QR</a>
+    </div>
     {% else %}
-    <a href="/">🏠 Home</a>
-    <a href="/login">🔐 Login</a>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/">🏠 Home</a>
+        <a href="/login">🔐 Login</a>
+    </div>
     {% endif %}
-    <a href="/attendance">📜 Attendance</a>
-    <a href="/subject_details">📚 Subjects</a>
-    <a href="/about">ℹ️ About</a>
-    {% if session.user_id %}<a href="/logout">🚪 Logout</a>{% endif %}
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance">📜 Attendance</a>
+        <a href="/subject_details" class="active">📚 Subjects</a>
+        <a href="/about">ℹ️ About</a>
+    </div>
+    
+    {% if session.user_id %}
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">🚪 Logout</a>
+    </div>
+    {% endif %}
 </div>
 
 <div class="main">
-    <div class="header">📚 B.Tech Computer Science & Engineering (Semester VI)</div>
+    <div class="header" style="background: linear-gradient(135deg, var(--primary), var(--primary-light));">
+        📚 B.Tech Computer Science & Engineering (Semester VI)
+    </div>
 
     <div class="card">
         <h2>📖 Theory Subjects</h2>
         <div class="table-container">
             <table style="width:100%">
-                <thead><tr style="background:#1a3c61; color:white;"><th>Code</th><th>Subject Name</th><th>Faculty</th><th>Credits</th><th>Theory</th><th>Practical</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Code</th><th>Subject Name</th><th>Faculty</th><th>Credits</th><th>Theory</th><th>Practical</th>
+                    </tr>
+                </thead>
                 <tbody>
                     <tr><td><strong>ML</strong></td><td>Machine Learning</td><td>Prof. Khadse</td><td>4</td><td>70</td><td>30</td></tr>
                     <tr><td><strong>DS</strong></td><td>Data Structures</td><td>Prof. Tikle</td><td>4</td><td>70</td><td>30</td></tr>
@@ -66,7 +102,11 @@
         <h2>💻 Laboratory Subjects</h2>
         <div class="table-container">
             <table style="width:100%">
-                <thead><tr style="background:#1a3c61; color:white;"><th>Code</th><th>Lab Name</th><th>Faculty</th><th>Credits</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Code</th><th>Lab Name</th><th>Faculty</th><th>Credits</th>
+                    </tr>
+                </thead>
                 <tbody>
                     <tr><td><strong>ML-Lab</strong></td><td>Machine Learning Lab</td><td>Prof. Khadse</td><td>2</td></tr>
                     <tr><td><strong>CD-Lab</strong></td><td>Compiler Design Lab</td><td>Prof. Katore</td><td>2</td></tr>
@@ -78,7 +118,6 @@
 </div>
 
 <script>
-    // Mobile Menu Functions
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -106,5 +145,4 @@
     window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 </body>
-
 </html>

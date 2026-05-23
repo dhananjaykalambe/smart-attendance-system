@@ -4,16 +4,9 @@
 <title>Admin - Faculty Management</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <style>
-    .admin-header {
-        background: linear-gradient(135deg, #dc3545, #c82333);
-    }
-    .stats-card {
-        background: #1a3c61;
-        color: white;
-        padding: 15px;
-        border-radius: 10px;
-        text-align: center;
-    }
+    .admin-header { background: linear-gradient(135deg, var(--danger), var(--danger-dark)); }
+    .stats-card { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; padding: 20px; border-radius: var(--radius-lg); text-align: center; }
+    .stats-card h3 { font-size: 2rem; margin-bottom: 5px; }
 </style>
 </head>
 <body>
@@ -26,18 +19,38 @@
     </div>
 </button>
 
-<!-- ✅ RIGHT HERE - Right after the button -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <h2>👑 Admin Panel</h2>
-    <a href="/admin/faculty">👥 Manage Faculty</a>
-    <a href="/admin/students">👨‍🎓 Manage Students</a>
-    <a href="/admin/sessions">📊 View All Sessions</a>
-    <a href="/admin/logout">🚪 Admin Logout</a>
-    <hr style="margin:15px 0; border-color:rgba(255,255,255,0.2);">
-    <a href="/faculty_dashboard">📊 Faculty Dashboard</a>
-    <a href="/">🏠 Home</a>
+    <div class="sidebar-header">
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/admin_dashboard">👑 Admin Dashboard</a>
+        <a href="/admin/manage_faculty" class="active">👥 Manage Faculty</a>
+        <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
+        <a href="/admin/manage_sessions">📊 Manage Sessions</a>
+        <a href="/admin/system_settings">⚙️ System Settings</a>
+        <a href="/admin/change_password">🔐 Change Password</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance">📜 All Attendance</a>
+        <a href="/subject_details">📚 Subjects</a>
+        <a href="/about">ℹ️ About</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">🚪 Logout</a>
+    </div>
 </div>
 
 <div class="main">
@@ -50,7 +63,7 @@
             <h3>{{ faculties|length }}</h3>
             <p>Total Faculty</p>
         </div>
-        <div class="stats-card">
+        <div class="stats-card" style="background: linear-gradient(135deg, var(--accent), var(--accent-hover));">
             <h3>ADMIN123</h3>
             <p>Admin Key</p>
         </div>
@@ -59,58 +72,56 @@
     <div class="card">
         <h2>➕ Add New Faculty Member</h2>
         <form method="POST" action="/admin/add_faculty">
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+            <div class="form-grid">
                 <input type="text" name="faculty_id" placeholder="Faculty ID (e.g., FAC010)" required>
                 <input type="text" name="name" placeholder="Full Name" required>
                 <input type="email" name="email" placeholder="Email Address" required>
                 <input type="text" name="department" placeholder="Department" required>
                 <input type="password" name="password" placeholder="Password" required>
             </div>
-            <button type="submit" style="background:#28a745;">➕ Add Faculty</button>
+            <button type="submit" class="success">➕ Add Faculty</button>
         </form>
     </div>
 
     <div class="card">
         <h2>📋 Existing Faculty Members</h2>
-        <div style="overflow-x:auto;">
+        <div class="table-container">
             <table style="width:100%;">
-                <tr style="background:#1a3c61; color:white;">
-                    <th>Faculty ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Department</th>
-                    <th>Action</th>
-                </tr>
-                {% for faculty in faculties %}
-                <tr>
-                    <td><strong>{{ faculty.faculty_id }}</strong></td>
-                    <td>{{ faculty.name }}</td>
-                    <td>{{ faculty.email }}</td>
-                    <td>{{ faculty.department }}</td>
-                    <td>
-                        <a href="/admin/delete_faculty/{{ faculty.faculty_id }}" 
-                           onclick="return confirm('Are you sure?')">
-                            <button class="danger" style="width:auto; padding:5px 15px; background:#dc3545;">🗑️ Delete</button>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
+                <thead>
+                    <tr>
+                        <th>Faculty ID</th><th>Name</th><th>Email</th><th>Department</th><th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for faculty in faculties %}
+                    <tr>
+                        <td><strong>{{ faculty.faculty_id }}</strong></td>
+                        <td>{{ faculty.name }}</td>
+                        <td>{{ faculty.email }}</td>
+                        <td><span class="badge badge-primary">{{ faculty.department }}</span></td>
+                        <td>
+                            <a href="/admin/delete_faculty/{{ faculty.faculty_id }}" onclick="return confirm('Are you sure?')">
+                                <button class="danger btn-small">🗑️ Delete</button>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
     </div>
     
     <div class="card">
         <h2>🔐 Security Information</h2>
-        <ul>
-            <li>Admin Key: <strong>ADMIN123</strong> (Keep this secure)</li>
-            <li>Faculty default password: <strong>faculty123</strong></li>
+        <ul style="color: var(--text-secondary);">
+            <li>Admin Key: <strong style="color: var(--primary);">ADMIN123</strong> (Keep this secure)</li>
+            <li>Faculty default password: <strong style="color: var(--primary);">faculty123</strong></li>
             <li>Change passwords after first login for security</li>
         </ul>
     </div>
 </div>
 
 <script>
-    // Mobile Menu Functions
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -138,5 +149,4 @@
     window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 </body>
-
 </html>

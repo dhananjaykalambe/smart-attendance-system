@@ -16,40 +16,57 @@
     </div>
 </button>
 
-<!-- ✅ RIGHT HERE - Right after the button -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <h2>📋 Smart Attendance</h2>
-    <a href="/student_dashboard">📊 Dashboard</a>
-    <a href="/scan">📷 Scan QR</a>
-    <a href="/attendance">📜 My Attendance</a>
-    <a href="/subject_details">📚 Subjects</a>
-    <a href="/about">ℹ️ About</a>
-    <a href="/logout">🚪 Logout</a>
+    <div class="sidebar-header">
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/student_dashboard">📊 Dashboard</a>
+        <a href="/scan" class="active">📷 Scan QR</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance">📜 My Attendance</a>
+        <a href="/subject_details">📚 Subjects</a>
+        <a href="/about">ℹ️ About</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">🚪 Logout</a>
+    </div>
 </div>
 
 <div class="main">
-    <div class="header">
+    <div class="header" style="background: linear-gradient(135deg, var(--info), var(--info-dark));">
         📷 QR Code Scanner
     </div>
 
     <div class="card" style="text-align: center;">
         <h3>👋 Welcome, {{ name }}</h3>
-        <p style="color: #666; margin-bottom: 20px;">Position the QR code within the frame to mark attendance</p>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">Position the QR code within the frame to mark attendance</p>
         
         <div id="reader" style="width: 100%; max-width: 400px; margin: 20px auto;"></div>
         
-        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
             <form method="POST" action="/mark" id="attendanceForm">
                 <input type="text" id="session_id" name="session_id" placeholder="Or enter Session ID manually" style="text-align: center;">
                 <button type="submit">✅ Submit Attendance</button>
             </form>
         </div>
         
-        <div id="locationStatus" style="margin-top: 15px; padding: 10px; border-radius: 8px;"></div>
+        <div id="locationStatus" style="margin-top: 15px; padding: 10px; border-radius: var(--radius-md);"></div>
         
-        <p style="margin-top: 15px; font-size: 12px; color: #999;">
+        <p style="margin-top: 15px; font-size: 12px; color: var(--text-muted);">
             🔒 Your location and device information will be recorded for security
         </p>
     </div>
@@ -59,8 +76,8 @@
 if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
         document.getElementById('locationStatus').innerHTML = '📍 Location detected ✓';
-        document.getElementById('locationStatus').style.background = '#d4edda';
-        document.getElementById('locationStatus').style.color = '#155724';
+        document.getElementById('locationStatus').style.background = 'var(--success-soft)';
+        document.getElementById('locationStatus').style.color = 'var(--success-dark)';
     }, function(error) {
         let message = '';
         switch(error.code) {
@@ -75,13 +92,13 @@ if (navigator.geolocation) {
                 break;
         }
         document.getElementById('locationStatus').innerHTML = message;
-        document.getElementById('locationStatus').style.background = '#fff3cd';
-        document.getElementById('locationStatus').style.color = '#856404';
+        document.getElementById('locationStatus').style.background = 'var(--warning-soft)';
+        document.getElementById('locationStatus').style.color = 'var(--warning-dark)';
     });
 } else {
     document.getElementById('locationStatus').innerHTML = '❌ Geolocation not supported by your browser';
-    document.getElementById('locationStatus').style.background = '#f8d7da';
-    document.getElementById('locationStatus').style.color = '#721c24';
+    document.getElementById('locationStatus').style.background = 'var(--danger-soft)';
+    document.getElementById('locationStatus').style.color = 'var(--danger-dark)';
 }
 
 function onScanSuccess(decodedText) {
@@ -103,7 +120,6 @@ scanner.render(onScanSuccess);
 </script>
 
 <script>
-    // Mobile Menu Functions
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -131,5 +147,4 @@ scanner.render(onScanSuccess);
     window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 </body>
-
 </html>

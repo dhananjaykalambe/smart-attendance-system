@@ -18,22 +18,28 @@
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h2>👑 Admin Panel</h2>
-        <p>System Configuration</p>
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
     </div>
     
-    {% if sidebar_links %}
-        {% if sidebar_links.main %}
-            <div class="sidebar-section">
-                <div class="sidebar-section-title">MAIN MENU</div>
-                {% for link in sidebar_links.main %}
-                <a href="{{ link.url }}" {% if request.path == link.url %}class="active"{% endif %}>
-                    {{ link.icon }} {{ link.text }}
-                </a>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endif %}
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/admin_dashboard">👑 Admin Dashboard</a>
+        <a href="/admin/manage_faculty">👥 Manage Faculty</a>
+        <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
+        <a href="/admin/manage_sessions">📊 Manage Sessions</a>
+        <a href="/admin/system_settings" class="active">⚙️ System Settings</a>
+        <a href="/admin/change_password">🔐 Change Password</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance">📜 All Attendance</a>
+        <a href="/subject_details">📚 Subjects</a>
+        <a href="/about">ℹ️ About</a>
+    </div>
     
     <div class="sidebar-divider"></div>
     <div class="sidebar-section">
@@ -43,7 +49,9 @@
 </div>
 
 <div class="main">
-    <div class="header" style="background:linear-gradient(135deg,#dc3545,#c82333);">⚙️ System Configuration</div>
+    <div class="header" style="background: linear-gradient(135deg, var(--danger), var(--danger-dark));">
+        ⚙️ System Configuration
+    </div>
 
     {% if message %}
     <div class="alert alert-success">{{ message }}</div>
@@ -55,7 +63,7 @@
             <div class="form-group">
                 <label>College Name:</label>
                 <input type="text" name="college_name" value="{{ settings.college_name }}" required>
-                <small>This appears in headers and PDF reports</small>
+                <small class="text-muted">This appears in headers and PDF reports</small>
             </div>
             <div class="form-group">
                 <label>College Location:</label>
@@ -64,7 +72,7 @@
             <div class="form-group">
                 <label>Header Display Text:</label>
                 <input type="text" name="college_header" value="{{ settings.get('college_header', settings.college_name) }}" placeholder="Optional custom header">
-                <small>If empty, college name will be used</small>
+                <small class="text-muted">If empty, college name will be used</small>
             </div>
             <div class="form-group">
                 <label>Academic Year:</label>
@@ -75,17 +83,17 @@
             <div class="form-group">
                 <label>⚠️ Low Attendance Threshold (%):</label>
                 <input type="number" name="attendance_threshold" value="{{ settings.attendance_threshold }}" min="0" max="100" required>
-                <small>Students below this percentage will receive alerts</small>
+                <small class="text-muted">Students below this percentage will receive alerts</small>
             </div>
             <div class="form-group">
                 <label>⏱️ QR Code Expiry (seconds):</label>
                 <input type="number" name="qr_expiry" value="{{ settings.qr_expiry_seconds }}" min="10" max="300" required>
-                <small>How long the QR code remains valid after generation</small>
+                <small class="text-muted">How long the QR code remains valid after generation</small>
             </div>
             <div class="form-group">
                 <label>⏰ Default Session Duration (minutes):</label>
                 <input type="number" name="session_duration" value="{{ settings.session_duration_minutes }}" min="1" max="60" required>
-                <small>Default duration when creating a new session</small>
+                <small class="text-muted">Default duration when creating a new session</small>
             </div>
             
             <button type="submit" class="success">💾 Save All Settings</button>
@@ -98,7 +106,6 @@
 </div>
 
 <script>
-    // Mobile Menu Functions
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');

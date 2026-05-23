@@ -3,6 +3,9 @@
 <head>
 <title>Admin Login</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+    .login-card { max-width: 450px; margin: 0 auto; }
+</style>
 </head>
 <body>
 
@@ -14,42 +17,56 @@
     </div>
 </button>
 
-<!-- ✅ RIGHT HERE - Right after the button -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <h2>📋 Admin Portal</h2>
-    <a href="/">🏠 Home</a>
-    <a href="/login">🔐 User Login</a>
+    <div class="sidebar-header">
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/">🏠 Home</a>
+        <a href="/login" class="active">🔐 User Login</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance">📜 Attendance</a>
+        <a href="/subject_details">📚 Subjects</a>
+        <a href="/about">ℹ️ About</a>
+    </div>
 </div>
 
 <div class="main">
-    <div class="header">
+    <div class="header" style="background: linear-gradient(135deg, var(--danger), var(--danger-dark));">
         🔐 Administrator Access Only
     </div>
 
-    <div class="card" style="max-width:450px; margin:0 auto;">
-        <h2 style="text-align:center;">Admin Authentication</h2>
+    <div class="card login-card">
+        <h2 style="text-align: center;">Admin Authentication</h2>
         
         {% if error %}
-        <div style="background:#f8d7da; color:#721c24; padding:10px; border-radius:8px; margin-bottom:15px;">
-            ❌ {{ error }}
-        </div>
+        <div class="alert alert-danger">{{ error }}</div>
         {% endif %}
         
         <form method="POST">
-            <input type="password" name="admin_key" placeholder="Enter Admin Security Key" required>
+            <div class="input-group">
+                <input type="password" name="admin_key" placeholder="Enter Admin Security Key" required>
+            </div>
             <button type="submit">Access Admin Panel →</button>
         </form>
         
-        <p style="margin-top:15px; font-size:12px; color:#666; text-align:center;">
+        <p style="margin-top: 15px; font-size: 12px; color: var(--text-muted); text-align: center;">
             🔒 Unauthorized access is prohibited and monitored.
         </p>
     </div>
 </div>
 
 <script>
-    // Mobile Menu Functions
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -77,5 +94,4 @@
     window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 </body>
-
 </html>

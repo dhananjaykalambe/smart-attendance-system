@@ -4,20 +4,22 @@
 <title>Admin - Manage Students</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <style>
-    .export-bottom { text-align: right; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0; }
-    .btn-export { background: #28a745; padding: 10px 25px; width: auto; }
-    .btn-export:hover { background: #218838; }
+    .export-bottom { text-align: right; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color); }
+    .btn-export { background: linear-gradient(135deg, var(--success), var(--success-dark)); padding: 10px 25px; width: auto; }
+    .btn-export:hover { transform: translateY(-2px); }
     .stats-grid-full { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px; }
-    .stat-card-branch { padding: 15px; border-radius: 12px; text-align: center; color: white; }
-    .branch-cse { background: linear-gradient(135deg, #1a3c61, #2a5298); }
-    .branch-it { background: linear-gradient(135deg, #17a2b8, #0dcaf0); }
-    .branch-ece { background: linear-gradient(135deg, #28a745, #20c997); }
-    .branch-mech { background: linear-gradient(135deg, #fd7e14, #ffc107); }
+    .stat-card-branch { padding: 20px; border-radius: var(--radius-lg); text-align: center; color: white; transition: var(--transition); }
+    .stat-card-branch:hover { transform: translateY(-3px); }
+    .branch-cse { background: linear-gradient(135deg, var(--primary), var(--primary-light)); }
+    .branch-it { background: linear-gradient(135deg, var(--info), var(--info-dark)); }
+    .branch-ece { background: linear-gradient(135deg, var(--success), var(--success-dark)); }
+    .branch-mech { background: linear-gradient(135deg, var(--warning), var(--warning-dark)); }
     .branch-ce { background: linear-gradient(135deg, #6f42c1, #8b5cf6); }
-    .search-box { margin-bottom: 20px; padding: 10px; background: #f8f9fa; border-radius: 8px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .search-box { margin-bottom: 20px; padding: 15px; background: var(--light); border-radius: var(--radius-md); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; border: 1px solid var(--border-color); }
     .search-box input { width: 200px; margin: 0; }
     .search-box select { width: 130px; margin: 0; }
     .search-box button { width: auto; margin: 0; padding: 10px 20px; }
+    .stat-card-branch h3 { font-size: 2rem; margin-bottom: 5px; }
 </style>
 </head>
 <body>
@@ -30,22 +32,44 @@
     </div>
 </button>
 
-<!-- ✅ RIGHT HERE - Right after the button -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <h2>👑 Admin Panel</h2>
-    <a href="/admin_dashboard">📊 Dashboard</a>
-    <a href="/admin/manage_faculty">👥 Manage Faculty</a>
-    <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
-    <a href="/admin/manage_sessions">📊 Manage Sessions</a>
-    <a href="/admin/system_settings">⚙️ System Settings</a>
-    <a href="/admin/change_password">🔐 Change Password</a>
-    <hr><a href="/logout">🚪 Logout</a>
+    <div class="sidebar-header">
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/admin_dashboard">👑 Admin Dashboard</a>
+        <a href="/admin/manage_faculty">👥 Manage Faculty</a>
+        <a href="/admin/manage_students" class="active">👨‍🎓 Manage Students</a>
+        <a href="/admin/manage_sessions">📊 Manage Sessions</a>
+        <a href="/admin/system_settings">⚙️ System Settings</a>
+        <a href="/admin/change_password">🔐 Change Password</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance">📜 All Attendance</a>
+        <a href="/subject_details">📚 Subjects</a>
+        <a href="/about">ℹ️ About</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">🚪 Logout</a>
+    </div>
 </div>
 
 <div class="main">
-    <div class="header" style="background:linear-gradient(135deg,#dc3545,#c82333);">👨‍🎓 Manage Students</div>
+    <div class="header" style="background: linear-gradient(135deg, var(--danger), var(--danger-dark));">
+        👨‍🎓 Manage Students
+    </div>
 
     <div class="card">
         <h2>➕ Add New Student</h2>
@@ -73,17 +97,21 @@
             <select id="branchFilter"><option value="">All Branches</option><option value="CSE">CSE</option><option value="IT">IT</option><option value="ECE">ECE</option><option value="ME">ME</option><option value="CE">CE</option></select>
             <select id="yearFilter"><option value="">All Years</option><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
             <button onclick="searchStudent()">🔍 Search</button>
-            <button onclick="clearSearch()" style="background:#6c757d;">🗑️ Clear</button>
+            <button onclick="clearSearch()" style="background: var(--gray);">🗑️ Clear</button>
         </div>
         <div class="table-container">
             <table style="width:100%" id="studentTable">
-                <thead><tr style="background:#1a3c61; color:white;"><th>Roll No</th><th>Name</th><th>Branch</th><th>Email</th><th>Year</th><th>Sem</th><th>Actions</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Roll No</th><th>Name</th><th>Branch</th><th>Email</th><th>Year</th><th>Sem</th><th>Actions</th>
+                    </tr>
+                </thead>
                 <tbody>
                     {% for student in students %}
                     <tr>
                         <td><strong>{{ student.roll_no }}</strong></td>
                         <td>{{ student.name }}</td>
-                        <td><span class="badge" style="background:#1a3c61; color:white;">{{ student.branch }}</span></td>
+                        <td><span class="badge badge-primary">{{ student.branch }}</span></td>
                         <td>{{ student.email or 'N/A' }}</td>
                         <td>{% if student.year == 1 %}1st{% elif student.year == 2 %}2nd{% elif student.year == 3 %}3rd{% else %}4th{% endif %} Year</td>
                         <td>Sem {{ student.semester or 6 }}</td>
@@ -115,7 +143,9 @@
             {% set ce = students|selectattr('branch', 'in', ['CE', 'CIVIL'])|list|length %}
             <div class="stat-card-branch branch-ce"><h3>{{ ce }}</h3><p>🏗️ CE</p></div>
         </div>
-        <div style="margin-top:15px; padding:10px; background:#e8f4f8; border-radius:10px; text-align:center;"><strong>📊 Total Students: {{ students|length }}</strong></div>
+        <div style="margin-top:15px; padding:15px; background: var(--primary-soft); border-radius: var(--radius-lg); text-align:center;">
+            <strong>📊 Total Students: {{ students|length }}</strong>
+        </div>
     </div>
 </div>
 
@@ -141,7 +171,6 @@
 </script>
 
 <script>
-    // Mobile Menu Functions
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -169,5 +198,4 @@
     window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 </body>
-
 </html>

@@ -14,28 +14,48 @@
     </div>
 </button>
 
-<!-- ✅ RIGHT HERE - Right after the button -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <h2>👑 Admin Panel</h2>
-    <a href="/admin_dashboard">📊 Dashboard</a>
-    <a href="/admin/manage_faculty">👥 Manage Faculty</a>
-    <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
-    <a href="/admin/manage_sessions">📊 Manage Sessions</a>
-    <a href="/admin/system_settings">⚙️ System Settings</a>
-    <a href="/admin/change_password">🔐 Change Password</a>
-    <hr><a href="/logout">🚪 Logout</a>
+    <div class="sidebar-header">
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/admin_dashboard" {% if request.path == '/admin_dashboard' %}class="active"{% endif %}>👑 Admin Dashboard</a>
+        <a href="/admin/manage_faculty" {% if request.path == '/admin/manage_faculty' %}class="active"{% endif %}>👥 Manage Faculty</a>
+        <a href="/admin/manage_students" {% if request.path == '/admin/manage_students' %}class="active"{% endif %}>👨‍🎓 Manage Students</a>
+        <a href="/admin/manage_sessions" {% if request.path == '/admin/manage_sessions' %}class="active"{% endif %}>📊 Manage Sessions</a>
+        <a href="/admin/system_settings" {% if request.path == '/admin/system_settings' %}class="active"{% endif %}>⚙️ System Settings</a>
+        <a href="/admin/change_password" {% if request.path == '/admin/change_password' %}class="active"{% endif %}>🔐 Change Password</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>📜 All Attendance</a>
+        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>📚 Subjects</a>
+        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>ℹ️ About</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">🚪 Logout</a>
+    </div>
 </div>
 
 <div class="main">
-    <div class="header" style="background:linear-gradient(135deg,#dc3545,#c82333);">👑 Welcome, {{ name }}! | Admin Dashboard</div>
+    <div class="header" style="background:linear-gradient(135deg, var(--danger), var(--danger-dark));">👑 Welcome, {{ name }}! | Admin Dashboard</div>
 
     <div class="stats-grid">
-        <div class="stat-card" style="background:#1a3c61;"><h3>{{ stats.total_students }}</h3><p>Total Students</p></div>
-        <div class="stat-card" style="background:#17a2b8;"><h3>{{ stats.total_faculty }}</h3><p>Total Faculty</p></div>
-        <div class="stat-card" style="background:#28a745;"><h3>{{ stats.total_sessions }}</h3><p>Total Sessions</p></div>
-        <div class="stat-card" style="background:#ffc107; color:#333;"><h3>{{ stats.total_attendance }}</h3><p>Attendance Records</p></div>
+        <div class="stat-card primary"><h3>{{ stats.total_students }}</h3><p>Total Students</p></div>
+        <div class="stat-card info"><h3>{{ stats.total_faculty }}</h3><p>Total Faculty</p></div>
+        <div class="stat-card success"><h3>{{ stats.total_sessions }}</h3><p>Total Sessions</p></div>
+        <div class="stat-card warning"><h3>{{ stats.total_attendance }}</h3><p>Attendance Records</p></div>
     </div>
 
     <div class="card">
@@ -49,7 +69,7 @@
         </form>
         <div class="table-container">
             <table style="width:100%">
-                <thead><tr style="background:#1a3c61; color:white;"><th>Title</th><th>Content</th><th>Date</th><th>Author</th><th>Action</th></tr></thead>
+                <thead><tr><th>Title</th><th>Content</th><th>Date</th><th>Author</th><th>Action</th></tr></thead>
                 <tbody>
                     {% for notice in notices %}
                     <tr>
@@ -69,7 +89,7 @@
         <h2>🕐 Recent Sessions</h2>
         <div class="table-container">
             <table style="width:100%">
-                <thead><tr style="background:#1a3c61; color:white;"><th>Session ID</th><th>Subject</th><th>Start Time</th><th>End Time</th><th>Status</th></tr></thead>
+                <thead><tr><th>Session ID</th><th>Subject</th><th>Start Time</th><th>End Time</th><th>Status</th></tr></thead>
                 <tbody>
                     {% for session in recent_sessions %}
                     <tr>
@@ -87,7 +107,6 @@
 </div>
 
 <script>
-    // Mobile Menu Functions
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -115,5 +134,4 @@
     window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 </body>
-
 </html>

@@ -5,35 +5,14 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <style>
     .session-card {
-        background: #f8f9fa;
-        border-left: 4px solid #1a3c61;
+        background: var(--card-bg);
+        border-left: 4px solid var(--primary);
         padding: 15px;
         margin-bottom: 15px;
-        border-radius: 8px;
+        border-radius: var(--radius-md);
     }
-    .status-active {
-        color: #28a745;
-        font-weight: bold;
-    }
-    .status-expired {
-        color: #dc3545;
-        font-weight: bold;
-    }
-    .badge {
-        display: inline-block;
-        padding: 3px 8px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: bold;
-    }
-    .badge-success {
-        background: #28a745;
-        color: white;
-    }
-    .badge-danger {
-        background: #dc3545;
-        color: white;
-    }
+    .status-active { color: var(--success); font-weight: bold; }
+    .status-expired { color: var(--danger); font-weight: bold; }
 </style>
 </head>
 <body>
@@ -46,22 +25,42 @@
     </div>
 </button>
 
-<!-- ✅ RIGHT HERE - Right after the button -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <h2>👑 Admin Panel</h2>
-    <a href="/admin/faculty">👥 Manage Faculty</a>
-    <a href="/admin/students">👨‍🎓 Manage Students</a>
-    <a href="/admin/sessions">📊 View All Sessions</a>
-    <a href="/admin/logout">🚪 Admin Logout</a>
-    <hr style="margin:15px 0; border-color:rgba(255,255,255,0.2);">
-    <a href="/faculty_dashboard">📊 Faculty Dashboard</a>
-    <a href="/">🏠 Home</a>
+    <div class="sidebar-header">
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/admin_dashboard">👑 Admin Dashboard</a>
+        <a href="/admin/manage_faculty">👥 Manage Faculty</a>
+        <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
+        <a href="/admin/manage_sessions" class="active">📊 Manage Sessions</a>
+        <a href="/admin/system_settings">⚙️ System Settings</a>
+        <a href="/admin/change_password">🔐 Change Password</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance">📜 All Attendance</a>
+        <a href="/subject_details">📚 Subjects</a>
+        <a href="/about">ℹ️ About</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">🚪 Logout</a>
+    </div>
 </div>
 
 <div class="main">
-    <div class="header" style="background:linear-gradient(135deg,#dc3545,#c82333);">
+    <div class="header" style="background: linear-gradient(135deg, var(--danger), var(--danger-dark));">
         📊 All Attendance Sessions
     </div>
 
@@ -69,62 +68,53 @@
         <h2>📋 Session History</h2>
         <p>Total Sessions: <strong>{{ sessions|length }}</strong></p>
         
-        <div style="overflow-x:auto;">
+        <div class="table-container">
             <table style="width:100%;">
-                <tr style="background:#1a3c61; color:white;">
-                    <th>Session ID</th>
-                    <th>Subject</th>
-                    <th>Start Time</th>
-                    <th>End Time</th>
-                    <th>Duration</th>
-                    <th>Status</th>
-                    <th>Attendance</th>
-                    <th>Actions</th>
-                </tr>
-                {% for session in sessions %}
-                <tr>
-                    <td><strong>{{ session.session_id }}</strong></td>
-                    <td>{{ session.subject }}</td>
-                    <td>{{ session.start_time[:19] }}</td>
-                    <td>{{ session.end_time[:19] if session.end_time else 'N/A' }}</td>
-                    <td>{{ session.duration }} min</td>
-                    <td>
-                        {% if session.is_active == 1 and session.end_time and session.end_time > now %}
-                            <span class="badge badge-success">🟢 Active</span>
-                        {% else %}
-                            <span class="badge badge-danger">🔴 Expired</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ session.attendance_count }} students</td>
-                    <td>
-                        <a href="/admin/session_details/{{ session.session_id }}">
-                            <button style="width:auto; padding:5px 10px; background:#17a2b8;">📋 View</button>
-                        </a>
-                        <a href="/admin/delete_session/{{ session.session_id }}" 
-                           onclick="return confirm('Delete this session and all its attendance records?')">
-                            <button style="width:auto; padding:5px 10px; background:#dc3545;">🗑️ Delete</button>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
+                <thead>
+                    <tr>
+                        <th>Session ID</th><th>Subject</th><th>Start Time</th><th>End Time</th>
+                        <th>Duration</th><th>Status</th><th>Attendance</th><th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in sessions %}
+                    <tr>
+                        <td><code>{{ session.session_id }}</code></td>
+                        <td><span class="badge badge-primary">{{ session.subject }}</span></td>
+                        <td>{{ session.start_time[:19] }}</td>
+                        <td>{{ session.end_time[:19] if session.end_time else 'N/A' }}</td>
+                        <td>{{ session.duration }} min</td>
+                        <td>
+                            {% if session.is_active == 1 and session.end_time and session.end_time > now %}
+                                <span class="badge badge-success">🟢 Active</span>
+                            {% else %}
+                                <span class="badge badge-danger">🔴 Expired</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ session.attendance_count }} students</td>
+                        <td class="action-buttons">
+                            <a href="/admin/session_details/{{ session.session_id }}"><button class="btn-small" style="background: linear-gradient(135deg, var(--info), var(--info-dark));">📋 View</button></a>
+                            <a href="/admin/delete_session/{{ session.session_id }}" onclick="return confirm('Delete this session and all its attendance records?')"><button class="btn-small" style="background: linear-gradient(135deg, var(--danger), var(--danger-dark));">🗑️ Delete</button></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
         
         {% if sessions|length == 0 %}
-        <p style="text-align:center; color:#666; padding:40px;">
+        <div class="alert alert-info" style="text-align:center;">
             No sessions created yet. Go to Faculty Dashboard to create sessions.
-        </p>
+        </div>
         {% endif %}
     </div>
 </div>
 
 <script>
-    // Pass current time for status comparison
     const now = new Date().toISOString();
 </script>
 
 <script>
-    // Mobile Menu Functions
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -152,5 +142,4 @@
     window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 </body>
-
 </html>

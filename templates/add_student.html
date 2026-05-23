@@ -5,33 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <style>
-    /* Bulk Upload Styles */
     .bulk-upload-section {
-        background: linear-gradient(135deg, #e8f4f8, #d1ecf1);
-        border: 2px dashed #17a2b8;
+        background: linear-gradient(135deg, var(--info-soft), #e0f2fe);
+        border: 2px dashed var(--info);
         border-radius: var(--radius-lg);
         padding: 20px;
         margin-bottom: 20px;
     }
     .bulk-upload-section h3 {
-        color: #0c5460;
+        color: var(--info-dark);
         margin-bottom: 15px;
         display: flex;
         align-items: center;
         gap: 10px;
     }
     .file-upload-area {
-        border: 2px dashed #17a2b8;
+        border: 2px dashed var(--info);
         border-radius: var(--radius-md);
         padding: 20px;
         text-align: center;
-        background: white;
+        background: var(--card-bg);
         cursor: pointer;
         transition: var(--transition);
     }
     .file-upload-area:hover {
-        background: #f8f9fa;
-        border-color: #0dcaf0;
+        background: var(--light);
+        border-color: var(--primary);
     }
     .file-upload-area input {
         display: none;
@@ -39,12 +38,12 @@
     .file-name {
         margin-top: 10px;
         font-size: 12px;
-        color: #666;
+        color: var(--text-muted);
     }
     .template-link {
         display: inline-block;
         margin-top: 10px;
-        color: #17a2b8;
+        color: var(--info);
         text-decoration: none;
         font-size: 12px;
     }
@@ -52,10 +51,13 @@
         text-decoration: underline;
     }
     .upload-btn {
-        background: #17a2b8;
+        background: var(--info);
         margin-top: 15px;
         width: auto;
         padding: 10px 25px;
+    }
+    .upload-btn:hover {
+        background: var(--info-dark);
     }
 </style>
 </head>
@@ -72,23 +74,40 @@
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <h2>📋 Smart Attendance</h2>
-    <a href="/faculty_dashboard">📊 Dashboard</a>
-    <a href="/create_session">➕ Create Session</a>
-    <a href="/add_student">👥 Manage Students</a>
-    <a href="/students_report">📑 Reports</a>
-    <a href="/attendance">📜 All Attendance</a>
-    <a href="/subject_details">📚 Subjects</a>
-    <a href="/about">ℹ️ About</a>
-    <a href="/logout">🚪 Logout</a>
+    <div class="sidebar-header">
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/faculty_dashboard">📊 Dashboard</a>
+        <a href="/create_session">➕ Create Session</a>
+        <a href="/add_student" class="active">👥 Manage Students</a>
+        <a href="/students_report">📑 Reports</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance">📜 All Attendance</a>
+        <a href="/subject_details">📚 Subjects</a>
+        <a href="/about">ℹ️ About</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">🚪 Logout</a>
+    </div>
 </div>
 
 <div class="main">
-    <div class="header">
+    <div class="header" style="background: linear-gradient(135deg, var(--info), var(--info-dark));">
         👥 Student Management System (Faculty)
     </div>
 
-    <!-- ✅ BULK UPLOAD SECTION - ADDED HERE -->
     <div class="bulk-upload-section">
         <h3>📁 Bulk Upload Students (Excel/CSV)</h3>
         <form method="POST" action="/admin/bulk_upload_students" enctype="multipart/form-data" id="bulkUploadForm">
@@ -100,18 +119,19 @@
             <a href="#" class="template-link" onclick="downloadTemplate()">📥 Download Excel Template</a><br>
             <button type="submit" class="upload-btn">🚀 Upload & Add Students</button>
         </form>
-        <p style="margin-top: 10px; font-size: 11px; color: #666;">
+        <p style="margin-top: 10px; font-size: 11px; color: var(--text-muted);">
             <strong>📋 Instructions:</strong> File must have columns: roll_no, name, branch (required) | year, semester, email (optional)
         </p>
     </div>
 
     <div class="card">
-        <h2>➕ Add New Student </h2>
+        <h2>➕ Add New Student</h2>
         <form method="POST">
             <div class="form-grid">
                 <input type="text" name="roll" placeholder="Roll Number (e.g., CS011)" required>
                 <input type="text" name="name" placeholder="Full Name" required>
                 <input type="text" name="branch" placeholder="Branch (e.g., CSE)" required>
+                <input type="email" name="email" placeholder="Email (Optional)">
             </div>
             <button type="submit" class="success">➕ Add Student</button>
         </form>
@@ -122,8 +142,8 @@
         <div class="table-container">
             <table style="width:100%">
                 <thead>
-                    <tr style="background:#1a3c61; color:white;">
-                        <th>Roll No</th><th>Name</th><th>Branch</th><th>Action</th>
+                    <tr>
+                        <th>Roll No</th><th>Name</th><th>Branch</th><th>Email</th><th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -132,7 +152,8 @@
                         <tr>
                             <td><strong>{{ student.roll_no }}</strong></td>
                             <td>{{ student.name }}</td>
-                            <td>{{ student.branch }}</td>
+                            <td><span class="badge badge-primary">{{ student.branch }}</span></td>
+                            <td>{{ student.email or 'N/A' }}</td>
                             <td>
                                 <a href="/delete_student/{{ student.roll_no }}" onclick="return confirm('Delete this student? This will also delete all attendance records.')">
                                     <button class="danger btn-small">🗑️ Delete</button>
@@ -142,7 +163,7 @@
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td colspan="4" style="text-align: center;">No students found. Add your first student above.</td>
+                            <td colspan="5" style="text-align: center;">No students found. Add your first student above.</td>
                         </tr>
                     {% endif %}
                 </tbody>
@@ -152,7 +173,6 @@
 </div>
 
 <script>
-    // Mobile Menu Functions
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -175,14 +195,12 @@
         }
     }
     
-    // Bulk Upload Functions
     function updateFileName(input) {
         const fileName = input.files[0]?.name || 'No file selected';
         document.getElementById('fileName').innerHTML = `📄 Selected: ${fileName}`;
     }
     
     function downloadTemplate() {
-        // Create CSV template
         const headers = ['roll_no', 'name', 'branch', 'year', 'semester', 'email'];
         const sampleData = [
             ['CS011', 'John Doe', 'CSE', '3', '6', 'john@example.com'],
@@ -212,6 +230,5 @@
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && window.innerWidth <= 768) closeSidebar(); });
     window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
-
 </body>
 </html>

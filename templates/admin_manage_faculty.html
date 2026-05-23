@@ -4,10 +4,10 @@
 <title>Admin - Manage Faculty</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <style>
-    .export-bottom { text-align: right; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0; }
-    .btn-export { background: #28a745; padding: 10px 25px; width: auto; }
-    .btn-export:hover { background: #218838; }
-    .search-box { margin-bottom: 20px; padding: 10px; background: #f8f9fa; border-radius: 8px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .export-bottom { text-align: right; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color); }
+    .btn-export { background: linear-gradient(135deg, var(--success), var(--success-dark)); padding: 10px 25px; width: auto; }
+    .btn-export:hover { transform: translateY(-2px); }
+    .search-box { margin-bottom: 20px; padding: 15px; background: var(--light); border-radius: var(--radius-md); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; border: 1px solid var(--border-color); }
     .search-box input { width: 250px; margin: 0; }
     .search-box button { width: auto; margin: 0; padding: 10px 20px; }
 </style>
@@ -22,22 +22,44 @@
     </div>
 </button>
 
-<!-- ✅ RIGHT HERE - Right after the button -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <h2>👑 Admin Panel</h2>
-    <a href="/admin_dashboard">📊 Dashboard</a>
-    <a href="/admin/manage_faculty">👥 Manage Faculty</a>
-    <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
-    <a href="/admin/manage_sessions">📊 Manage Sessions</a>
-    <a href="/admin/system_settings">⚙️ System Settings</a>
-    <a href="/admin/change_password">🔐 Change Password</a>
-    <hr><a href="/logout">🚪 Logout</a>
+    <div class="sidebar-header">
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/admin_dashboard">👑 Admin Dashboard</a>
+        <a href="/admin/manage_faculty" class="active">👥 Manage Faculty</a>
+        <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
+        <a href="/admin/manage_sessions">📊 Manage Sessions</a>
+        <a href="/admin/system_settings">⚙️ System Settings</a>
+        <a href="/admin/change_password">🔐 Change Password</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance">📜 All Attendance</a>
+        <a href="/subject_details">📚 Subjects</a>
+        <a href="/about">ℹ️ About</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">🚪 Logout</a>
+    </div>
 </div>
 
 <div class="main">
-    <div class="header" style="background:linear-gradient(135deg,#dc3545,#c82333);">👥 Manage Faculty Members</div>
+    <div class="header" style="background: linear-gradient(135deg, var(--danger), var(--danger-dark));">
+        👥 Manage Faculty Members
+    </div>
 
     <div class="card">
         <h2>➕ Add New Faculty</h2>
@@ -65,18 +87,22 @@
         <div class="search-box">
             <input type="text" id="searchInput" placeholder="🔍 Search by ID, Name, Email...">
             <button onclick="searchFaculty()">🔍 Search</button>
-            <button onclick="clearSearch()" style="background:#6c757d;">🗑️ Clear</button>
+            <button onclick="clearSearch()" style="background: var(--gray);">🗑️ Clear</button>
         </div>
         <div class="table-container">
             <table style="width:100%" id="facultyTable">
-                <thead><tr style="background:#1a3c61; color:white;"><th>Faculty ID</th><th>Name</th><th>Email</th><th>Department</th><th>Actions</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Faculty ID</th><th>Name</th><th>Email</th><th>Department</th><th>Actions</th>
+                    </tr>
+                </thead>
                 <tbody>
                     {% for faculty in faculties %}
                     <tr>
                         <td><strong>{{ faculty.faculty_id }}</strong></td>
                         <td>{{ faculty.name }}</td>
                         <td>{{ faculty.email }}</td>
-                        <td><span class="badge" style="background:#1a3c61; color:white;">{{ faculty.department }}</span></td>
+                        <td><span class="badge badge-primary">{{ faculty.department }}</span></td>
                         <td class="action-buttons">
                             <a href="/admin/edit_faculty/{{ faculty.faculty_id }}"><button class="btn-edit">✏️ Edit</button></a>
                             <a href="/admin/delete_faculty/{{ faculty.faculty_id }}" onclick="return confirm('Delete this faculty?')"><button class="btn-delete">🗑️ Delete</button></a>
@@ -103,7 +129,6 @@
 </script>
 
 <script>
-    // Mobile Menu Functions
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -131,5 +156,4 @@
     window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 </body>
-
 </html>

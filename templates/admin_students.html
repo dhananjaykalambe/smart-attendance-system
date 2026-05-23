@@ -14,64 +14,88 @@
     </div>
 </button>
 
-<!-- ✅ RIGHT HERE - Right after the button -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <h2>👑 Admin Panel</h2>
-    <a href="/admin/faculty">👥 Manage Faculty</a>
-    <a href="/admin/students">👨‍🎓 Manage Students</a>
-    <a href="/admin/sessions">📊 View All Sessions</a>
-    <a href="/admin/logout">🚪 Admin Logout</a>
-    <hr style="margin:15px 0;">
-    <a href="/faculty_dashboard">📊 Dashboard</a>
-    <a href="/">🏠 Home</a>
+    <div class="sidebar-header">
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/admin_dashboard">👑 Admin Dashboard</a>
+        <a href="/admin/manage_faculty">👥 Manage Faculty</a>
+        <a href="/admin/manage_students" class="active">👨‍🎓 Manage Students</a>
+        <a href="/admin/manage_sessions">📊 Manage Sessions</a>
+        <a href="/admin/system_settings">⚙️ System Settings</a>
+        <a href="/admin/change_password">🔐 Change Password</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance">📜 All Attendance</a>
+        <a href="/subject_details">📚 Subjects</a>
+        <a href="/about">ℹ️ About</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">🚪 Logout</a>
+    </div>
 </div>
 
 <div class="main">
-    <div class="header" style="background:linear-gradient(135deg,#dc3545,#c82333);">
+    <div class="header" style="background: linear-gradient(135deg, var(--danger), var(--danger-dark));">
         👨‍🎓 Student Management
     </div>
 
     <div class="card">
         <h2>➕ Add New Student</h2>
         <form method="POST" action="/admin/add_student">
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px;">
+            <div class="form-grid">
                 <input type="text" name="roll_no" placeholder="Roll Number (e.g., CS011)" required>
                 <input type="text" name="name" placeholder="Full Name" required>
                 <input type="text" name="branch" placeholder="Branch" required>
+                <input type="email" name="email" placeholder="Email (Optional)">
             </div>
-            <button type="submit" style="background:#28a745;">➕ Add Student</button>
+            <button type="submit" class="success">➕ Add Student</button>
         </form>
     </div>
 
     <div class="card">
         <h2>📋 All Students</h2>
-        <div style="overflow-x:auto;">
-            <table>
-                <tr style="background:#1a3c61; color:white;">
-                    <th>Roll No</th><th>Name</th><th>Branch</th><th>Action</th>
-                </tr>
-                {% for student in students %}
-                <tr>
-                    <td>{{ student.roll_no }}</td>
-                    <td>{{ student.name }}</td>
-                    <td>{{ student.branch }}</td>
-                    <td>
-                        <a href="/admin/delete_student/{{ student.roll_no }}" 
-                           onclick="return confirm('Delete this student?')">
-                            <button class="danger" style="background:#dc3545;">Delete</button>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
+        <div class="table-container">
+            <table style="width:100%">
+                <thead>
+                    <tr style="background: var(--primary); color: white;">
+                        <th>Roll No</th><th>Name</th><th>Branch</th><th>Email</th><th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td><strong>{{ student.roll_no }}</strong></td>
+                        <td>{{ student.name }}</td>
+                        <td><span class="badge badge-primary">{{ student.branch }}</span></td>
+                        <td>{{ student.email or 'N/A' }}</td>
+                        <td>
+                            <a href="/admin/delete_student/{{ student.roll_no }}" onclick="return confirm('Delete this student?')">
+                                <button class="danger btn-small">🗑️ Delete</button>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
     </div>
 </div>
 
 <script>
-    // Mobile Menu Functions
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -99,5 +123,4 @@
     window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 </body>
-
 </html>

@@ -15,17 +15,34 @@
     </div>
 </button>
 
-<!-- ✅ RIGHT HERE - Right after the button -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <h2>📋 Smart Attendance</h2>
-    <a href="/student_dashboard">📊 Dashboard</a>
-    <a href="/scan">📷 Scan QR</a>
-    <a href="/attendance">📜 My Attendance</a>
-    <a href="/subject_details">📚 Subjects</a>
-    <a href="/about">ℹ️ About</a>
-    <a href="/logout">🚪 Logout</a>
+    <div class="sidebar-header">
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/student_dashboard" {% if request.path == '/student_dashboard' %}class="active"{% endif %}>📊 Dashboard</a>
+        <a href="/scan" {% if request.path == '/scan' %}class="active"{% endif %}>📷 Scan QR</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>📜 My Attendance</a>
+        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>📚 Subjects</a>
+        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>ℹ️ About</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">🚪 Logout</a>
+    </div>
 </div>
 
 <div class="main">
@@ -43,18 +60,18 @@
     {% endif %}
 
     <div class="stats-grid">
-        <div class="stat-card" style="background: #28a745;">
+        <div class="stat-card success">
             <h3>{{ stats.overall_percentage }}%</h3>
             <p>Overall Attendance</p>
             <div class="progress-bar-container">
                 <div class="progress-bar" style="width: {{ stats.overall_percentage }}%"></div>
             </div>
         </div>
-        <div class="stat-card" style="background: #17a2b8;">
+        <div class="stat-card info">
             <h3>{{ stats.total_attended }}</h3>
             <p>Classes Attended</p>
         </div>
-        <div class="stat-card" style="background: #1a3c61;">
+        <div class="stat-card primary">
             <h3>{{ stats.total_sessions }}</h3>
             <p>Total Classes</p>
         </div>
@@ -67,7 +84,7 @@
         <div class="table-container">
             <table style="width:100%">
                 <thead>
-                    <tr style="background:#1a3c61; color:white;">
+                    <tr>
                         <th>Subject</th><th>Attended</th><th>Total</th><th>Percentage</th><th>Progress</th><th>Status</th>
                     </tr>
                 </thead>
@@ -77,12 +94,12 @@
                         <td><strong>{{ subject }}</strong></td>
                         <td>{{ data.attended }}</td>
                         <td>{{ data.total }}</td>
-                        <td style="{% if data.percentage < 75 %}color:red;font-weight:bold{% elif data.percentage < 85 %}color:orange;font-weight:bold{% else %}color:green;font-weight:bold{% endif %}">
+                        <td style="{% if data.percentage < 75 %}color:var(--danger);font-weight:bold{% elif data.percentage < 85 %}color:var(--warning);font-weight:bold{% else %}color:var(--success);font-weight:bold{% endif %}">
                             {{ data.percentage }}%
                         </td>
                         <td style="width:150px">
                             <div class="progress-bar-container">
-                                <div class="progress-bar {% if data.percentage < 75 %}danger{% elif data.percentage < 85 %}warning{% else %}success{% endif %}" 
+                                <div class="progress-bar {% if data.percentage < 75 %}danger{% elif data.percentage < 85 %}warning{% endif %}" 
                                      style="width: {{ data.percentage }}%"></div>
                             </div>
                         </td>
@@ -107,7 +124,7 @@
         <h2>🕐 Today's Active Sessions</h2>
         <div class="table-container">
             <table style="width:100%">
-                <thead><tr style="background:#1a3c61; color:white;"><th>Session ID</th><th>Subject</th><th>End Time</th><th>Status</th></tr></thead>
+                <thead><tr><th>Session ID</th><th>Subject</th><th>End Time</th><th>Status</th></tr></thead>
                 <tbody>
                     {% for session in today_sessions %}
                     <tr>
@@ -127,7 +144,7 @@
         <h2>📋 Recent Attendance Records</h2>
         <div class="table-container">
             <table style="width:100%">
-                <thead><tr style="background:#1a3c61; color:white;"><th>Date</th><th>Subject</th><th>Session ID</th><th>Status</th></tr></thead>
+                <thead><tr><th>Date</th><th>Subject</th><th>Session ID</th><th>Status</th></tr></thead>
                 <tbody>
                     {% for record in recent_attendance %}
                     <tr>
@@ -160,7 +177,7 @@
             labels: subjects,
             datasets: [{
                 data: percentages,
-                backgroundColor: ['#1a3c61', '#28a745', '#17a2b8', '#ffc107', '#dc3545', '#20c997', '#fd7e14', '#6f42c1'],
+                backgroundColor: ['#2563eb', '#10b981', '#06b6d4', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'],
                 borderWidth: 0,
                 hoverOffset: 10
             }]
@@ -176,7 +193,6 @@
 </script>
 
 <script>
-    // Mobile Menu Functions
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -204,5 +220,4 @@
     window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 </body>
-
 </html>

@@ -59,7 +59,7 @@
         margin-top: 20px; 
     }
     .tech-card { 
-        background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+        background: linear-gradient(135deg, var(--light) 0%, var(--primary-soft) 100%);
         padding: 20px; 
         text-align: center; 
         border-radius: var(--radius-lg);
@@ -126,7 +126,6 @@
         margin-top: 5px;
     }
     
-    /* Responsive */
     @media (max-width: 768px) {
         .stats-banner { grid-template-columns: repeat(2, 1fr); gap: 15px; }
         .hero-section h1 { font-size: 1.8rem; }
@@ -199,6 +198,7 @@
     {% endif %}
     
     <div class="sidebar-divider"></div>
+    
     <div class="sidebar-section">
         <div class="sidebar-section-title">GENERAL</div>
         <a href="/attendance">📜 Attendance</a>
@@ -228,93 +228,33 @@
         </div>
 
         <div class="stats-banner">
-            <div class="stat-item">
-                <div class="stat-number">⚡</div>
-                <p>Fast Marking</p>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">🔐</div>
-                <p>Secure System</p>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">📱</div>
-                <p>Mobile Ready</p>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">📊</div>
-                <p>Real-time Analytics</p>
-            </div>
+            <div class="stat-item"><div class="stat-number">⚡</div><p>Fast Marking</p></div>
+            <div class="stat-item"><div class="stat-number">🔐</div><p>Secure System</p></div>
+            <div class="stat-item"><div class="stat-number">📱</div><p>Mobile Ready</p></div>
+            <div class="stat-item"><div class="stat-number">📊</div><p>Real-time Analytics</p></div>
         </div>
 
         <div class="card">
             <h2>🛠️ Technologies Used</h2>
             <div class="tech-grid">
-                <div class="tech-card">
-                    <div class="tech-icon">🐍</div>
-                    <div class="tech-name">Flask</div>
-                    <div>Python Framework</div>
-                </div>
-                <div class="tech-card">
-                    <div class="tech-icon">🍃</div>
-                    <div class="tech-name">MongoDB Atlas</div>
-                    <div>Cloud Database</div>
-                </div>
-                <div class="tech-card">
-                    <div class="tech-icon">🎨</div>
-                    <div class="tech-name">HTML5/CSS3</div>
-                    <div>Frontend UI</div>
-                </div>
-                <div class="tech-card">
-                    <div class="tech-icon">📊</div>
-                    <div class="tech-name">Chart.js</div>
-                    <div>Analytics</div>
-                </div>
-                <div class="tech-card">
-                    <div class="tech-icon">📷</div>
-                    <div class="tech-name">QR Code</div>
-                    <div>Scanning & Generation</div>
-                </div>
-                <div class="tech-card">
-                    <div class="tech-icon">📄</div>
-                    <div class="tech-name">ReportLab</div>
-                    <div>PDF Export</div>
-                </div>
+                <div class="tech-card"><div class="tech-icon">🐍</div><div class="tech-name">Flask</div><div>Python Framework</div></div>
+                <div class="tech-card"><div class="tech-icon">🍃</div><div class="tech-name">MongoDB Atlas</div><div>Cloud Database</div></div>
+                <div class="tech-card"><div class="tech-icon">🎨</div><div class="tech-name">HTML5/CSS3</div><div>Frontend UI</div></div>
+                <div class="tech-card"><div class="tech-icon">📊</div><div class="tech-name">Chart.js</div><div>Analytics</div></div>
+                <div class="tech-card"><div class="tech-icon">📷</div><div class="tech-name">QR Code</div><div>Scanning & Generation</div></div>
+                <div class="tech-card"><div class="tech-icon">📄</div><div class="tech-name">ReportLab</div><div>PDF Export</div></div>
             </div>
         </div>
 
         <div class="card">
             <h2>✨ Key Features</h2>
             <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">👥</div>
-                    <div class="feature-title">3 Role-Based Login</div>
-                    <p>Student, Faculty, and Admin portals with dedicated dashboards</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔐</div>
-                    <div class="feature-title">Secure QR Attendance</div>
-                    <p>Hash-based QR generation with time expiry and tamper detection</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <div class="feature-title">Real-time Analytics</div>
-                    <p>Dynamic dashboards with interactive charts and statistics</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🎯</div>
-                    <div class="feature-title">Low Attendance Alerts</div>
-                    <p>Automatic notifications when attendance drops below threshold</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📍</div>
-                    <div class="feature-title">IP Tracking</div>
-                    <p>Location-based attendance validation with IP logging</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📄</div>
-                    <div class="feature-title">PDF Reports</div>
-                    <p>Export detailed attendance reports with college branding</p>
-                </div>
+                <div class="feature-card"><div class="feature-icon">👥</div><div class="feature-title">3 Role-Based Login</div><p>Student, Faculty, and Admin portals with dedicated dashboards</p></div>
+                <div class="feature-card"><div class="feature-icon">🔐</div><div class="feature-title">Secure QR Attendance</div><p>Hash-based QR generation with time expiry and tamper detection</p></div>
+                <div class="feature-card"><div class="feature-icon">📊</div><div class="feature-title">Real-time Analytics</div><p>Dynamic dashboards with interactive charts and statistics</p></div>
+                <div class="feature-card"><div class="feature-icon">🎯</div><div class="feature-title">Low Attendance Alerts</div><p>Automatic notifications when attendance drops below threshold</p></div>
+                <div class="feature-card"><div class="feature-icon">📍</div><div class="feature-title">IP Tracking</div><p>Location-based attendance validation with IP logging</p></div>
+                <div class="feature-card"><div class="feature-icon">📄</div><div class="feature-title">PDF Reports</div><p>Export detailed attendance reports with college branding</p></div>
             </div>
         </div>
 
@@ -322,15 +262,12 @@
             <div class="developer-name">👨‍💻 Dhananjay & Team</div>
             <div class="college-name">Priyadarshini Bhagwati College of Engineering, Nagpur</div>
             <div class="academic-info">Academic Year: 2024-25 | Semester: VI</div>
-            <div class="academic-info" style="margin-top: 15px; font-size: 12px;">
-                Version 3.0 | Smart Attendance System
-            </div>
+            <div class="academic-info" style="margin-top: 15px; font-size: 12px;">Version 3.0 | Smart Attendance System</div>
         </div>
     </div>
 </div>
 
 <script>
-    // Mobile Menu Functions
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -354,18 +291,11 @@
     }
     
     document.querySelectorAll('.sidebar a').forEach(link => {
-        link.addEventListener('click', () => { 
-            if (window.innerWidth <= 768) closeSidebar(); 
-        });
+        link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
     });
     
-    document.addEventListener('keydown', (e) => { 
-        if (e.key === 'Escape' && window.innerWidth <= 768) closeSidebar(); 
-    });
-    
-    window.addEventListener('resize', () => { 
-        if (window.innerWidth > 768) closeSidebar(); 
-    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && window.innerWidth <= 768) closeSidebar(); });
+    window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 </body>
 </html>

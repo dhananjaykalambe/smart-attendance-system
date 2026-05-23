@@ -14,29 +14,51 @@
     </div>
 </button>
 
-<!-- ✅ RIGHT HERE - Right after the button -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <div class="sidebar" id="sidebar">
-    <h2>👑 Admin Panel</h2>
-    <a href="/admin_dashboard">📊 Dashboard</a>
-    <a href="/admin/manage_faculty">👥 Manage Faculty</a>
-    <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
-    <a href="/admin/manage_sessions">📊 Manage Sessions</a>
-    <a href="/admin/system_settings">⚙️ System Settings</a>
-    <a href="/admin/change_password">🔐 Change Password</a>
-    <hr><a href="/logout">🚪 Logout</a>
+    <div class="sidebar-header">
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/admin_dashboard">👑 Admin Dashboard</a>
+        <a href="/admin/manage_faculty">👥 Manage Faculty</a>
+        <a href="/admin/manage_students" class="active">👨‍🎓 Manage Students</a>
+        <a href="/admin/manage_sessions">📊 Manage Sessions</a>
+        <a href="/admin/system_settings">⚙️ System Settings</a>
+        <a href="/admin/change_password">🔐 Change Password</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance">📜 All Attendance</a>
+        <a href="/subject_details">📚 Subjects</a>
+        <a href="/about">ℹ️ About</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">🚪 Logout</a>
+    </div>
 </div>
 
 <div class="main">
-    <div class="header" style="background:linear-gradient(135deg,#ffc107,#e0a800); color:#333;">✏️ Edit Student Information</div>
+    <div class="header" style="background: linear-gradient(135deg, var(--warning), var(--warning-dark)); color: white;">
+        ✏️ Edit Student Information
+    </div>
 
     <div class="card" style="max-width: 600px; margin: 0 auto;">
         <h2>Editing: {{ student.roll_no }} - {{ student.name }}</h2>
         <div class="alert alert-warning" style="margin-bottom: 20px;">⚠️ Roll Number cannot be changed. To change Roll Number, please delete and recreate the student.</div>
         
         <form method="POST">
-            <div class="form-group"><label>Roll Number:</label><input type="text" value="{{ student.roll_no }}" disabled style="background:#e9ecef;"></div>
+            <div class="form-group"><label>Roll Number:</label><input type="text" value="{{ student.roll_no }}" disabled style="background: var(--light);"></div>
             <div class="form-group"><label>Full Name *</label><input type="text" name="name" value="{{ student.name }}" required></div>
             <div class="form-group">
                 <label>Branch *</label>
@@ -73,14 +95,13 @@
             
             <div class="action-buttons" style="margin-top: 20px;">
                 <button type="submit" class="success" style="flex:1;">💾 Save Changes</button>
-                <a href="/admin/manage_students" style="flex:1;"><button type="button" style="background:#6c757d;">❌ Cancel</button></a>
+                <a href="/admin/manage_students" style="flex:1;"><button type="button" style="background: var(--gray);">❌ Cancel</button></a>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    // Mobile Menu Functions
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -108,5 +129,4 @@
     window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 </body>
-
 </html>
