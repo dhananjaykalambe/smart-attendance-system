@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>Student Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -92,17 +93,17 @@
                     {% for subject, data in stats.subject_stats.items() %}
                     <tr>
                         <td><strong>{{ subject }}</strong></td>
-                        <td>{{ data.attended }}</td>
-                        <td>{{ data.total }}</td>
+                        <td>{{ data.attended }}</span></td>
+                        <td>{{ data.total }}</span></td>
                         <td style="{% if data.percentage < 75 %}color:var(--danger);font-weight:bold{% elif data.percentage < 85 %}color:var(--warning);font-weight:bold{% else %}color:var(--success);font-weight:bold{% endif %}">
                             {{ data.percentage }}%
-                        </td>
+                        </span></span></span></td>
                         <td style="width:150px">
                             <div class="progress-bar-container">
                                 <div class="progress-bar {% if data.percentage < 75 %}danger{% elif data.percentage < 85 %}warning{% endif %}" 
                                      style="width: {{ data.percentage }}%"></div>
                             </div>
-                        </td>
+                        </span></span></span></td>
                         <td>
                             {% if data.percentage >= 85 %}
                                 <span class="badge badge-success">✅ Excellent</span>
@@ -111,7 +112,7 @@
                             {% else %}
                                 <span class="badge badge-danger">⚠️ Low</span>
                             {% endif %}
-                        </td>
+                        </span></span></span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -128,10 +129,10 @@
                 <tbody>
                     {% for session in today_sessions %}
                     <tr>
-                        <td><code>{{ session.session_id }}</code></td>
-                        <td>{{ session.subject }}</td>
-                        <td>{{ session.end_time.strftime('%H:%M:%S') }}</td>
-                        <td><span class="badge badge-success">🟢 Active</span></td>
+                        <td><code>{{ session.session_id }}</code></span></span></td>
+                        <td>{{ session.subject }}</span></span></span></span></td>
+                        <td>{{ session.end_time.strftime('%H:%M:%S') }}</span></span></span></span></td>
+                        <td><span class="badge badge-success">🟢 Active</span></span></span></span></span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -148,13 +149,13 @@
                 <tbody>
                     {% for record in recent_attendance %}
                     <tr>
-                        <td>{{ record.time.strftime('%d %b %Y, %H:%M') }}</td>
-                        <td>{{ record.subject }}</td>
-                        <td><code>{{ record.session_id }}</code></td>
-                        <td><span class="badge badge-success">✓ Present</span></td>
+                        <td>{{ record.time.strftime('%d %b %Y, %H:%M') }}</span></span></span></span></td>
+                        <td>{{ record.subject }}</span></span></span></span></td>
+                        <td><code>{{ record.session_id }}</code></span></span></span></span></td>
+                        <td><span class="badge badge-success">✓ Present</span></span></span></span></span></span></span></td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="4" style="text-align: center;">No attendance records found.</td></tr>
+                    <tr><td colspan="4" style="text-align: center;">No attendance records found.</span></span></span></span></td>
                     {% endfor %}
                 </tbody>
             </table>

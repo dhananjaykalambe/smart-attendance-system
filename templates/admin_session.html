@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>Admin - All Sessions</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <style>
     .session-card {
@@ -91,7 +92,7 @@
                                 <span class="badge badge-danger">🔴 Expired</span>
                             {% endif %}
                         </td>
-                        <td>{{ session.attendance_count }} students</td>
+                        <td>{{ session.attendance_count }} students</span></td>
                         <td class="action-buttons">
                             <a href="/admin/session_details/{{ session.session_id }}"><button class="btn-small" style="background: linear-gradient(135deg, var(--info), var(--info-dark));">📋 View</button></a>
                             <a href="/admin/delete_session/{{ session.session_id }}" onclick="return confirm('Delete this session and all its attendance records?')"><button class="btn-small" style="background: linear-gradient(135deg, var(--danger), var(--danger-dark));">🗑️ Delete</button></a>

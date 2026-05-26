@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>Admin - Manage Students</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -79,9 +80,9 @@
                     {% for student in students %}
                     <tr>
                         <td><strong>{{ student.roll_no }}</strong></td>
-                        <td>{{ student.name }}</td>
-                        <td><span class="badge badge-primary">{{ student.branch }}</span></td>
-                        <td>{{ student.email or 'N/A' }}</td>
+                        <td>{{ student.name }}</span></span></td>
+                        <td><span class="badge badge-primary">{{ student.branch }}</span></span></span></td>
+                        <td>{{ student.email or 'N/A' }}</span></span></span></td>
                         <td>
                             <a href="/admin/delete_student/{{ student.roll_no }}" onclick="return confirm('Delete this student?')">
                                 <button class="danger btn-small">🗑️ Delete</button>

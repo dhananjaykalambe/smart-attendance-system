@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>Session Details</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -60,7 +61,7 @@
                 <tr><th style="width:150px;">Subject</th><td><span class="badge badge-primary">{{ session.subject }}</span></td></tr>
                 <tr><th>Start Time</th><td>{{ session.start_time.strftime('%Y-%m-%d %H:%M:%S') if session.start_time else 'N/A' }}</td></tr>
                 <tr><th>End Time</th><td>{{ session.end_time.strftime('%Y-%m-%d %H:%M:%S') if session.end_time else 'N/A' }}</td></tr>
-                <tr><th>Duration</th><td>{{ session.duration }} minutes</td>
+                <tr><th>Duration</th><td>{{ session.duration }} minutes</td></tr>
                 <tr>
                     <th>Status</th>
                     <td>{% if session.is_active %}<span class="badge badge-success">🟢 Active</span>{% else %}<span class="badge badge-danger">🔴 Closed</span>{% endif %}</td>

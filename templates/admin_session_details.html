@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>Session Details - Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -59,9 +60,9 @@
             <table style="width:100%;">
                 <tr><th style="width:150px;">Session ID</th><td><code>{{ session.session_id }}</code></td></tr>
                 <tr><th>Subject</th><td><span class="badge badge-primary">{{ session.subject }}</span></td></tr>
-                <tr><th>Start Time</th><td>{{ session.start_time }}</td></tr>
-                <tr><th>End Time</th><td>{{ session.end_time }}</td></tr>
-                <tr><th>Duration</th><td>{{ session.duration }} minutes</td></tr>
+                <tr><th>Start Time</th><td>{{ session.start_time }}</span></td></tr>
+                <tr><th>End Time</th><td>{{ session.end_time }}</span></td></tr>
+                <tr><th>Duration</th><td>{{ session.duration }} minutes</span></td></tr>
                 <tr>
                     <th>Status</th>
                     <td>
@@ -89,11 +90,11 @@
                     {% for record in records %}
                     <tr>
                         <td><strong>{{ record.student_id }}</strong></td>
-                        <td>{{ record.name }}</td>
-                        <td><span class="badge badge-info">{{ record.branch }}</span></td>
-                        <td>{{ record.time[:19] }}</td>
-                        <td><code>{{ record.ip_address or 'N/A' }}</code></td>
-                        <td><small>{{ record.device_fingerprint[:16] }}...</small></td>
+                        <td>{{ record.name }}</span></td>
+                        <td><span class="badge badge-info">{{ record.branch }}</span></span></td>
+                        <td>{{ record.time[:19] }}</span></span></td>
+                        <td><code>{{ record.ip_address or 'N/A' }}</code></span></span></td>
+                        <td><small>{{ record.device_fingerprint[:16] }}...</small></span></span></td>
                     </tr>
                     {% endfor %}
                 </tbody>

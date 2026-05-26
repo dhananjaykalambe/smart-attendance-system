@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>Students Report</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <style>
     .student-row { cursor: pointer; transition: var(--transition); }
@@ -105,7 +106,7 @@
         <div class="table-container">
             <table style="width:100%">
                 <thead>
-                    <tr>
+                    <tr style="background: var(--primary); color: white;">
                         <th>Roll No</th><th>Name</th><th>Branch</th><th>Overall %</th><th>Performance</th><th>Action</th>
                     </tr>
                 </thead>
@@ -113,11 +114,11 @@
                     {% for student in data %}
                     <tr class="student-row" onclick="toggleDetails('details_{{ loop.index }}')">
                         <td><strong>{{ student.roll_no }}</strong></td>
-                        <td>{{ student.name }}</td>
-                        <td><span class="badge badge-primary">{{ student.branch }}</span></td>
+                        <td>{{ student.name }}</span></span></td>
+                        <td><span class="badge badge-primary">{{ student.branch }}</span></span></span></td>
                         <td class="{% if student.overall_percentage >= 85 %}performance-excellent{% elif student.overall_percentage >= 75 %}performance-good{% else %}performance-low{% endif %}">
                             {{ student.overall_percentage }}%
-                        </td>
+                        </span></span></span></span></td>
                         <td>
                             {% if student.overall_percentage >= 85 %}
                                 <span class="badge badge-success">✅ Excellent</span>
@@ -126,12 +127,12 @@
                             {% else %}
                                 <span class="badge badge-danger">⚠️ Needs Improvement</span>
                             {% endif %}
-                        </td>
+                        </span></span></span></span></td>
                         <td>
                             <a href="/export_student_pdf/{{ student.roll_no }}">
                                 <button class="btn-small" style="background: linear-gradient(135deg, var(--danger), var(--danger-dark));">📄 PDF</button>
                             </a>
-                        </td>
+                        </span></span></span></span></td>
                     </tr>
                     <tr id="details_{{ loop.index }}" class="details-row">
                         <td colspan="6">
@@ -147,18 +148,18 @@
                                         <tbody>
                                             {% for subject in student.subjects %}
                                             <tr>
-                                                <td>{{ subject.subject }}</td>
-                                                <td>{{ subject.attended }}</td>
-                                                <td>{{ subject.total }}</td>
-                                                <td style="{% if subject.percentage < 75 %}color:var(--danger){% elif subject.percentage < 85 %}color:var(--warning){% else %}color:var(--success){% endif %}">{{ subject.percentage }}%</td>
-                                                <td style="width:150px"><div class="progress-bar-container"><div class="progress-bar" style="width: {{ subject.percentage }}%"></div></div></td>
+                                                <td>{{ subject.subject }}</span></span></span></span></span></span></span></span></td>
+                                                <td>{{ subject.attended }}</span></span></span></span></span></span></span></span></td>
+                                                <td>{{ subject.total }}</span></span></span></span></span></span></span></span></td>
+                                                <td style="{% if subject.percentage < 75 %}color:var(--danger){% elif subject.percentage < 85 %}color:var(--warning){% else %}color:var(--success){% endif %}">{{ subject.percentage }}%</span></span></span></span></span></span></span></span></td>
+                                                <td style="width:150px"><div class="progress-bar-container"><div class="progress-bar" style="width: {{ subject.percentage }}%"></div></div></span></span></span></span></span></span></span></span></td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
-                        </td>
+                        </span></span></span></span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
