@@ -911,54 +911,260 @@ tbody tr:nth-child(even) {
 }
 
 /* ====================================================================
-   RESPONSIVE DESIGN - Enhanced
+   RESPONSIVE DESIGN - CORRECTED
    ==================================================================== */
 
+/* Desktop: Show sidebar always, hide toggle button */
 @media (min-width: 1025px) {
-    .menu-toggle { display: none; }
-    .sidebar { transform: translateX(0) !important; }
-    .sidebar-overlay { display: none !important; }
+    .menu-toggle {
+        display: none !important;
+    }
+    .sidebar {
+        transform: translateX(0) !important;
+    }
+    .sidebar-overlay {
+        display: none !important;
+    }
+    .main {
+        margin-left: 280px !important;
+        width: calc(100% - 280px) !important;
+    }
 }
 
+/* Tablet: 769px to 1024px */
 @media (min-width: 769px) and (max-width: 1024px) {
-    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 18px; }
-    .card { padding: 22px; }
-    .sidebar { width: 260px; }
-    .main { margin-left: 260px; width: calc(100% - 260px); }
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+    .card {
+        padding: 22px;
+    }
+    .sidebar {
+        width: 260px;
+    }
+    .main {
+        margin-left: 260px;
+        width: calc(100% - 260px);
+        padding: 20px 20px;
+    }
+    .menu-toggle {
+        display: none !important;
+    }
 }
 
+/* Mobile: 768px and below - FIXED */
 @media (max-width: 768px) {
-    .menu-toggle { display: block; z-index: 1000; background: linear-gradient(135deg, var(--primary), var(--primary-light)); }
-    .sidebar { transform: translateX(-100%); width: 280px; z-index: 1001; }
-    .sidebar.open { transform: translateX(0); }
-    .sidebar-overlay.active { display: block; z-index: 1000; }
-    .main { margin-left: 0 !important; width: 100% !important; padding: 80px 16px 20px 16px !important; }
-    .stats-grid { grid-template-columns: 1fr; gap: 14px; }
-    .stat-card h3 { font-size: 1.8rem; }
-    .form-row, .form-grid { grid-template-columns: 1fr; gap: 0; }
-    .search-box { flex-direction: column; align-items: stretch; }
-    .search-box input, .search-box select, .search-box button { width: 100%; }
-    .card h2 { font-size: 1.2rem; }
-    .header { font-size: 0.95rem; padding: 16px 20px; border-radius: var(--radius-lg); }
-    .countdown-timer { font-size: 2rem; padding: 16px 28px; }
-    th, td { padding: 10px 8px; font-size: 11px; }
-    .notice-title { flex-direction: column; align-items: flex-start; }
-    .notice-date { margin-left: 0; }
-    .notice-content { margin-left: 0; }
-    .sidebar-profile { display: none; }
+    /* Show toggle button */
+    .menu-toggle {
+        display: block !important;
+        position: fixed !important;
+        top: 16px !important;
+        left: 16px !important;
+        z-index: 1002 !important;
+        background: linear-gradient(135deg, var(--primary), var(--primary-light)) !important;
+    }
+    
+    /* Sidebar hidden by default */
+    .sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 280px !important;
+        height: 100vh !important;
+        transform: translateX(-100%) !important;
+        transition: transform 0.3s ease !important;
+        z-index: 1001 !important;
+    }
+    
+    /* Sidebar when open */
+    .sidebar.open {
+        transform: translateX(0) !important;
+    }
+    
+    /* Overlay */
+    .sidebar-overlay {
+        display: none !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        background: rgba(0,0,0,0.5) !important;
+        backdrop-filter: blur(4px) !important;
+        z-index: 1000 !important;
+    }
+    
+    .sidebar-overlay.active {
+        display: block !important;
+    }
+    
+    /* Main content - FULL WIDTH without margin */
+    .main {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 80px 16px 20px 16px !important;
+    }
+    
+    /* Stats grid - 2 columns on tablet, 1 on phone */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+    }
+    
+    /* Cards */
+    .card {
+        padding: 16px !important;
+        margin-bottom: 16px !important;
+    }
+    
+    .card h2 {
+        font-size: 1.2rem !important;
+        margin-bottom: 15px !important;
+    }
+    
+    /* Tables - horizontal scroll */
+    .table-container {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        margin: 15px -16px !important;
+        padding: 0 16px !important;
+        width: calc(100% + 32px) !important;
+    }
+    
+    .table-container table {
+        min-width: 600px !important;
+    }
+    
+    /* Forms */
+    .form-row, .form-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+    
+    /* Search box */
+    .search-box {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    
+    .search-box input, .search-box select, .search-box button {
+        width: 100% !important;
+        margin: 4px 0 !important;
+    }
+    
+    /* Subject grid */
+    .subject-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+    
+    /* Hide profile on mobile */
+    .sidebar-profile {
+        display: none !important;
+    }
+    
+    /* Header padding */
+    .header {
+        padding: 16px 20px !important;
+        font-size: 0.95rem !important;
+    }
+    
+    /* Countdown timer */
+    .countdown-timer {
+        font-size: 2rem !important;
+        padding: 12px 20px !important;
+    }
+    
+    /* Notice board */
+    .notice-title {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+    
+    .notice-date {
+        margin-left: 0 !important;
+    }
+    
+    .notice-content {
+        margin-left: 0 !important;
+    }
+    
+    /* Action buttons in tables */
+    td .action-buttons {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 8px !important;
+        flex-wrap: wrap !important;
+    }
 }
 
+/* Very small phones (max-width: 480px) */
 @media (max-width: 480px) {
-    .main { padding: 75px 12px 16px 12px; }
-    .card { padding: 16px; }
-    .card h2 { font-size: 1.1rem; padding-left: 12px; }
-    th, td { padding: 8px 6px; font-size: 10px; }
-    .badge { padding: 2px 8px; font-size: 10px; }
-    button, .btn { padding: 10px 16px; font-size: 13px; }
-    .btn-small { padding: 4px 10px; font-size: 10px; }
-    .menu-toggle { top: 12px; left: 12px; padding: 10px 12px; }
-    .header { font-size: 0.85rem; padding: 12px 16px; }
-    .countdown-timer { font-size: 1.5rem; padding: 12px 20px; letter-spacing: 2px; }
+    .main {
+        padding: 75px 12px 16px 12px !important;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .subject-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .card {
+        padding: 12px !important;
+    }
+    
+    .card h2 {
+        font-size: 1rem !important;
+    }
+    
+    .stat-card h3 {
+        font-size: 1.5rem !important;
+    }
+    
+    .header {
+        font-size: 0.85rem !important;
+        padding: 12px 16px !important;
+    }
+    
+    .menu-toggle {
+        top: 12px !important;
+        left: 12px !important;
+        padding: 10px 12px !important;
+    }
+    
+    .countdown-timer {
+        font-size: 1.5rem !important;
+        padding: 10px 16px !important;
+    }
+    
+    th, td {
+        padding: 8px 6px !important;
+        font-size: 10px !important;
+    }
+    
+    .btn-small {
+        padding: 4px 10px !important;
+        font-size: 10px !important;
+    }
+}
+
+/* Landscape mode fix */
+@media (max-width: 768px) and (orientation: landscape) {
+    .sidebar {
+        width: 260px !important;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+    
+    .main {
+        padding: 65px 16px 16px 16px !important;
+    }
 }
 
 /* ====================================================================
@@ -969,11 +1175,31 @@ tbody tr:nth-child(even) {
     .menu-toggle, .sidebar, .sidebar-overlay, button, .btn, .action-buttons, .export-buttons, .search-box {
         display: none !important;
     }
-    .main { margin-left: 0; width: 100%; padding: 0; }
-    .card { box-shadow: none; border: 1px solid #ddd; background: white; break-inside: avoid; }
-    .header { background: var(--primary); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    th { background: var(--primary); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    body { background: white; color: black; }
+    .main {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 0 !important;
+    }
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        background: white;
+        break-inside: avoid;
+    }
+    .header {
+        background: var(--primary);
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    th {
+        background: var(--primary);
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    body {
+        background: white;
+        color: black;
+    }
 }
 
 /* ====================================================================
@@ -1047,426 +1273,4 @@ tbody tr:nth-child(even) {
 .tooltip:hover .tooltip-text {
     visibility: visible;
     opacity: 1;
-}
-
-/* ====================================================================
-   COMPLETE MOBILE RESPONSIVE FIXES
-   ==================================================================== */
-
-/* Force all tables to be scrollable on mobile */
-@media (max-width: 768px) {
-    /* Make tables horizontally scrollable */
-    .table-container {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        margin: 15px -12px;
-        padding: 0 12px;
-        width: calc(100% + 24px);
-    }
-    
-    .table-container table {
-        min-width: 650px;
-        font-size: 12px;
-    }
-    
-    .table-container th,
-    .table-container td {
-        padding: 10px 8px;
-        white-space: nowrap;
-    }
-    
-    /* Stack cards properly */
-    .card {
-        padding: 16px;
-        margin-bottom: 16px;
-    }
-    
-    .card h2 {
-        font-size: 1.1rem;
-        margin-bottom: 15px;
-    }
-    
-    /* Stats grid - 2 columns on tablet, 1 on phone */
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-    }
-    
-    /* Progress bar width fix */
-    td .progress-bar-container {
-        width: 100px;
-        min-width: 80px;
-    }
-    
-    /* Fix buttons on mobile */
-    .action-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .action-buttons a,
-    .action-buttons button {
-        width: 100%;
-        margin: 0;
-    }
-    
-    /* Fix export buttons */
-    .export-buttons-container,
-    .export-buttons {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .export-btn,
-    .export-buttons .export-btn {
-        width: 100%;
-        text-align: center;
-        justify-content: center;
-    }
-    
-    /* Fix search box */
-    .search-box {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .search-box input,
-    .search-box select,
-    .search-box button {
-        width: 100%;
-        margin: 5px 0;
-    }
-    
-    /* Fix subject grid on create session page */
-    .subject-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-    
-    .subject-card {
-        padding: 12px 8px;
-        font-size: 12px;
-    }
-    
-    /* Fix stats cards on mobile */
-    .quick-stats,
-    .stats-banner {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-    }
-    
-    /* Fix notice board on mobile */
-    .notice-item {
-        padding: 12px;
-    }
-    
-    .notice-title {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px;
-    }
-    
-    .notice-date {
-        margin-left: 0;
-        font-size: 10px;
-    }
-    
-    .notice-content {
-        margin-left: 0;
-        font-size: 12px;
-        margin-top: 8px;
-    }
-    
-    /* Fix form layouts */
-    .form-row,
-    .form-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-    
-    /* Fix countdown timer */
-    .countdown-timer {
-        font-size: 2rem;
-        padding: 12px 20px;
-    }
-    
-    /* Fix login page */
-    .login-card {
-        margin: 0 10px;
-    }
-    
-    .role-tabs {
-        gap: 3px;
-    }
-    
-    .role-tab {
-        padding: 8px 4px;
-        font-size: 11px;
-    }
-}
-
-/* For very small phones (max-width: 480px) */
-@media (max-width: 480px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .quick-stats,
-    .stats-banner {
-        grid-template-columns: 1fr;
-    }
-    
-    .subject-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .table-container {
-        margin: 15px -8px;
-        padding: 0 8px;
-        width: calc(100% + 16px);
-    }
-    
-    .table-container table {
-        min-width: 580px;
-        font-size: 11px;
-    }
-    
-    .card {
-        padding: 12px;
-    }
-    
-    .card h2 {
-        font-size: 1rem;
-    }
-    
-    .header {
-        font-size: 0.85rem;
-        padding: 12px 15px;
-    }
-    
-    .stat-card h3 {
-        font-size: 1.5rem;
-    }
-    
-    .stat-card p {
-        font-size: 0.7rem;
-    }
-    
-    button, .btn {
-        padding: 10px 16px;
-        font-size: 13px;
-    }
-    
-    .btn-small {
-        padding: 6px 12px;
-        font-size: 11px;
-    }
-    
-    .countdown-timer {
-        font-size: 1.5rem;
-        padding: 10px 16px;
-    }
-    
-    .badge {
-        padding: 2px 8px;
-        font-size: 9px;
-    }
-    
-    th, td {
-        padding: 8px 6px;
-        font-size: 10px;
-    }
-    
-    .menu-toggle {
-        top: 12px;
-        left: 12px;
-        padding: 8px 10px;
-    }
-    
-    .main {
-        padding: 70px 12px 16px 12px;
-    }
-}
-
-/* For tablets (769px - 1024px) */
-@media (min-width: 769px) and (max-width: 1024px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-    }
-    
-    .quick-stats {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    
-    .subject-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    
-    .table-container table {
-        min-width: 100%;
-    }
-}
-
-/* Fix for landscape orientation on mobile */
-@media (max-width: 768px) and (orientation: landscape) {
-    .sidebar {
-        width: 260px;
-    }
-    
-    .stats-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    
-    .main {
-        padding: 65px 16px 16px 16px;
-    }
-}
-
-/* Fix modal/dialog issues on mobile */
-@media (max-width: 768px) {
-    .alert {
-        padding: 12px;
-        font-size: 12px;
-    }
-    
-    .progress-bar-container {
-        height: 6px;
-    }
-    
-    select, input, textarea {
-        padding: 10px 12px;
-        font-size: 13px;
-    }
-    
-    /* Fix tech grid on about page */
-    .tech-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-    }
-    
-    /* Fix features grid */
-    .features-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-    
-    /* Fix hero section */
-    .hero-section {
-        padding: 30px 20px;
-    }
-    
-    .hero-section h1 {
-        font-size: 1.5rem;
-    }
-    
-    .hero-section p {
-        font-size: 0.85rem;
-    }
-    
-    /* Fix developer section */
-    .developer-section {
-        padding: 25px 20px;
-    }
-    
-    .developer-name {
-        font-size: 1.2rem;
-    }
-}
-
-/* Hide sidebar on mobile by default, show when toggled */
-@media (max-width: 768px) {
-    .sidebar {
-        transform: translateX(-100%);
-        width: 280px;
-        z-index: 1001;
-    }
-    
-    .sidebar.open {
-        transform: translateX(0);
-    }
-    
-    .sidebar-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.5);
-        z-index: 1000;
-    }
-    
-    .sidebar-overlay.active {
-        display: block;
-    }
-    
-    .menu-toggle {
-        display: block;
-        position: fixed;
-        top: 16px;
-        left: 16px;
-        z-index: 1002;
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    }
-    
-    .main {
-        margin-left: 0;
-        width: 100%;
-    }
-}
-
-/* Table cell content wrapping */
-@media (max-width: 768px) {
-    td {
-        word-break: break-word;
-        white-space: normal;
-    }
-    
-    .badge {
-        white-space: nowrap;
-    }
-}
-
-/* Fix progress bar in tables on mobile */
-td .progress-bar-container {
-    min-width: 80px;
-}
-
-/* Fix action buttons in tables */
-td .action-buttons {
-    display: flex;
-    flex-direction: row;
-    gap: 5px;
-    justify-content: center;
-}
-
-@media (max-width: 480px) {
-    td .action-buttons {
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    td .action-buttons a,
-    td .action-buttons button {
-        width: 100%;
-    }
-}
-
-/* Fix export bottom section */
-.export-bottom {
-    text-align: right;
-    margin-top: 15px;
-    padding-top: 12px;
-}
-
-@media (max-width: 768px) {
-    .export-bottom {
-        text-align: center;
-    }
-    
-    .export-bottom button {
-        width: 100%;
-    }
 }
