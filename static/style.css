@@ -1,7 +1,7 @@
 /* static/style.css */
 /* ====================================================================
    SMART ATTENDANCE SYSTEM - PREMIUM LIGHT THEME WITH ENHANCED SIDEBAR
-   Version: 4.1 - FULLY MOBILE RESPONSIVE
+   Version: 4.2 - FULLY MOBILE RESPONSIVE + CENTERED SCROLLABLE TABLES
    ==================================================================== */
 
 /* CSS Variables - Modern Light Theme */
@@ -676,25 +676,66 @@ input::placeholder, textarea::placeholder {
 }
 
 /* ====================================================================
-   TABLES - Premium
+   TABLES - Premium (UPDATED WITH CENTERING FIX)
    ==================================================================== */
 
+/* TABLE CENTERING FIX - This solves your alignment issue */
 .table-container {
     width: 100%;
     overflow-x: auto;
-    margin: 24px 0;
+    margin: 24px auto;
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
     background: var(--card-bg);
     -webkit-overflow-scrolling: touch;
+    display: flex;
+    justify-content: center;
 }
 
-table {
+/* Make tables centered with proper width */
+.table-container table {
     width: 100%;
+    max-width: 1200px;
     min-width: 600px;
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+/* Alternative: If table-container has table directly */
+.table-container > table {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* For any div that contains scrollable tables (global fix) */
+div[style*="overflow-x"]:has(table),
+div[class*="scroll"]:has(table),
+div[class*="table"]:has(table),
+div[style*="overflow"]:has(table) {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+}
+
+div[style*="overflow-x"]:has(table) table,
+div[class*="scroll"]:has(table) table,
+div[class*="table"]:has(table) table,
+div[style*="overflow"]:has(table) table {
+    width: 95% !important;
+    max-width: 1100px !important;
+    margin: 0 auto !important;
+}
+
+/* Direct table styling */
+table:not(.no-center) {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
     border-collapse: collapse;
 }
 
+/* Table header styling */
 th {
     background: linear-gradient(135deg, var(--primary), var(--primary-light));
     color: white;
@@ -1051,18 +1092,22 @@ tbody tr:nth-child(even) {
         padding-left: 12px;
     }
     
-    /* Tables - horizontal scroll */
+    /* Tables - horizontal scroll with centering on mobile */
     .table-container {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-        margin: 15px -16px;
-        padding: 0 16px;
-        width: calc(100% + 32px);
+        margin: 15px auto;
+        padding: 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
     }
     
     .table-container table {
-        min-width: 600px;
-        width: max-content;
+        min-width: 550px;
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
     }
     
     .table-container th,
@@ -1445,9 +1490,10 @@ tbody tr:nth-child(even) {
         z-index: 10000 !important;
     }
     
-    /* Make all tables scrollable horizontally */
+    /* Make all tables scrollable horizontally AND centered */
     .table-container {
-        display: block !important;
+        display: flex !important;
+        justify-content: center !important;
         overflow-x: auto !important;
         width: 100% !important;
         -webkit-overflow-scrolling: touch !important;
@@ -1456,9 +1502,11 @@ tbody tr:nth-child(even) {
     .table-container table {
         min-width: 550px !important;
         width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
     }
     
-    /* Make stats grid single column on very small screens */
+    /* Force stats grid single column on very small screens */
     .stats-grid {
         display: grid !important;
         grid-template-columns: 1fr !important;
@@ -1552,5 +1600,46 @@ tbody tr:nth-child(even) {
     
     .main {
         padding: 70px 10px 15px 10px !important;
+    }
+}
+
+/* ====================================================================
+   TABLE CENTERING - FINAL FIX (WORKS FOR ALL SCROLLABLE TABLES)
+   ==================================================================== */
+
+/* Universal centering for any scrollable table container */
+*:has(> .table-container),
+div:has(> table),
+section:has(> table),
+main:has(> table) {
+    text-align: center;
+}
+
+/* Center all tables inside any scrollable wrapper */
+[style*="overflow-x"]:has(table),
+[class*="table-container"],
+div[style*="overflow"]:has(table) {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+/* Style the actual table */
+[style*="overflow-x"]:has(table) table,
+[class*="table-container"] table,
+div[style*="overflow"]:has(table) table {
+    width: auto !important;
+    min-width: 80% !important;
+    max-width: 95% !important;
+    margin: 0 auto !important;
+}
+
+/* For responsive behavior on larger screens */
+@media (min-width: 1200px) {
+    [style*="overflow-x"]:has(table) table,
+    [class*="table-container"] table,
+    div[style*="overflow"]:has(table) table {
+        max-width: 1100px !important;
     }
 }
