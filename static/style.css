@@ -1,7 +1,7 @@
 /* static/style.css */
 /* ====================================================================
    SMART ATTENDANCE SYSTEM - PREMIUM LIGHT THEME WITH ENHANCED SIDEBAR
-   Version: 4.1
+   Version: 4.1 - FULLY MOBILE RESPONSIVE
    ==================================================================== */
 
 /* CSS Variables - Modern Light Theme */
@@ -911,28 +911,41 @@ tbody tr:nth-child(even) {
 }
 
 /* ====================================================================
-   RESPONSIVE DESIGN - CORRECTED
+   RESPONSIVE DESIGN - FULLY MOBILE RESPONSIVE
    ==================================================================== */
 
-/* Desktop: Show sidebar always, hide toggle button */
+/* Desktop: 1025px and above */
 @media (min-width: 1025px) {
     .menu-toggle {
-        display: none !important;
+        display: none;
     }
     .sidebar {
-        transform: translateX(0) !important;
+        transform: translateX(0);
     }
     .sidebar-overlay {
-        display: none !important;
+        display: none;
     }
     .main {
-        margin-left: 280px !important;
-        width: calc(100% - 280px) !important;
+        margin-left: 280px;
+        width: calc(100% - 280px);
+        padding: 25px 30px;
     }
 }
 
 /* Tablet: 769px to 1024px */
 @media (min-width: 769px) and (max-width: 1024px) {
+    .menu-toggle {
+        display: none;
+    }
+    .sidebar {
+        width: 260px;
+        transform: translateX(0);
+    }
+    .main {
+        margin-left: 260px;
+        width: calc(100% - 260px);
+        padding: 20px 20px;
+    }
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 18px;
@@ -940,230 +953,349 @@ tbody tr:nth-child(even) {
     .card {
         padding: 22px;
     }
-    .sidebar {
-        width: 260px;
-    }
-    .main {
-        margin-left: 260px;
-        width: calc(100% - 260px);
-        padding: 20px 20px;
-    }
-    .menu-toggle {
-        display: none !important;
+    .quick-stats {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
     }
 }
 
-/* Mobile: 768px and below - FIXED */
+/* Mobile: 768px and below */
 @media (max-width: 768px) {
-    /* Show toggle button */
+    /* Show menu button */
     .menu-toggle {
-        display: block !important;
-        position: fixed !important;
-        top: 16px !important;
-        left: 16px !important;
-        z-index: 1002 !important;
-        background: linear-gradient(135deg, var(--primary), var(--primary-light)) !important;
+        display: block;
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        z-index: 1002;
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        border: none;
+        border-radius: 12px;
+        padding: 12px 14px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
     
     /* Sidebar hidden by default */
     .sidebar {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 280px !important;
-        height: 100vh !important;
-        transform: translateX(-100%) !important;
-        transition: transform 0.3s ease !important;
-        z-index: 1001 !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 280px;
+        height: 100vh;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1001;
+        overflow-y: auto;
     }
     
     /* Sidebar when open */
     .sidebar.open {
-        transform: translateX(0) !important;
+        transform: translateX(0);
     }
     
     /* Overlay */
     .sidebar-overlay {
-        display: none !important;
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        background: rgba(0,0,0,0.5) !important;
-        backdrop-filter: blur(4px) !important;
-        z-index: 1000 !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        display: none;
     }
     
     .sidebar-overlay.active {
-        display: block !important;
+        display: block;
     }
     
-    /* Main content - FULL WIDTH without margin */
+    /* Main content - full width */
     .main {
-        margin-left: 0 !important;
-        width: 100% !important;
-        padding: 80px 16px 20px 16px !important;
+        margin-left: 0;
+        width: 100%;
+        padding: 80px 16px 20px 16px;
     }
     
-    /* Stats grid - 2 columns on tablet, 1 on phone */
+    /* Header */
+    .header {
+        padding: 16px 20px;
+        font-size: 0.95rem;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    /* Stats grid - 2 columns on mobile */
     .stats-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 12px !important;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    
+    /* Quick stats on faculty dashboard */
+    .quick-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
     }
     
     /* Cards */
     .card {
-        padding: 16px !important;
-        margin-bottom: 16px !important;
+        padding: 16px;
+        margin-bottom: 16px;
     }
     
     .card h2 {
-        font-size: 1.2rem !important;
-        margin-bottom: 15px !important;
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        padding-left: 12px;
     }
     
     /* Tables - horizontal scroll */
     .table-container {
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        margin: 15px -16px !important;
-        padding: 0 16px !important;
-        width: calc(100% + 32px) !important;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 15px -16px;
+        padding: 0 16px;
+        width: calc(100% + 32px);
     }
     
     .table-container table {
-        min-width: 600px !important;
+        min-width: 600px;
+        width: max-content;
+    }
+    
+    .table-container th,
+    .table-container td {
+        white-space: nowrap;
+        padding: 10px 12px;
     }
     
     /* Forms */
     .form-row, .form-grid {
-        grid-template-columns: 1fr !important;
-        gap: 12px !important;
+        grid-template-columns: 1fr;
+        gap: 12px;
     }
     
     /* Search box */
     .search-box {
-        flex-direction: column !important;
-        align-items: stretch !important;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px;
     }
     
-    .search-box input, .search-box select, .search-box button {
-        width: 100% !important;
-        margin: 4px 0 !important;
+    .search-box input,
+    .search-box select,
+    .search-box button {
+        width: 100%;
+        margin: 4px 0;
     }
     
-    /* Subject grid */
+    /* Buttons */
+    button, .btn {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+    
+    .btn-small {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+    
+    /* Subject grid on create session */
     .subject-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 10px !important;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
     }
     
-    /* Hide profile on mobile */
-    .sidebar-profile {
-        display: none !important;
-    }
-    
-    /* Header padding */
-    .header {
-        padding: 16px 20px !important;
-        font-size: 0.95rem !important;
-    }
-    
-    /* Countdown timer */
-    .countdown-timer {
-        font-size: 2rem !important;
-        padding: 12px 20px !important;
+    .subject-card {
+        padding: 12px 8px;
+        font-size: 12px;
     }
     
     /* Notice board */
     .notice-title {
-        flex-direction: column !important;
-        align-items: flex-start !important;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
     }
     
     .notice-date {
-        margin-left: 0 !important;
+        margin-left: 0;
     }
     
     .notice-content {
-        margin-left: 0 !important;
+        margin-left: 0;
+        margin-top: 8px;
+    }
+    
+    /* Export buttons */
+    .export-buttons-container,
+    .export-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .export-btn {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
     }
     
     /* Action buttons in tables */
     td .action-buttons {
-        display: flex !important;
-        flex-direction: row !important;
-        gap: 8px !important;
-        flex-wrap: wrap !important;
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    /* Countdown timer */
+    .countdown-timer {
+        font-size: 2rem;
+        padding: 12px 20px;
+    }
+    
+    /* Role tabs on login */
+    .role-tabs {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .role-tab {
+        flex: 1;
+        min-width: 80px;
+        padding: 10px 4px;
+        font-size: 12px;
+    }
+    
+    /* Tech grid on about page */
+    .tech-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    /* Features grid */
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    /* Stats banner on about page */
+    .stats-banner {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    /* Hero section */
+    .hero-section {
+        padding: 30px 20px;
+    }
+    
+    .hero-section h1 {
+        font-size: 1.5rem;
+    }
+    
+    /* Progress bar in tables */
+    td .progress-bar-container {
+        min-width: 80px;
+    }
+    
+    /* Hide profile on mobile sidebar */
+    .sidebar-profile {
+        display: none;
     }
 }
 
-/* Very small phones (max-width: 480px) */
+/* Very small phones: 480px and below */
 @media (max-width: 480px) {
     .main {
-        padding: 75px 12px 16px 12px !important;
+        padding: 75px 12px 16px 12px;
     }
     
     .stats-grid {
-        grid-template-columns: 1fr !important;
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .quick-stats {
+        grid-template-columns: 1fr;
     }
     
     .subject-grid {
-        grid-template-columns: 1fr !important;
+        grid-template-columns: 1fr;
+    }
+    
+    .tech-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-banner {
+        grid-template-columns: 1fr;
     }
     
     .card {
-        padding: 12px !important;
+        padding: 12px;
     }
     
     .card h2 {
-        font-size: 1rem !important;
-    }
-    
-    .stat-card h3 {
-        font-size: 1.5rem !important;
+        font-size: 1rem;
     }
     
     .header {
-        font-size: 0.85rem !important;
-        padding: 12px 16px !important;
+        font-size: 0.85rem;
+        padding: 12px 16px;
+    }
+    
+    .stat-card h3 {
+        font-size: 1.5rem;
     }
     
     .menu-toggle {
-        top: 12px !important;
-        left: 12px !important;
-        padding: 10px 12px !important;
+        top: 12px;
+        left: 12px;
+        padding: 8px 10px;
     }
     
     .countdown-timer {
-        font-size: 1.5rem !important;
-        padding: 10px 16px !important;
+        font-size: 1.3rem;
+        padding: 8px 16px;
     }
     
     th, td {
-        padding: 8px 6px !important;
-        font-size: 10px !important;
+        padding: 8px 6px;
+        font-size: 10px;
+    }
+    
+    .badge {
+        padding: 2px 8px;
+        font-size: 9px;
     }
     
     .btn-small {
-        padding: 4px 10px !important;
-        font-size: 10px !important;
+        padding: 4px 10px;
+        font-size: 10px;
+    }
+    
+    .export-btn {
+        padding: 8px 16px;
+        font-size: 12px;
     }
 }
 
-/* Landscape mode fix */
+/* Landscape orientation on mobile */
 @media (max-width: 768px) and (orientation: landscape) {
     .sidebar {
-        width: 260px !important;
+        width: 260px;
     }
     
     .stats-grid {
-        grid-template-columns: repeat(3, 1fr) !important;
+        grid-template-columns: repeat(3, 1fr);
     }
     
     .main {
-        padding: 65px 16px 16px 16px !important;
+        padding: 65px 16px 16px 16px;
     }
 }
 
