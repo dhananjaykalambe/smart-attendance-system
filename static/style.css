@@ -1406,3 +1406,151 @@ tbody tr:nth-child(even) {
     visibility: visible;
     opacity: 1;
 }
+
+/* ====================================================================
+   EMERGENCY MOBILE FIXES - OVERRIDE EVERYTHING
+   ==================================================================== */
+
+/* Force mobile styles - this overrides any conflicting CSS */
+@media screen and (max-width: 768px) {
+    /* Force main content to take full width */
+    .main {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 75px 12px 20px 12px !important;
+        overflow-x: hidden !important;
+    }
+    
+    /* Force sidebar to be hidden by default */
+    .sidebar {
+        transform: translateX(-100%) !important;
+        width: 280px !important;
+        position: fixed !important;
+        z-index: 9999 !important;
+    }
+    
+    /* Show sidebar when open */
+    .sidebar.open {
+        transform: translateX(0) !important;
+    }
+    
+    /* Show menu toggle button */
+    .menu-toggle {
+        display: flex !important;
+        position: fixed !important;
+        top: 12px !important;
+        left: 12px !important;
+        z-index: 10000 !important;
+    }
+    
+    /* Make all tables scrollable horizontally */
+    .table-container {
+        display: block !important;
+        overflow-x: auto !important;
+        width: 100% !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    .table-container table {
+        min-width: 550px !important;
+        width: 100% !important;
+    }
+    
+    /* Make stats grid single column on very small screens */
+    .stats-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+    
+    /* Make cards full width */
+    .card {
+        width: 100% !important;
+        padding: 15px !important;
+        margin: 0 0 15px 0 !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Fix header text size */
+    .header {
+        font-size: 0.9rem !important;
+        padding: 12px 15px !important;
+        text-align: center !important;
+    }
+    
+    /* Fix forms */
+    .form-row, .form-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    
+    .form-row input, .form-grid input,
+    .form-row select, .form-grid select {
+        width: 100% !important;
+    }
+    
+    /* Fix buttons */
+    button, .btn {
+        width: 100% !important;
+        padding: 12px !important;
+    }
+    
+    .btn-small {
+        width: auto !important;
+        display: inline-block !important;
+    }
+    
+    /* Fix search box */
+    .search-box {
+        flex-direction: column !important;
+    }
+    
+    .search-box input, .search-box select {
+        width: 100% !important;
+        margin: 5px 0 !important;
+    }
+    
+    /* Fix notice board */
+    .notice-title {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+    
+    .notice-date {
+        margin-left: 0 !important;
+    }
+    
+    /* Ensure body doesn't overflow */
+    body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+    }
+    
+    /* Fix HTML overflow */
+    html {
+        overflow-x: hidden !important;
+        width: 100% !important;
+    }
+}
+
+/* For very small phones */
+@media screen and (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .subject-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .stat-card h3 {
+        font-size: 1.5rem !important;
+    }
+    
+    .main {
+        padding: 70px 10px 15px 10px !important;
+    }
+}
