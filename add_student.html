@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Manage Students - Faculty</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+    .bulk-upload-section {
+        background: linear-gradient(135deg, var(--info-soft), #e0f2fe);
+        border: 2px dashed var(--info);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .bulk-upload-section h3 {
+        color: var(--info-dark);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .file-upload-area {
+        border: 2px dashed var(--info);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        text-align: center;
+        background: var(--card-bg);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    .file-upload-area:hover {
+        background: var(--light);
+        border-color: var(--primary);
+    }
+    .file-upload-area input {
+        display: none;
+    }
+    .file-name {
+        margin-top: 10px;
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+    .template-link {
+        display: inline-block;
+        margin-top: 10px;
+        color: var(--info);
+        text-decoration: none;
+        font-size: 12px;
+    }
+    .template-link:hover {
+        text-decoration: underline;
+    }
+    .upload-btn {
+        background: var(--info);
+        margin-top: 15px;
+        width: auto;
+        padding: 10px 25px;
+    }
+    .upload-btn:hover {
+        background: var(--info-dark);
+    }
+    .progress-bar-bulk {
+        width: 100%;
+        height: 4px;
+        background: var(--gray-light);
+        border-radius: 2px;
+        margin-top: 15px;
+        display: none;
+        overflow: hidden;
+    }
+    .progress-bar-bulk.active {
+        display: block;
+    }
+    .progress-bar-bulk .progress {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, var(--info), var(--success));
+        transition: width 0.3s ease;
+        animation: shimmer 1s infinite;
+    }
+    @keyframes shimmer {
+        0% { opacity: 0.5; }
+        50% { opacity: 1; }
+        100% { opacity: 0.5; }
+    }
+</style>
+</head>
+<body>
+
+<button class="menu-toggle" onclick="toggleSidebar()">
+    <div class="hamburger-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</button>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h2>📋 Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/faculty_dashboard">📊 Dashboard</a>
+        <a href="/create_session">➕ Create Session</a>
+        <a href="/add_student" class="active">👥 Manage Students</a>
+        <a href="/students_report">📑 Reports</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance">📜 All Attendance</a>
+        <a href="/subject_details">📚 Subjects</a>
+        <a href="/about">ℹ️ About</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">🚪 Logout</a>
+    </div>
+</div>
+
+<div class="main">
+    <div class="header" style="background: linear-gradient(135deg, var(--info), var(--info-dark));">
+        👥 Student Management System (Faculty)
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }}">
+                    {{ message|safe }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="bulk-upload-section">
+        <h3>📁 Bulk Upload Students (Excel/CSV)</h3>
+        <form method="POST" action="/faculty_bulk_upload" enctype="multipart/form-data" id="bulkUploadForm">
+            <div class="file-upload-area" onclick="document.getElementById('fileInput').click()">
+                📂 Click to select Excel or CSV file
+                <input type="file" id="fileInput" name="file" accept=".xlsx,.xls,.csv" required onchange="updateFileName(this)">
+                <div id="fileName" class="file-name">No file selected</div>
+            </div>
+            <a href="#" class="template-link" onclick="downloadTemplate()">📥 Download Excel/CSV Template</a><br>
+            <div class="progress-bar-bulk" id="progressBarBulk">
+                <div class="progress" id="bulkProgress"></div>
+            </div>
+            <button type="submit" class="upload-btn" id="uploadBtn">🚀 Upload & Add Students</button>
+        </form>
+        <p style="margin-top: 10px; font-size: 11px; color: var(--text-muted);">
+            <strong>📋 Instructions:</strong> File must have columns: <strong>Roll No, Name, Branch</strong> (required) | Year, Semester, Email (optional)<br>
+            <strong>✅ Supported formats:</strong> .xlsx, .xls, .csv
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>➕ Add New Student</h2>
+        <form method="POST">
+            <div class="form-grid">
+                <input type="text" name="roll" placeholder="Roll Number (e.g., CS011)" required>
+                <input type="text" name="name" placeholder="Full Name" required>
+                <input type="text" name="branch" placeholder="Branch (e.g., CSE)" required>
+                <input type="email" name="email" placeholder="Email (Optional)">
+            </div>
+            <button type="submit" class="success">➕ Add Student</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>📋 Existing Students</h2>
+        <div class="table-container">
+            <table style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Roll No</th><th>Name</th><th>Branch</th><th>Email</th><th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if students %}
+                        {% for student in students %}
+                        <tr>
+                            <td><strong>{{ student.roll_no }}</strong></td>
+                            <td>{{ student.name }}</td>
+                            <td><span class="badge badge-primary">{{ student.branch }}</span></td>
+                            <td>{{ student.email or 'N/A' }}</td>
+                            <td>
+                                <a href="/delete_student/{{ student.roll_no }}" onclick="return confirm('Delete this student? This will also delete all attendance records.')">
+                                    <button class="danger btn-small">🗑️ Delete</button>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" style="text-align: center;">No students found. Add your first student above.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuBtn = document.querySelector('.menu-toggle');
+        if (sidebar) {
+            sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('active');
+            if (menuBtn) menuBtn.classList.toggle('open');
+        }
+    }
+    
+    function closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuBtn = document.querySelector('.menu-toggle');
+        if (sidebar) {
+            sidebar.classList.remove('open');
+            if (overlay) overlay.classList.remove('active');
+            if (menuBtn) menuBtn.classList.remove('open');
+        }
+    }
+    
+    function updateFileName(input) {
+        const fileName = input.files[0]?.name || 'No file selected';
+        document.getElementById('fileName').innerHTML = `📄 Selected: ${fileName}`;
+    }
+    
+    function downloadTemplate() {
+        // Create CSV template with correct column headers
+        const headers = ['Roll No', 'Name', 'Branch', 'Year', 'Semester', 'Email'];
+        const sampleData = [
+            ['CS011', 'John Doe', 'CSE', '3', '6', 'john@example.com'],
+            ['CS012', 'Jane Smith', 'CSE', '3', '6', 'jane@example.com'],
+            ['IT013', 'Mike Johnson', 'IT', '3', '6', 'mike@example.com'],
+            ['IT014', 'Sarah Williams', 'IT', '3', '6', 'sarah@example.com'],
+            ['EC015', 'David Brown', 'ECE', '3', '6', 'david@example.com']
+        ];
+        
+        let csvContent = headers.join(',') + '\n';
+        sampleData.forEach(row => {
+            csvContent += row.join(',') + '\n';
+        });
+        
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'student_template.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    
+    // Show progress bar on form submit
+    document.getElementById('bulkUploadForm').addEventListener('submit', function(e) {
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput.files.length > 0) {
+            document.getElementById('progressBarBulk').classList.add('active');
+            document.getElementById('bulkProgress').style.width = '50%';
+            document.getElementById('uploadBtn').disabled = true;
+            document.getElementById('uploadBtn').textContent = '⏳ Uploading...';
+        }
+    });
+    
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && window.innerWidth <= 768) closeSidebar(); });
+    window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+</script>
+</body>
+</html>

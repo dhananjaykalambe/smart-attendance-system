@@ -448,6 +448,153 @@ def add_student():
                           college_header=college_header,
                           settings=settings)
 
+# ====================================================================
+# FACULTY BULK UPLOAD - FIXED VERSION
+# ====================================================================
+
+@app.route('/faculty_bulk_upload', methods=['POST'])
+@login_required
+@faculty_required
+def faculty_bulk_upload():
+    """Bulk upload students from Excel or CSV file for faculty"""
+    
+    if 'file' not in request.files:
+        flash('No file selected', 'error')
+        return redirect(url_for('add_student'))
+    
+    file = request.files['file']
+    if file.filename == '':
+        flash('No file selected', 'error')
+        return redirect(url_for('add_student'))
+    
+    if not file.filename.endswith(('.xlsx', '.xls', '.csv')):
+        flash('Please upload Excel (.xlsx, .xls) or CSV file only', 'error')
+        return redirect(url_for('add_student'))
+    
+    try:
+        import pandas as pd
+        import io
+        
+        # Read file based on extension
+        if file.filename.endswith('.csv'):
+            df = pd.read_csv(file)
+        else:
+            df = pd.read_excel(file)
+        
+        # Normalize column names - handle common variations
+        df.columns = [str(col).strip().lower().replace(' ', '_') for col in df.columns]
+        
+        # Expected columns mapping (handle variations)
+        roll_no_col = None
+        name_col = None
+        branch_col = None
+        
+        for col in df.columns:
+            if 'roll' in col or 'roll_no' in col:
+                roll_no_col = col
+            if 'name' in col:
+                name_col = col
+            if 'branch' in col or 'dept' in col:
+                branch_col = col
+        
+        # Check required columns
+        if not roll_no_col:
+            flash('Missing required column: roll_no or roll number column', 'error')
+            return redirect(url_for('add_student'))
+        if not name_col:
+            flash('Missing required column: name column', 'error')
+            return redirect(url_for('add_student'))
+        if not branch_col:
+            flash('Missing required column: branch column', 'error')
+            return redirect(url_for('add_student'))
+        
+        success_count = 0
+        error_count = 0
+        errors = []
+        
+        for idx, row in df.iterrows():
+            try:
+                roll_no = str(row[roll_no_col]).strip().upper()
+                name = str(row[name_col]).strip()
+                branch = str(row[branch_col]).strip().upper()
+                
+                # Skip empty rows or invalid data
+                if not roll_no or not name or not branch or roll_no == 'NAN' or name == 'NAN':
+                    continue
+                
+                # Clean branch name
+                if 'cse' in branch.lower() or 'computer' in branch.lower():
+                    branch = 'CSE'
+                elif 'it' in branch.lower():
+                    branch = 'IT'
+                elif 'ece' in branch.lower() or 'electronics' in branch.lower():
+                    branch = 'ECE'
+                elif 'me' in branch.lower() or 'mech' in branch.lower():
+                    branch = 'ME'
+                elif 'ce' in branch.lower() or 'civil' in branch.lower():
+                    branch = 'CE'
+                
+                # Check if student already exists
+                existing = db.students.find_one({"roll_no": roll_no})
+                if existing:
+                    error_count += 1
+                    errors.append(f"Row {idx+2}: Roll number {roll_no} already exists")
+                    continue
+                
+                # Get optional values
+                email = ''
+                if 'email' in df.columns and pd.notna(row['email']):
+                    email = str(row['email']).strip()
+                
+                year = 3
+                if 'year' in df.columns and pd.notna(row['year']):
+                    try:
+                        year = int(row['year'])
+                    except:
+                        year = 3
+                
+                semester = 6
+                if 'semester' in df.columns and pd.notna(row['semester']):
+                    try:
+                        semester = int(row['semester'])
+                    except:
+                        semester = 6
+                
+                student_data = {
+                    "roll_no": roll_no,
+                    "name": name,
+                    "branch": branch,
+                    "year": year,
+                    "semester": semester,
+                    "email": email,
+                    "created_at": datetime.now(),
+                    "created_by": session['user_id']
+                }
+                db.students.insert_one(student_data)
+                success_count += 1
+                
+            except Exception as e:
+                error_count += 1
+                errors.append(f"Row {idx+2}: {str(e)}")
+        
+        log_activity('faculty_bulk_upload', session['user_id'], get_client_ip(), 
+                    f"Bulk uploaded {success_count} students, {error_count} errors")
+        
+        if success_count > 0:
+            flash(f"✅ Successfully added {success_count} students!", 'success')
+        if error_count > 0 and errors:
+            for err in errors[:5]:
+                flash(err, 'warning')
+        if success_count == 0 and error_count > 0:
+            flash(f"❌ No students added. {error_count} errors occurred. Check file format.", 'error')
+        
+    except Exception as e:
+        app.logger.error(f"Bulk upload error: {str(e)}")
+        flash(f"Error reading file: {str(e)}", 'error')
+    
+    return redirect(url_for('add_student'))
+
+
 @app.route('/delete_student/<roll_no>')
 @login_required
 @faculty_required
@@ -822,8 +969,7 @@ def admin_delete_faculty(faculty_id):
     return redirect(url_for('admin_manage_faculty'))
 
 @app.route('/admin/manage_students')
-@login_required
-@admin_required
+@login_required@admin_required
 def admin_manage_students():
     """Manage students"""
     students_list = list(db.students.find({}).sort("roll_no", 1))
@@ -1064,7 +1210,7 @@ def admin_delete_notice(notice_id):
     return redirect(url_for('admin_dashboard'))
 
 # ====================================================================
-# BULK UPLOAD STUDENTS
+# ADMIN BULK UPLOAD - FIXED VERSION
 # ====================================================================
 
 import pandas as pd
@@ -1096,14 +1242,30 @@ def admin_bulk_upload_students():
         else:
             df = pd.read_excel(file)
         
-        # Expected columns
-        expected_columns = ['roll_no', 'name', 'branch']
-        optional_columns = ['year', 'semester', 'email']
+        # Normalize column names - remove spaces, convert to lowercase
+        df.columns = [str(col).strip().lower().replace(' ', '_') for col in df.columns]
         
-        # Check required columns
-        missing_cols = [col for col in expected_columns if col not in df.columns]
-        if missing_cols:
-            flash(f"Missing required columns: {', '.join(missing_cols)}. Required: roll_no, name, branch", 'error')
+        # Expected columns mapping - handle variations
+        roll_no_col = None
+        name_col = None
+        branch_col = None
+        
+        for col in df.columns:
+            if 'roll' in col or 'roll_no' in col:
+                roll_no_col = col
+            if 'name' in col:
+                name_col = col
+            if 'branch' in col or 'dept' in col:
+                branch_col = col
+        
+        if not roll_no_col:
+            flash('Missing required column: roll_no or roll number column', 'error')
+            return redirect(url_for('admin_manage_students'))
+        if not name_col:
+            flash('Missing required column: name column', 'error')
+            return redirect(url_for('admin_manage_students'))
+        if not branch_col:
+            flash('Missing required column: branch column', 'error')
             return redirect(url_for('admin_manage_students'))
         
         success_count = 0
@@ -1112,13 +1274,25 @@ def admin_bulk_upload_students():
         
         for idx, row in df.iterrows():
             try:
-                roll_no = str(row['roll_no']).strip().upper()
-                name = str(row['name']).strip()
-                branch = str(row['branch']).strip().upper()
+                roll_no = str(row[roll_no_col]).strip().upper()
+                name = str(row[name_col]).strip()
+                branch = str(row[branch_col]).strip().upper()
                 
                 # Skip empty rows
-                if not roll_no or not name or not branch:
+                if not roll_no or not name or not branch or roll_no == 'NAN' or name == 'NAN':
                     continue
+                
+                # Clean branch names
+                if 'cse' in branch.lower() or 'computer' in branch.lower():
+                    branch = 'CSE'
+                elif 'it' in branch.lower():
+                    branch = 'IT'
+                elif 'ece' in branch.lower() or 'electronics' in branch.lower():
+                    branch = 'ECE'
+                elif 'me' in branch.lower() or 'mech' in branch.lower():
+                    branch = 'ME'
+                elif 'ce' in branch.lower() or 'civil' in branch.lower():
+                    branch = 'CE'
                 
                 # Check if student already exists
                 existing = db.students.find_one({"roll_no": roll_no})
@@ -1128,9 +1302,23 @@ def admin_bulk_upload_students():
                     continue
                 
                 # Get optional values
-                year = int(row['year']) if 'year' in df.columns and pd.notna(row['year']) else 3
-                semester = int(row['semester']) if 'semester' in df.columns and pd.notna(row['semester']) else 6
-                email = str(row['email']) if 'email' in df.columns and pd.notna(row['email']) else ''
+                email = ''
+                if 'email' in df.columns and pd.notna(row['email']):
+                    email = str(row['email']).strip()
+                
+                year = 3
+                if 'year' in df.columns and pd.notna(row['year']):
+                    try:
+                        year = int(row['year'])
+                    except:
+                        year = 3
+                
+                semester = 6
+                if 'semester' in df.columns and pd.notna(row['semester']):
+                    try:
+                        semester = int(row['semester'])
+                    except:
+                        semester = 6
                 
                 student_data = {
                     "roll_no": roll_no,
@@ -1149,16 +1337,19 @@ def admin_bulk_upload_students():
                 error_count += 1
                 errors.append(f"Row {idx+2}: {str(e)}")
         
-        log_activity('bulk_upload', session['user_id'], get_client_ip(), 
+        log_activity('admin_bulk_upload', session['user_id'], get_client_ip(), 
                     f"Bulk uploaded {success_count} students, {error_count} errors")
         
         if success_count > 0:
-            flash(f"✅ Successfully added {success_count} students. {error_count} failed.", 'success')
+            flash(f"✅ Successfully added {success_count} students!", 'success')
         if error_count > 0 and errors:
             for err in errors[:5]:
                 flash(err, 'warning')
+        if success_count == 0 and error_count > 0:
+            flash(f"❌ No students added. {error_count} errors occurred. Check file format.", 'error')
         
     except Exception as e:
+        app.logger.error(f"Bulk upload error: {str(e)}")
         flash(f"Error reading file: {str(e)}", 'error')
     
     return redirect(url_for('admin_manage_students'))
