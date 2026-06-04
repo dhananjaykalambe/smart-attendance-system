@@ -473,7 +473,6 @@ def faculty_bulk_upload():
     
     try:
         import pandas as pd
-        import io
         
         # Read file based on extension
         if file.filename.endswith('.csv'):
@@ -490,7 +489,7 @@ def faculty_bulk_upload():
         branch_col = None
         
         for col in df.columns:
-            if 'roll' in col or 'roll_no' in col:
+            if 'roll' in col:
                 roll_no_col = col
             if 'name' in col:
                 name_col = col
@@ -499,7 +498,7 @@ def faculty_bulk_upload():
         
         # Check required columns
         if not roll_no_col:
-            flash('Missing required column: roll_no or roll number column', 'error')
+            flash('Missing required column: roll number column', 'error')
             return redirect(url_for('add_student'))
         if not name_col:
             flash('Missing required column: name column', 'error')
@@ -549,14 +548,18 @@ def faculty_bulk_upload():
                 year = 3
                 if 'year' in df.columns and pd.notna(row['year']):
                     try:
-                        year = int(row['year'])
+                        year_val = str(row['year']).strip().lower()
+                        if 'rd' in year_val:
+                            year = int(year_val[0])
+                        else:
+                            year = int(float(year_val))
                     except:
                         year = 3
                 
                 semester = 6
                 if 'semester' in df.columns and pd.notna(row['semester']):
                     try:
-                        semester = int(row['semester'])
+                        semester = int(float(row['semester']))
                     except:
                         semester = 6
                 
@@ -969,7 +972,8 @@ def admin_delete_faculty(faculty_id):
     return redirect(url_for('admin_manage_faculty'))
 
 @app.route('/admin/manage_students')
-@login_required@admin_required
+@login_required
+@admin_required
 def admin_manage_students():
     """Manage students"""
     students_list = list(db.students.find({}).sort("roll_no", 1))
@@ -1214,7 +1218,6 @@ def admin_delete_notice(notice_id):
 # ====================================================================
 
 import pandas as pd
-import io
 
 @app.route('/admin/bulk_upload_students', methods=['POST'])
 @login_required
@@ -1251,7 +1254,7 @@ def admin_bulk_upload_students():
         branch_col = None
         
         for col in df.columns:
-            if 'roll' in col or 'roll_no' in col:
+            if 'roll' in col:
                 roll_no_col = col
             if 'name' in col:
                 name_col = col
@@ -1259,7 +1262,7 @@ def admin_bulk_upload_students():
                 branch_col = col
         
         if not roll_no_col:
-            flash('Missing required column: roll_no or roll number column', 'error')
+            flash('Missing required column: roll number column', 'error')
             return redirect(url_for('admin_manage_students'))
         if not name_col:
             flash('Missing required column: name column', 'error')
@@ -1309,14 +1312,18 @@ def admin_bulk_upload_students():
                 year = 3
                 if 'year' in df.columns and pd.notna(row['year']):
                     try:
-                        year = int(row['year'])
+                        year_val = str(row['year']).strip().lower()
+                        if 'rd' in year_val:
+                            year = int(year_val[0])
+                        else:
+                            year = int(float(year_val))
                     except:
                         year = 3
                 
                 semester = 6
                 if 'semester' in df.columns and pd.notna(row['semester']):
                     try:
-                        semester = int(row['semester'])
+                        semester = int(float(row['semester']))
                     except:
                         semester = 6
                 
