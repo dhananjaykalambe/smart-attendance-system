@@ -1,16 +1,18 @@
-# render.yaml
 services:
   - type: web
-    name: smart-attendance-system
+    name: digiserve
     runtime: python
+    repo: https://github.com/dhananjaykalambe/DigiServe
+    plan: free
+    region: singapore
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn wsgi:app
+    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app --timeout 120
     envVars:
       - key: MONGO_URI
-        sync: false
-      - key: DB_NAME
-        value: smart_attendance
+        value: mongodb+srv://digiserve_admin:digiserve2324@digiserve-cluster.mrlhjs4.mongodb.net/digiserve?retryWrites=true&w=majority&appName=digiserve-cluster
       - key: SECRET_KEY
         generateValue: true
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: 3.11.9
+      - key: FLASK_DEBUG
+        value: false
