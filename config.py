@@ -1,49 +1,82 @@
+# config.py
+# ====================================================================
+# SMART ATTENDANCE SYSTEM - PRODUCTION CONFIGURATION
+# ====================================================================
+
 import os
-from datetime import timedelta
+import secrets
 from dotenv import load_dotenv
 
 load_dotenv()
 
-class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'digiserve-secret-key-2026-mongo')
-    
-    # MongoDB Configuration
-    MONGO_URI = os.environ.get('MONGO_URI', 'mongodb://localhost:27017/')
-    MONGO_DB = os.environ.get('MONGO_DB', 'digiserve')
-    
-    # File Upload Configuration
-    UPLOAD_FOLDER = 'uploads/'
-    DOCUMENT_FOLDER = 'uploads/documents/'
-    MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50MB
-    
-    # Session Configuration
-    PERMANENT_SESSION_LIFETIME = timedelta(days=7)
-    
-    # Admin Configuration
-    ADMIN_PHONE = '9999999999'
-    ADMIN_NAME = 'Admin User'
-    ADMIN_EMAIL = 'admin@digiserve.com'
-    
-    # Contact Information
-    CONTACT_PHONE = '9421456959'
-    CONTACT_EMAIL = 'support@digiserve.com'
-    
-    # Company Info
-    COMPANY_NAME = 'DigiSoft'
-    COPYRIGHT_YEAR = '2026'
-    COPYRIGHT_HOLDER = 'DK'
+# ====================================================================
+# MONGODB CONNECTION
+# ====================================================================
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+DB_NAME = os.getenv("DB_NAME", "smart_attendance")
 
-class DevelopmentConfig(Config):
-    DEBUG = True
-    TESTING = False
+# ====================================================================
+# COLLECTIONS
+# ====================================================================
+COLLECTIONS = {
+    "students": "students",
+    "faculty": "faculty",
+    "admins": "admins",
+    "sessions": "sessions",
+    "attendance": "attendance",
+    "notices": "notices",
+    "settings": "settings",
+    "logs": "logs"
+}
 
-class ProductionConfig(Config):
-    DEBUG = False
-    TESTING = False
-    # In production, use environment variables for MongoDB URI
+# ====================================================================
+# DEFAULT SYSTEM SETTINGS
+# ====================================================================
+DEFAULT_SETTINGS = {
+    "attendance_threshold": 75,
+    "qr_expiry_seconds": 60,
+    "session_duration_minutes": 5,
+    "college_name": "Priyadarshini Bhagwati College of Engineering",
+    "college_location": "Nagpur",
+    "college_header": "Smart Attendance System",
+    "academic_year": "2024-25",
+    "enable_location_tracking": True,
+    "enable_ip_tracking": True,
+    "maintenance_mode": False,
+    "max_login_attempts": 5,
+    "session_timeout_minutes": 30
+}
 
-config = {
-    'development': DevelopmentConfig,
-    'production': ProductionConfig,
-    'default': DevelopmentConfig
+# ====================================================================
+# APP CONFIGURATION
+# ====================================================================
+APP_NAME = "Smart Attendance System"
+APP_VERSION = "3.0.0"
+SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_hex(32))
+
+# Session configuration
+SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False").lower() == "true"
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+
+# Rate limiting
+RATE_LIMIT = "100 per minute"
+
+# Color Theme - Modern Dark/Light Hybrid
+THEME = {
+    "primary": "#1a1a2e",
+    "primary-dark": "#0f0f1a",
+    "primary-light": "#16213e",
+    "accent": "#e94560",
+    "accent-success": "#0f3460",
+    "success": "#00b4d8",
+    "warning": "#f4a261",
+    "danger": "#e76f51",
+    "info": "#48cae4",
+    "dark": "#0a0a0a",
+    "light": "#f8f9fa",
+    "gray": "#6c757d",
+    "card-bg": "#1e1e2e",
+    "text-primary": "#e0e0e0",
+    "text-secondary": "#a0a0a0"
 }
