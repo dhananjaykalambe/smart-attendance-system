@@ -1,3 +1,4 @@
+<!-- login.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -121,33 +122,33 @@
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h2>📋 Smart Attendance</h2>
+        <h2>Smart Attendance</h2>
         <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
     </div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/" {% if request.path == '/' %}class="active"{% endif %}>🏠 Home</a>
-        <a href="/login" {% if request.path == '/login' %}class="active"{% endif %}>🔐 Login</a>
+        <a href="/" {% if request.path == '/' %}class="active"{% endif %}>Home</a>
+        <a href="/login" {% if request.path == '/login' %}class="active"{% endif %}>Login</a>
     </div>
     
     <div class="sidebar-divider"></div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">GENERAL</div>
-        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>📜 Attendance</a>
-        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>📚 Subjects</a>
-        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>ℹ️ About</a>
+        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>Attendance</a>
+        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>Subjects</a>
+        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>About</a>
     </div>
 </div>
 
 <div class="main">
     <div class="header">
-        🎓 Priyadarshini Bhagwati College of Engineering, Nagpur
+        Priyadarshini Bhagwati College of Engineering, Nagpur
     </div>
 
     <div class="card login-card">
-        <h2 style="text-align: center;">🔐 Login to System</h2>
+        <h2 style="text-align: center;">Login to System</h2>
         
         {% if error %}
         <div class="alert alert-danger">{{ error }}</div>
@@ -156,13 +157,13 @@
         <form method="POST">
             <div class="role-tabs">
                 <button type="button" class="role-tab student active" data-role="student" onclick="selectRole('student')">
-                    👨‍🎓 Student
+                    Student
                 </button>
                 <button type="button" class="role-tab faculty" data-role="faculty" onclick="selectRole('faculty')">
-                    👨‍🏫 Faculty
+                    Faculty
                 </button>
                 <button type="button" class="role-tab admin" data-role="admin" onclick="selectRole('admin')">
-                    👑 Admin
+                    Admin
                 </button>
             </div>
             
@@ -176,12 +177,12 @@
                 <input type="password" name="password" id="password" placeholder="Password" autocomplete="off">
             </div>
             
-            <button type="submit" class="login-btn">Login →</button>
+            <button type="submit" class="login-btn">Login</button>
         </form>
         
         <div class="demo-credentials">
-            <p><strong>📋 Demo Credentials</strong></p>
-            <p>👨‍🎓 Student: CS001 (No password) | 👨‍🏫 Faculty: FAC001 / faculty123 | 👑 Admin: ADMIN001 / admin123</p>
+            <p><strong>Demo Credentials</strong></p>
+            <p>Student: CS001 (No password) | Faculty: FAC001 / faculty123 | Admin: ADMIN001 / admin123</p>
         </div>
     </div>
 </div>

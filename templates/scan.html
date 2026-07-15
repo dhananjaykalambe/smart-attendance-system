@@ -1,3 +1,4 @@
+<!-- scan.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -20,39 +21,39 @@
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h2>📋 Smart Attendance</h2>
+        <h2>Smart Attendance</h2>
         <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
     </div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/student_dashboard">📊 Dashboard</a>
-        <a href="/scan" class="active">📷 Scan QR</a>
+        <a href="/student_dashboard">Dashboard</a>
+        <a href="/scan" class="active">Scan QR</a>
     </div>
     
     <div class="sidebar-divider"></div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">GENERAL</div>
-        <a href="/attendance">📜 My Attendance</a>
-        <a href="/subject_details">📚 Subjects</a>
-        <a href="/about">ℹ️ About</a>
+        <a href="/attendance">My Attendance</a>
+        <a href="/subject_details">Subjects</a>
+        <a href="/about">About</a>
     </div>
     
     <div class="sidebar-divider"></div>
     <div class="sidebar-section">
         <div class="sidebar-section-title">ACCOUNT</div>
-        <a href="/logout">🚪 Logout</a>
+        <a href="/logout">Logout</a>
     </div>
 </div>
 
 <div class="main">
     <div class="header" style="background: linear-gradient(135deg, var(--info), var(--info-dark));">
-        📷 QR Code Scanner
+        QR Code Scanner
     </div>
 
     <div class="card" style="text-align: center;">
-        <h3>👋 Welcome, {{ name }}</h3>
+        <h3>Welcome, {{ name }}</h3>
         <p style="color: var(--text-secondary); margin-bottom: 20px;">Position the QR code within the frame to mark attendance</p>
         
         <div id="reader" style="width: 100%; max-width: 400px; margin: 20px auto;"></div>
@@ -60,14 +61,14 @@
         <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
             <form method="POST" action="/mark" id="attendanceForm">
                 <input type="text" id="session_id" name="session_id" placeholder="Or enter Session ID manually" style="text-align: center;">
-                <button type="submit">✅ Submit Attendance</button>
+                <button type="submit">Submit Attendance</button>
             </form>
         </div>
         
         <div id="locationStatus" style="margin-top: 15px; padding: 10px; border-radius: var(--radius-md);"></div>
         
         <p style="margin-top: 15px; font-size: 12px; color: var(--text-muted);">
-            🔒 Your location and device information will be recorded for security
+            Your location and device information will be recorded for security
         </p>
     </div>
 </div>
@@ -75,20 +76,20 @@
 <script>
 if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
-        document.getElementById('locationStatus').innerHTML = '📍 Location detected ✓';
+        document.getElementById('locationStatus').innerHTML = 'Location detected';
         document.getElementById('locationStatus').style.background = 'var(--success-soft)';
         document.getElementById('locationStatus').style.color = 'var(--success-dark)';
     }, function(error) {
         let message = '';
         switch(error.code) {
             case error.PERMISSION_DENIED:
-                message = '⚠️ Location access denied. Please enable GPS for accurate marking.';
+                message = 'Location access denied. Please enable GPS for accurate marking.';
                 break;
             case error.POSITION_UNAVAILABLE:
-                message = '⚠️ Location information unavailable.';
+                message = 'Location information unavailable.';
                 break;
             case error.TIMEOUT:
-                message = '⚠️ Location request timed out.';
+                message = 'Location request timed out.';
                 break;
         }
         document.getElementById('locationStatus').innerHTML = message;
@@ -96,7 +97,7 @@ if (navigator.geolocation) {
         document.getElementById('locationStatus').style.color = 'var(--warning-dark)';
     });
 } else {
-    document.getElementById('locationStatus').innerHTML = '❌ Geolocation not supported by your browser';
+    document.getElementById('locationStatus').innerHTML = 'Geolocation not supported by your browser';
     document.getElementById('locationStatus').style.background = 'var(--danger-soft)';
     document.getElementById('locationStatus').style.color = 'var(--danger-dark)';
 }

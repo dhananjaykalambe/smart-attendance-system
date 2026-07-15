@@ -1,3 +1,4 @@
+<!-- faculty_dashboard.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -33,36 +34,36 @@
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h2>📋 Smart Attendance</h2>
+        <h2>Smart Attendance</h2>
         <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
     </div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/faculty_dashboard" {% if request.path == '/faculty_dashboard' %}class="active"{% endif %}>📊 Dashboard</a>
-        <a href="/create_session" {% if request.path == '/create_session' %}class="active"{% endif %}>➕ Create Session</a>
-        <a href="/add_student" {% if request.path == '/add_student' %}class="active"{% endif %}>👥 Manage Students</a>
-        <a href="/students_report" {% if request.path == '/students_report' %}class="active"{% endif %}>📑 Reports</a>
+        <a href="/faculty_dashboard" {% if request.path == '/faculty_dashboard' %}class="active"{% endif %}>Dashboard</a>
+        <a href="/create_session" {% if request.path == '/create_session' %}class="active"{% endif %}>Create Session</a>
+        <a href="/add_student" {% if request.path == '/add_student' %}class="active"{% endif %}>Manage Students</a>
+        <a href="/students_report" {% if request.path == '/students_report' %}class="active"{% endif %}>Reports</a>
     </div>
     
     <div class="sidebar-divider"></div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">GENERAL</div>
-        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>📜 All Attendance</a>
-        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>📚 Subjects</a>
-        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>ℹ️ About</a>
+        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>All Attendance</a>
+        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>Subjects</a>
+        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>About</a>
     </div>
     
     <div class="sidebar-divider"></div>
     <div class="sidebar-section">
         <div class="sidebar-section-title">ACCOUNT</div>
-        <a href="/logout">🚪 Logout</a>
+        <a href="/logout">Logout</a>
     </div>
 </div>
 
 <div class="main">
-    <div class="header">👨‍🏫 Welcome, {{ name }}! | Faculty Dashboard</div>
+    <div class="header">Welcome, {{ name }}! | Faculty Dashboard</div>
 
     <div class="quick-stats">
         <div class="quick-stat-card"><h3>{{ total_students }}</h3><p>Total Students</p></div>
@@ -71,22 +72,22 @@
     </div>
 
     <div class="card">
-        <h2>📄 Export Reports</h2>
+        <h2>Export Reports</h2>
         <div class="export-buttons-container">
-            <a href="/export_all_students_pdf" class="export-btn btn-blue">📑 All Students Report</a>
-            <a href="/export_overall_pdf" class="export-btn btn-red">📊 Overall Report</a>
+            <a href="/export_all_students_pdf" class="export-btn btn-blue">All Students Report</a>
+            <a href="/export_overall_pdf" class="export-btn btn-red">Overall Report</a>
             <select id="subjectSelectExport" class="subject-select">
                 <option value="">-- Select Subject --</option>
-                <option value="ML">🤖 Machine Learning (ML)</option><option value="DS">🗃️ Data Structures (DS)</option>
-                <option value="CD">⚙️ Compiler Design (CD)</option><option value="IPR">📜 Intellectual Property (IPR)</option>
-                <option value="EOII">📈 Economics in IT (EOII)</option><option value="OE-1">🌍 Environmental Engg (OE-1)</option>
+                <option value="ML">Machine Learning (ML)</option><option value="DS">Data Structures (DS)</option>
+                <option value="CD">Compiler Design (CD)</option><option value="IPR">Intellectual Property (IPR)</option>
+                <option value="EOII">Economics in IT (EOII)</option><option value="OE-1">Environmental Engg (OE-1)</option>
             </select>
-            <button onclick="exportSubjectReport()" class="export-btn btn-orange">📚 Export Subject Report</button>
+            <button onclick="exportSubjectReport()" class="export-btn btn-orange">Export Subject Report</button>
         </div>
     </div>
 
     <div class="card">
-        <h2>📊 Subject-wise Attendance</h2>
+        <h2>Subject-wise Attendance</h2>
         <canvas id="subjectChart" style="max-height: 350px; width: 100%;"></canvas>
         <div class="table-container">
             <table style="width:100%">
@@ -99,7 +100,7 @@
                         <td>{{ stat.attended }}</td>
                         <td style="{% if stat.percentage < 75 %}color:var(--danger);font-weight:bold{% elif stat.percentage < 85 %}color:var(--warning);font-weight:bold{% else %}color:var(--success);font-weight:bold{% endif %}">{{ stat.percentage }}%</td>
                         <td style="width:150px"><div class="progress-bar-container"><div class="progress-bar {% if stat.percentage < 75 %}danger{% elif stat.percentage < 85 %}warning{% endif %}" style="width: {{ stat.percentage }}%"></div></div></td>
-                        <td><a href="/export_subject_pdf/{{ stat.subject }}"><button class="btn-small" style="background:linear-gradient(135deg, var(--warning), var(--warning-dark));">📄 PDF</button></a></td>
+                        <td><a href="/export_subject_pdf/{{ stat.subject }}"><button class="btn-small" style="background:linear-gradient(135deg, var(--warning), var(--warning-dark));">PDF</button></a></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -108,7 +109,7 @@
     </div>
 
     <div class="card">
-        <h2>🕐 Recent Sessions</h2>
+        <h2>Recent Sessions</h2>
         <div class="table-container">
             <table style="width:100%">
                 <thead><tr><th>Session ID</th><th>Subject</th><th>Start Time</th><th>End Time</th><th>Status</th><th>Export</th></tr></thead>
@@ -119,8 +120,8 @@
                         <td>{{ session.subject }}</td>
                         <td>{{ session.start_time.strftime('%Y-%m-%d %H:%M') if session.start_time else 'N/A' }}</td>
                         <td>{{ session.end_time.strftime('%H:%M') if session.end_time else 'N/A' }}</td>
-                        <td>{% if session.end_time and session.end_time > now %}<span class="badge badge-success">🟢 Active</span>{% else %}<span class="badge badge-danger">🔴 Expired</span>{% endif %}</td>
-                        <td><a href="/export_report/{{ session.session_id }}"><button class="btn-small" style="background:linear-gradient(135deg, var(--success), var(--success-dark));">📄 PDF</button></a></td>
+                        <td>{% if session.end_time and session.end_time > now %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-danger">Expired</span>{% endif %}</td>
+                        <td><a href="/export_report/{{ session.session_id }}"><button class="btn-small" style="background:linear-gradient(135deg, var(--success), var(--success-dark));">PDF</button></a></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -135,7 +136,7 @@
         data: { labels: {{ subject_stats|map(attribute='subject')|list|tojson }}, datasets: [{ label: 'Attendance Percentage (%)', data: {{ subject_stats|map(attribute='percentage')|list|tojson }}, backgroundColor: ['#2563eb', '#10b981', '#06b6d4', '#f59e0b', '#ef4444', '#8b5cf6'], borderRadius: 8 }] },
         options: { responsive: true, scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: 'Percentage (%)' } } } }
     });
-    function exportSubjectReport() { const subject = document.getElementById('subjectSelectExport').value; if (subject) { window.location.href = '/export_subject_pdf/' + subject; } else { alert('⚠️ Please select a subject first'); } }
+    function exportSubjectReport() { const subject = document.getElementById('subjectSelectExport').value; if (subject) { window.location.href = '/export_subject_pdf/' + subject; } else { alert('Please select a subject first'); } }
 </script>
 
 <script>

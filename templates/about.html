@@ -1,3 +1,4 @@
+<!-- about.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -162,39 +163,39 @@
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h2>📋 Smart Attendance</h2>
+        <h2>Smart Attendance</h2>
         <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
     </div>
     
     {% if session.role == 'faculty' %}
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/faculty_dashboard">📊 Dashboard</a>
-        <a href="/create_session">➕ Create Session</a>
-        <a href="/add_student">👥 Manage Students</a>
-        <a href="/students_report">📑 Reports</a>
+        <a href="/faculty_dashboard">Dashboard</a>
+        <a href="/create_session">Create Session</a>
+        <a href="/add_student">Manage Students</a>
+        <a href="/students_report">Reports</a>
     </div>
     {% elif session.role == 'admin' %}
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/admin_dashboard">👑 Admin Dashboard</a>
-        <a href="/admin/manage_faculty">👥 Manage Faculty</a>
-        <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
-        <a href="/admin/manage_sessions">📊 Manage Sessions</a>
-        <a href="/admin/system_settings">⚙️ System Settings</a>
-        <a href="/admin/change_password">🔐 Change Password</a>
+        <a href="/admin_dashboard">Admin Dashboard</a>
+        <a href="/admin/manage_faculty">Manage Faculty</a>
+        <a href="/admin/manage_students">Manage Students</a>
+        <a href="/admin/manage_sessions">Manage Sessions</a>
+        <a href="/admin/system_settings">System Settings</a>
+        <a href="/admin/change_password">Change Password</a>
     </div>
     {% elif session.role == 'student' %}
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/student_dashboard">📊 Dashboard</a>
-        <a href="/scan">📷 Scan QR</a>
+        <a href="/student_dashboard">Dashboard</a>
+        <a href="/scan">Scan QR</a>
     </div>
     {% else %}
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/">🏠 Home</a>
-        <a href="/login">🔐 Login</a>
+        <a href="/">Home</a>
+        <a href="/login">Login</a>
     </div>
     {% endif %}
     
@@ -202,65 +203,65 @@
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">GENERAL</div>
-        <a href="/attendance">📜 Attendance</a>
-        <a href="/subject_details">📚 Subjects</a>
-        <a href="/about" class="active">ℹ️ About</a>
+        <a href="/attendance">Attendance</a>
+        <a href="/subject_details">Subjects</a>
+        <a href="/about" class="active">About</a>
     </div>
     
     {% if session.user_id %}
     <div class="sidebar-divider"></div>
     <div class="sidebar-section">
         <div class="sidebar-section-title">ACCOUNT</div>
-        <a href="/logout">🚪 Logout</a>
+        <a href="/logout">Logout</a>
     </div>
     {% endif %}
 </div>
 
 <div class="main">
     <div class="header">
-        {{ college_header if college_header else '🎓 Smart Attendance System v3.0' }}
+        {{ college_header if college_header else 'Smart Attendance System v3.0' }}
     </div>
     
     <div class="about-container">
         <div class="hero-section">
-            <div class="hero-icon" style="font-size: 60px;">🎓</div>
+            <div class="hero-icon" style="font-size: 60px;">[Academy]</div>
             <h1>Smart Attendance System</h1>
             <p>Revolutionizing attendance management with QR technology, real-time analytics, and smart reporting</p>
         </div>
 
         <div class="stats-banner">
-            <div class="stat-item"><div class="stat-number">⚡</div><p>Fast Marking</p></div>
-            <div class="stat-item"><div class="stat-number">🔐</div><p>Secure System</p></div>
-            <div class="stat-item"><div class="stat-number">📱</div><p>Mobile Ready</p></div>
-            <div class="stat-item"><div class="stat-number">📊</div><p>Real-time Analytics</p></div>
+            <div class="stat-item"><div class="stat-number">[Fast]</div><p>Fast Marking</p></div>
+            <div class="stat-item"><div class="stat-number">[Secure]</div><p>Secure System</p></div>
+            <div class="stat-item"><div class="stat-number">[Mobile]</div><p>Mobile Ready</p></div>
+            <div class="stat-item"><div class="stat-number">[Analytics]</div><p>Real-time Analytics</p></div>
         </div>
 
         <div class="card">
-            <h2>🛠️ Technologies Used</h2>
+            <h2>Technologies Used</h2>
             <div class="tech-grid">
-                <div class="tech-card"><div class="tech-icon">🐍</div><div class="tech-name">Flask</div><div>Python Framework</div></div>
-                <div class="tech-card"><div class="tech-icon">🍃</div><div class="tech-name">MongoDB Atlas</div><div>Cloud Database</div></div>
-                <div class="tech-card"><div class="tech-icon">🎨</div><div class="tech-name">HTML5/CSS3</div><div>Frontend UI</div></div>
-                <div class="tech-card"><div class="tech-icon">📊</div><div class="tech-name">Chart.js</div><div>Analytics</div></div>
-                <div class="tech-card"><div class="tech-icon">📷</div><div class="tech-name">QR Code</div><div>Scanning & Generation</div></div>
-                <div class="tech-card"><div class="tech-icon">📄</div><div class="tech-name">ReportLab</div><div>PDF Export</div></div>
+                <div class="tech-card"><div class="tech-icon">[Python]</div><div class="tech-name">Flask</div><div>Python Framework</div></div>
+                <div class="tech-card"><div class="tech-icon">[MongoDB]</div><div class="tech-name">MongoDB Atlas</div><div>Cloud Database</div></div>
+                <div class="tech-card"><div class="tech-icon">[CSS]</div><div class="tech-name">HTML5/CSS3</div><div>Frontend UI</div></div>
+                <div class="tech-card"><div class="tech-icon">[Chart]</div><div class="tech-name">Chart.js</div><div>Analytics</div></div>
+                <div class="tech-card"><div class="tech-icon">[QR]</div><div class="tech-name">QR Code</div><div>Scanning & Generation</div></div>
+                <div class="tech-card"><div class="tech-icon">[PDF]</div><div class="tech-name">ReportLab</div><div>PDF Export</div></div>
             </div>
         </div>
 
         <div class="card">
-            <h2>✨ Key Features</h2>
+            <h2>Key Features</h2>
             <div class="features-grid">
-                <div class="feature-card"><div class="feature-icon">👥</div><div class="feature-title">3 Role-Based Login</div><p>Student, Faculty, and Admin portals with dedicated dashboards</p></div>
-                <div class="feature-card"><div class="feature-icon">🔐</div><div class="feature-title">Secure QR Attendance</div><p>Hash-based QR generation with time expiry and tamper detection</p></div>
-                <div class="feature-card"><div class="feature-icon">📊</div><div class="feature-title">Real-time Analytics</div><p>Dynamic dashboards with interactive charts and statistics</p></div>
-                <div class="feature-card"><div class="feature-icon">🎯</div><div class="feature-title">Low Attendance Alerts</div><p>Automatic notifications when attendance drops below threshold</p></div>
-                <div class="feature-card"><div class="feature-icon">📍</div><div class="feature-title">IP Tracking</div><p>Location-based attendance validation with IP logging</p></div>
-                <div class="feature-card"><div class="feature-icon">📄</div><div class="feature-title">PDF Reports</div><p>Export detailed attendance reports with college branding</p></div>
+                <div class="feature-card"><div class="feature-icon">[Login]</div><div class="feature-title">3 Role-Based Login</div><p>Student, Faculty, and Admin portals with dedicated dashboards</p></div>
+                <div class="feature-card"><div class="feature-icon">[Secure]</div><div class="feature-title">Secure QR Attendance</div><p>Hash-based QR generation with time expiry and tamper detection</p></div>
+                <div class="feature-card"><div class="feature-icon">[Analytics]</div><div class="feature-title">Real-time Analytics</div><p>Dynamic dashboards with interactive charts and statistics</p></div>
+                <div class="feature-card"><div class="feature-icon">[Alerts]</div><div class="feature-title">Low Attendance Alerts</div><p>Automatic notifications when attendance drops below threshold</p></div>
+                <div class="feature-card"><div class="feature-icon">[Tracking]</div><div class="feature-title">IP Tracking</div><p>Location-based attendance validation with IP logging</p></div>
+                <div class="feature-card"><div class="feature-icon">[Reports]</div><div class="feature-title">PDF Reports</div><p>Export detailed attendance reports with college branding</p></div>
             </div>
         </div>
 
         <div class="developer-section">
-            <div class="developer-name">👨‍💻 Dhananjay & Team</div>
+            <div class="developer-name">Dhananjay & Team</div>
             <div class="college-name">Priyadarshini Bhagwati College of Engineering, Nagpur</div>
             <div class="academic-info">Academic Year: 2024-25 | Semester: VI</div>
             <div class="academic-info" style="margin-top: 15px; font-size: 12px;">Version 3.0 | Smart Attendance System</div>

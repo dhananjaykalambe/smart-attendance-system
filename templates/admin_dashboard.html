@@ -1,3 +1,4 @@
+<!-- admin_dashboard.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -19,38 +20,38 @@
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h2>📋 Smart Attendance</h2>
+        <h2>Smart Attendance</h2>
         <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
     </div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/admin_dashboard" {% if request.path == '/admin_dashboard' %}class="active"{% endif %}>👑 Admin Dashboard</a>
-        <a href="/admin/manage_faculty" {% if request.path == '/admin/manage_faculty' %}class="active"{% endif %}>👥 Manage Faculty</a>
-        <a href="/admin/manage_students" {% if request.path == '/admin/manage_students' %}class="active"{% endif %}>👨‍🎓 Manage Students</a>
-        <a href="/admin/manage_sessions" {% if request.path == '/admin/manage_sessions' %}class="active"{% endif %}>📊 Manage Sessions</a>
-        <a href="/admin/system_settings" {% if request.path == '/admin/system_settings' %}class="active"{% endif %}>⚙️ System Settings</a>
-        <a href="/admin/change_password" {% if request.path == '/admin/change_password' %}class="active"{% endif %}>🔐 Change Password</a>
+        <a href="/admin_dashboard" {% if request.path == '/admin_dashboard' %}class="active"{% endif %}>Admin Dashboard</a>
+        <a href="/admin/manage_faculty" {% if request.path == '/admin/manage_faculty' %}class="active"{% endif %}>Manage Faculty</a>
+        <a href="/admin/manage_students" {% if request.path == '/admin/manage_students' %}class="active"{% endif %}>Manage Students</a>
+        <a href="/admin/manage_sessions" {% if request.path == '/admin/manage_sessions' %}class="active"{% endif %}>Manage Sessions</a>
+        <a href="/admin/system_settings" {% if request.path == '/admin/system_settings' %}class="active"{% endif %}>System Settings</a>
+        <a href="/admin/change_password" {% if request.path == '/admin/change_password' %}class="active"{% endif %}>Change Password</a>
     </div>
     
     <div class="sidebar-divider"></div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">GENERAL</div>
-        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>📜 All Attendance</a>
-        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>📚 Subjects</a>
-        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>ℹ️ About</a>
+        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>All Attendance</a>
+        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>Subjects</a>
+        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>About</a>
     </div>
     
     <div class="sidebar-divider"></div>
     <div class="sidebar-section">
         <div class="sidebar-section-title">ACCOUNT</div>
-        <a href="/logout">🚪 Logout</a>
+        <a href="/logout">Logout</a>
     </div>
 </div>
 
 <div class="main">
-    <div class="header" style="background:linear-gradient(135deg, var(--danger), var(--danger-dark));">👑 Welcome, {{ name }}! | Admin Dashboard</div>
+    <div class="header" style="background:linear-gradient(135deg, var(--danger), var(--danger-dark));">Welcome, {{ name }}! | Admin Dashboard</div>
 
     <div class="stats-grid">
         <div class="stat-card primary"><h3>{{ stats.total_students }}</h3><p>Total Students</p></div>
@@ -60,12 +61,12 @@
     </div>
 
     <div class="card">
-        <h2>📢 Notice Board</h2>
+        <h2>Notice Board</h2>
         <form method="POST" action="/admin/add_notice" style="margin-bottom: 20px;">
             <div class="form-grid">
                 <input type="text" name="title" placeholder="Notice Title" required>
                 <textarea name="content" placeholder="Notice Content" rows="2" required></textarea>
-                <button type="submit" class="success" style="width: auto;">➕ Add Notice</button>
+                <button type="submit" class="success" style="width: auto;">Add Notice</button>
             </div>
         </form>
         <div class="table-container">
@@ -78,7 +79,7 @@
                         <td>{{ notice.content[:50] }}{% if notice.content|length > 50 %}...{% endif %}</td>
                         <td>{{ notice.created_at.strftime('%d %b %Y') if notice.created_at else 'N/A' }}</td>
                         <td>{{ notice.author }}</td>
-                        <td><a href="/admin/delete_notice/{{ notice._id }}" onclick="return confirm('Delete this notice?')"><button class="danger btn-small">🗑️ Delete</button></a></td>
+                        <td><a href="/admin/delete_notice/{{ notice._id }}" onclick="return confirm('Delete this notice?')"><button class="danger btn-small">Delete</button></a></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -87,7 +88,7 @@
     </div>
 
     <div class="card">
-        <h2>🕐 Recent Sessions</h2>
+        <h2>Recent Sessions</h2>
         <div class="table-container">
             <table style="width:100%">
                 <thead><tr><th>Session ID</th><th>Subject</th><th>Start Time</th><th>End Time</th><th>Status</th></tr></thead>
@@ -98,7 +99,7 @@
                         <td>{{ session.subject }}</td>
                         <td>{{ session.start_time.strftime('%Y-%m-%d %H:%M') if session.start_time else 'N/A' }}</td>
                         <td>{{ session.end_time.strftime('%H:%M') if session.end_time else 'N/A' }}</td>
-                        <td>{% if session.end_time and session.end_time > now %}<span class="badge badge-success">🟢 Active</span>{% else %}<span class="badge badge-danger">🔴 Expired</span>{% endif %}</td>
+                        <td>{% if session.end_time and session.end_time > now %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-danger">Expired</span>{% endif %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

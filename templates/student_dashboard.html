@@ -1,3 +1,4 @@
+<!-- student_dashboard.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -20,40 +21,40 @@
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h2>📋 Smart Attendance</h2>
+        <h2>Smart Attendance</h2>
         <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
     </div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/student_dashboard" {% if request.path == '/student_dashboard' %}class="active"{% endif %}>📊 Dashboard</a>
-        <a href="/scan" {% if request.path == '/scan' %}class="active"{% endif %}>📷 Scan QR</a>
+        <a href="/student_dashboard" {% if request.path == '/student_dashboard' %}class="active"{% endif %}>Dashboard</a>
+        <a href="/scan" {% if request.path == '/scan' %}class="active"{% endif %}>Scan QR</a>
     </div>
     
     <div class="sidebar-divider"></div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">GENERAL</div>
-        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>📜 My Attendance</a>
-        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>📚 Subjects</a>
-        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>ℹ️ About</a>
+        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>My Attendance</a>
+        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>Subjects</a>
+        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>About</a>
     </div>
     
     <div class="sidebar-divider"></div>
     <div class="sidebar-section">
         <div class="sidebar-section-title">ACCOUNT</div>
-        <a href="/logout">🚪 Logout</a>
+        <a href="/logout">Logout</a>
     </div>
 </div>
 
 <div class="main">
     <div class="header">
-        👋 Welcome, {{ name }}! | Student Dashboard
+        Welcome, {{ name }}! | Student Dashboard
     </div>
 
     {% if alerts %}
     <div class="alert alert-danger">
-        <strong>⚠️ LOW ATTENDANCE ALERT!</strong><br>
+        <strong>LOW ATTENDANCE ALERT!</strong><br>
         {% for alert in alerts %}
         • {{ alert.subject }}: {{ alert.percentage }}% (Need {{ alert.shortage }}% more to reach {{ alert.required }}%)<br>
         {% endfor %}
@@ -79,7 +80,7 @@
     </div>
 
     <div class="card">
-        <h2>📊 Subject-wise Performance</h2>
+        <h2>Subject-wise Performance</h2>
         <canvas id="subjectChart" style="max-height: 350px;"></canvas>
         
         <div class="table-container">
@@ -93,26 +94,26 @@
                     {% for subject, data in stats.subject_stats.items() %}
                     <tr>
                         <td><strong>{{ subject }}</strong></td>
-                        <td>{{ data.attended }}</span></td>
-                        <td>{{ data.total }}</span></td>
+                        <td>{{ data.attended }}</td>
+                        <td>{{ data.total }}</td>
                         <td style="{% if data.percentage < 75 %}color:var(--danger);font-weight:bold{% elif data.percentage < 85 %}color:var(--warning);font-weight:bold{% else %}color:var(--success);font-weight:bold{% endif %}">
                             {{ data.percentage }}%
-                        </span></span></span></td>
+                        </td>
                         <td style="width:150px">
                             <div class="progress-bar-container">
                                 <div class="progress-bar {% if data.percentage < 75 %}danger{% elif data.percentage < 85 %}warning{% endif %}" 
                                      style="width: {{ data.percentage }}%"></div>
                             </div>
-                        </span></span></span></td>
+                        </td>
                         <td>
                             {% if data.percentage >= 85 %}
-                                <span class="badge badge-success">✅ Excellent</span>
+                                <span class="badge badge-success">Excellent</span>
                             {% elif data.percentage >= 75 %}
-                                <span class="badge badge-warning">📊 Average</span>
+                                <span class="badge badge-warning">Average</span>
                             {% else %}
-                                <span class="badge badge-danger">⚠️ Low</span>
+                                <span class="badge badge-danger">Low</span>
                             {% endif %}
-                        </span></span></span></td>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -122,17 +123,17 @@
 
     {% if today_sessions %}
     <div class="card">
-        <h2>🕐 Today's Active Sessions</h2>
+        <h2>Today's Active Sessions</h2>
         <div class="table-container">
             <table style="width:100%">
                 <thead><tr><th>Session ID</th><th>Subject</th><th>End Time</th><th>Status</th></tr></thead>
                 <tbody>
                     {% for session in today_sessions %}
                     <tr>
-                        <td><code>{{ session.session_id }}</code></span></span></td>
-                        <td>{{ session.subject }}</span></span></span></span></td>
-                        <td>{{ session.end_time.strftime('%H:%M:%S') }}</span></span></span></span></td>
-                        <td><span class="badge badge-success">🟢 Active</span></span></span></span></span></td>
+                        <td><code>{{ session.session_id }}</code></td>
+                        <td>{{ session.subject }}</td>
+                        <td>{{ session.end_time.strftime('%H:%M:%S') }}</td>
+                        <td><span class="badge badge-success">Active</span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -142,20 +143,20 @@
     {% endif %}
 
     <div class="card">
-        <h2>📋 Recent Attendance Records</h2>
+        <h2>Recent Attendance Records</h2>
         <div class="table-container">
             <table style="width:100%">
                 <thead><tr><th>Date</th><th>Subject</th><th>Session ID</th><th>Status</th></tr></thead>
                 <tbody>
                     {% for record in recent_attendance %}
                     <tr>
-                        <td>{{ record.time.strftime('%d %b %Y, %H:%M') }}</span></span></span></span></td>
-                        <td>{{ record.subject }}</span></span></span></span></td>
-                        <td><code>{{ record.session_id }}</code></span></span></span></span></td>
-                        <td><span class="badge badge-success">✓ Present</span></span></span></span></span></span></span></td>
+                        <td>{{ record.time.strftime('%d %b %Y, %H:%M') }}</td>
+                        <td>{{ record.subject }}</td>
+                        <td><code>{{ record.session_id }}</code></td>
+                        <td><span class="badge badge-success">Present</span></td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="4" style="text-align: center;">No attendance records found.</span></span></span></span></td>
+                    <tr><td colspan="4" style="text-align: center;">No attendance records found.</td>
                     {% endfor %}
                 </tbody>
             </table>

@@ -1,3 +1,4 @@
+<!-- base.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -22,39 +23,39 @@
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h2>📋 Smart Attendance</h2>
+        <h2>Smart Attendance</h2>
         <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
     </div>
     
     {% if session.role == 'faculty' %}
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/faculty_dashboard" {% if request.path == '/faculty_dashboard' %}class="active"{% endif %}>📊 Dashboard</a>
-        <a href="/create_session" {% if request.path == '/create_session' %}class="active"{% endif %}>➕ Create Session</a>
-        <a href="/add_student" {% if request.path == '/add_student' %}class="active"{% endif %}>👥 Manage Students</a>
-        <a href="/students_report" {% if request.path == '/students_report' %}class="active"{% endif %}>📑 Reports</a>
+        <a href="/faculty_dashboard" {% if request.path == '/faculty_dashboard' %}class="active"{% endif %}>Dashboard</a>
+        <a href="/create_session" {% if request.path == '/create_session' %}class="active"{% endif %}>Create Session</a>
+        <a href="/add_student" {% if request.path == '/add_student' %}class="active"{% endif %}>Manage Students</a>
+        <a href="/students_report" {% if request.path == '/students_report' %}class="active"{% endif %}>Reports</a>
     </div>
     {% elif session.role == 'admin' %}
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/admin_dashboard" {% if request.path == '/admin_dashboard' %}class="active"{% endif %}>👑 Admin Dashboard</a>
-        <a href="/admin/manage_faculty" {% if request.path == '/admin/manage_faculty' %}class="active"{% endif %}>👥 Manage Faculty</a>
-        <a href="/admin/manage_students" {% if request.path == '/admin/manage_students' %}class="active"{% endif %}>👨‍🎓 Manage Students</a>
-        <a href="/admin/manage_sessions" {% if request.path == '/admin/manage_sessions' %}class="active"{% endif %}>📊 Manage Sessions</a>
-        <a href="/admin/system_settings" {% if request.path == '/admin/system_settings' %}class="active"{% endif %}>⚙️ System Settings</a>
-        <a href="/admin/change_password" {% if request.path == '/admin/change_password' %}class="active"{% endif %}>🔐 Change Password</a>
+        <a href="/admin_dashboard" {% if request.path == '/admin_dashboard' %}class="active"{% endif %}>Admin Dashboard</a>
+        <a href="/admin/manage_faculty" {% if request.path == '/admin/manage_faculty' %}class="active"{% endif %}>Manage Faculty</a>
+        <a href="/admin/manage_students" {% if request.path == '/admin/manage_students' %}class="active"{% endif %}>Manage Students</a>
+        <a href="/admin/manage_sessions" {% if request.path == '/admin/manage_sessions' %}class="active"{% endif %}>Manage Sessions</a>
+        <a href="/admin/system_settings" {% if request.path == '/admin/system_settings' %}class="active"{% endif %}>System Settings</a>
+        <a href="/admin/change_password" {% if request.path == '/admin/change_password' %}class="active"{% endif %}>Change Password</a>
     </div>
     {% elif session.role == 'student' %}
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/student_dashboard" {% if request.path == '/student_dashboard' %}class="active"{% endif %}>📊 Dashboard</a>
-        <a href="/scan" {% if request.path == '/scan' %}class="active"{% endif %}>📷 Scan QR</a>
+        <a href="/student_dashboard" {% if request.path == '/student_dashboard' %}class="active"{% endif %}>Dashboard</a>
+        <a href="/scan" {% if request.path == '/scan' %}class="active"{% endif %}>Scan QR</a>
     </div>
     {% else %}
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/" {% if request.path == '/' %}class="active"{% endif %}>🏠 Home</a>
-        <a href="/login" {% if request.path == '/login' %}class="active"{% endif %}>🔐 Login</a>
+        <a href="/" {% if request.path == '/' %}class="active"{% endif %}>Home</a>
+        <a href="/login" {% if request.path == '/login' %}class="active"{% endif %}>Login</a>
     </div>
     {% endif %}
     
@@ -62,23 +63,23 @@
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">GENERAL</div>
-        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>📜 Attendance</a>
-        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>📚 Subjects</a>
-        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>ℹ️ About</a>
+        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>Attendance</a>
+        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>Subjects</a>
+        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>About</a>
     </div>
     
     {% if session.user_id %}
     <div class="sidebar-divider"></div>
     <div class="sidebar-section">
         <div class="sidebar-section-title">ACCOUNT</div>
-        <a href="/logout">🚪 Logout</a>
+        <a href="/logout">Logout</a>
     </div>
     {% endif %}
 </div>
 
 <div class="main">
     <div class="header">
-        {{ college_header if college_header else '🎓 Smart Attendance System v3.0' }}
+        {{ college_header if college_header else 'Smart Attendance System v3.0' }}
     </div>
     
     {% with messages = get_flashed_messages(with_categories=true) %}

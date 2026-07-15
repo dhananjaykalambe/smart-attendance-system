@@ -1,3 +1,4 @@
+<!-- create_session.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -74,71 +75,71 @@
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h2>📋 Smart Attendance</h2>
+        <h2>Smart Attendance</h2>
         <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
     </div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/faculty_dashboard" {% if request.path == '/faculty_dashboard' %}class="active"{% endif %}>📊 Dashboard</a>
-        <a href="/create_session" {% if request.path == '/create_session' %}class="active"{% endif %}>➕ Create Session</a>
-        <a href="/add_student" {% if request.path == '/add_student' %}class="active"{% endif %}>👥 Manage Students</a>
-        <a href="/students_report" {% if request.path == '/students_report' %}class="active"{% endif %}>📑 Reports</a>
+        <a href="/faculty_dashboard" {% if request.path == '/faculty_dashboard' %}class="active"{% endif %}>Dashboard</a>
+        <a href="/create_session" {% if request.path == '/create_session' %}class="active"{% endif %}>Create Session</a>
+        <a href="/add_student" {% if request.path == '/add_student' %}class="active"{% endif %}>Manage Students</a>
+        <a href="/students_report" {% if request.path == '/students_report' %}class="active"{% endif %}>Reports</a>
     </div>
     
     <div class="sidebar-divider"></div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">GENERAL</div>
-        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>📜 All Attendance</a>
-        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>📚 Subjects</a>
-        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>ℹ️ About</a>
+        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>All Attendance</a>
+        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>Subjects</a>
+        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>About</a>
     </div>
     
     <div class="sidebar-divider"></div>
     <div class="sidebar-section">
         <div class="sidebar-section-title">ACCOUNT</div>
-        <a href="/logout">🚪 Logout</a>
+        <a href="/logout">Logout</a>
     </div>
 </div>
 
 <div class="main">
     <div class="header" style="background: linear-gradient(135deg, var(--success), var(--success-dark));">
-        ➕ Create New Attendance Session
+        Create New Attendance Session
     </div>
 
     <div class="card">
-        <h2>📝 Session Details</h2>
+        <h2>Session Details</h2>
         
         <div id="errorMsg" class="error-msg">
-            ⚠️ Please select a subject before creating session
+            Please select a subject before creating session
         </div>
         
         <form method="POST" action="/create_session" id="sessionForm">
-            <label>📚 Select Subject:</label>
+            <label>Select Subject:</label>
             <div class="subject-grid">
                 <button type="button" value="ML" class="subject-card" onclick="selectSubject(this, 'ML')">
-                    🤖 Machine Learning<br><small>(ML)</small>
+                    Machine Learning<br><small>(ML)</small>
                 </button>
                 <button type="button" value="DS" class="subject-card" onclick="selectSubject(this, 'DS')">
-                    🗃️ Data Structures<br><small>(DS)</small>
+                    Data Structures<br><small>(DS)</small>
                 </button>
                 <button type="button" value="CD" class="subject-card" onclick="selectSubject(this, 'CD')">
-                    ⚙️ Compiler Design<br><small>(CD)</small>
+                    Compiler Design<br><small>(CD)</small>
                 </button>
                 <button type="button" value="IPR" class="subject-card" onclick="selectSubject(this, 'IPR')">
-                    📜 IPR<br><small>(IPR)</small>
+                    IPR<br><small>(IPR)</small>
                 </button>
                 <button type="button" value="EOII" class="subject-card" onclick="selectSubject(this, 'EOII')">
-                    📈 Economics in IT<br><small>(EOII)</small>
+                    Economics in IT<br><small>(EOII)</small>
                 </button>
                 <button type="button" value="OE-1" class="subject-card" onclick="selectSubject(this, 'OE-1')">
-                    🌍 Environmental Engg<br><small>(OE-1)</small>
+                    Environmental Engg<br><small>(OE-1)</small>
                 </button>
             </div>
             
             <div class="duration-select">
-                <label>⏱️ Session Duration:</label>
+                <label>Session Duration:</label>
                 <select name="duration" required>
                     <option value="1">1 minute (Quick Session)</option>
                     <option value="2">2 minutes</option>
@@ -151,11 +152,11 @@
             
             <input type="hidden" name="selected_subject" id="selected_subject" value="">
             
-            <button type="button" class="create-btn" onclick="submitSession()">🚀 Generate QR Code</button>
+            <button type="button" class="create-btn" onclick="submitSession()">Generate QR Code</button>
         </form>
         
         <div class="info-tip">
-            <p>💡 Tip: Select a subject first, then click "Generate QR Code"</p>
+            <p>Tip: Select a subject first, then click "Generate QR Code"</p>
         </div>
     </div>
 </div>

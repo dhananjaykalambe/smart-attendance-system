@@ -1,3 +1,4 @@
+<!-- admin_manage_faculty.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -27,43 +28,43 @@
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h2>📋 Smart Attendance</h2>
+        <h2>Smart Attendance</h2>
         <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
     </div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/admin_dashboard">👑 Admin Dashboard</a>
-        <a href="/admin/manage_faculty" class="active">👥 Manage Faculty</a>
-        <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
-        <a href="/admin/manage_sessions">📊 Manage Sessions</a>
-        <a href="/admin/system_settings">⚙️ System Settings</a>
-        <a href="/admin/change_password">🔐 Change Password</a>
+        <a href="/admin_dashboard">Admin Dashboard</a>
+        <a href="/admin/manage_faculty" class="active">Manage Faculty</a>
+        <a href="/admin/manage_students">Manage Students</a>
+        <a href="/admin/manage_sessions">Manage Sessions</a>
+        <a href="/admin/system_settings">System Settings</a>
+        <a href="/admin/change_password">Change Password</a>
     </div>
     
     <div class="sidebar-divider"></div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">GENERAL</div>
-        <a href="/attendance">📜 All Attendance</a>
-        <a href="/subject_details">📚 Subjects</a>
-        <a href="/about">ℹ️ About</a>
+        <a href="/attendance">All Attendance</a>
+        <a href="/subject_details">Subjects</a>
+        <a href="/about">About</a>
     </div>
     
     <div class="sidebar-divider"></div>
     <div class="sidebar-section">
         <div class="sidebar-section-title">ACCOUNT</div>
-        <a href="/logout">🚪 Logout</a>
+        <a href="/logout">Logout</a>
     </div>
 </div>
 
 <div class="main">
     <div class="header" style="background: linear-gradient(135deg, var(--danger), var(--danger-dark));">
-        👥 Manage Faculty Members
+        Manage Faculty Members
     </div>
 
     <div class="card">
-        <h2>➕ Add New Faculty</h2>
+        <h2>Add New Faculty</h2>
         <form method="POST" action="/admin/add_faculty">
             <div class="form-grid">
                 <input type="text" name="faculty_id" placeholder="Faculty ID (e.g., FAC010)" required>
@@ -79,16 +80,16 @@
                 </select>
                 <input type="password" name="password" placeholder="Password" required>
             </div>
-            <button type="submit" class="success">➕ Add Faculty</button>
+            <button type="submit" class="success">Add Faculty</button>
         </form>
     </div>
 
     <div class="card">
-        <h2>📋 Faculty List</h2>
+        <h2>Faculty List</h2>
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="🔍 Search by ID, Name, Email...">
-            <button onclick="searchFaculty()">🔍 Search</button>
-            <button onclick="clearSearch()" style="background: var(--gray);">🗑️ Clear</button>
+            <input type="text" id="searchInput" placeholder="Search by ID, Name, Email...">
+            <button onclick="searchFaculty()">Search</button>
+            <button onclick="clearSearch()" style="background: var(--gray);">Clear</button>
         </div>
         <div class="table-container">
             <table style="width:100%" id="facultyTable">
@@ -105,8 +106,8 @@
                         <td>{{ faculty.email }}</td>
                         <td><span class="badge badge-primary">{{ faculty.department }}</span></td>
                         <td class="action-buttons">
-                            <a href="/admin/edit_faculty/{{ faculty.faculty_id }}"><button class="btn-edit">✏️ Edit</button></a>
-                            <a href="/admin/delete_faculty/{{ faculty.faculty_id }}" onclick="return confirm('Delete this faculty?')"><button class="btn-delete">🗑️ Delete</button></a>
+                            <a href="/admin/edit_faculty/{{ faculty.faculty_id }}"><button class="btn-edit">Edit</button></a>
+                            <a href="/admin/delete_faculty/{{ faculty.faculty_id }}" onclick="return confirm('Delete this faculty?')"><button class="btn-delete">Delete</button></a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -114,7 +115,7 @@
             </table>
         </div>
         <div class="export-bottom">
-            <button onclick="exportFacultyList()" class="btn-export">📄 Export Faculty List as PDF</button>
+            <button onclick="exportFacultyList()" class="btn-export">Export Faculty List as PDF</button>
         </div>
     </div>
 </div>

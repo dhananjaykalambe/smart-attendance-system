@@ -1,3 +1,4 @@
+<!-- admin_manage_students.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -37,43 +38,43 @@
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h2>📋 Smart Attendance</h2>
+        <h2>Smart Attendance</h2>
         <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
     </div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/admin_dashboard">👑 Admin Dashboard</a>
-        <a href="/admin/manage_faculty">👥 Manage Faculty</a>
-        <a href="/admin/manage_students" class="active">👨‍🎓 Manage Students</a>
-        <a href="/admin/manage_sessions">📊 Manage Sessions</a>
-        <a href="/admin/system_settings">⚙️ System Settings</a>
-        <a href="/admin/change_password">🔐 Change Password</a>
+        <a href="/admin_dashboard">Admin Dashboard</a>
+        <a href="/admin/manage_faculty">Manage Faculty</a>
+        <a href="/admin/manage_students" class="active">Manage Students</a>
+        <a href="/admin/manage_sessions">Manage Sessions</a>
+        <a href="/admin/system_settings">System Settings</a>
+        <a href="/admin/change_password">Change Password</a>
     </div>
     
     <div class="sidebar-divider"></div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">GENERAL</div>
-        <a href="/attendance">📜 All Attendance</a>
-        <a href="/subject_details">📚 Subjects</a>
-        <a href="/about">ℹ️ About</a>
+        <a href="/attendance">All Attendance</a>
+        <a href="/subject_details">Subjects</a>
+        <a href="/about">About</a>
     </div>
     
     <div class="sidebar-divider"></div>
     <div class="sidebar-section">
         <div class="sidebar-section-title">ACCOUNT</div>
-        <a href="/logout">🚪 Logout</a>
+        <a href="/logout">Logout</a>
     </div>
 </div>
 
 <div class="main">
     <div class="header" style="background: linear-gradient(135deg, var(--danger), var(--danger-dark));">
-        👨‍🎓 Manage Students
+        Manage Students
     </div>
 
     <div class="card">
-        <h2>➕ Add New Student</h2>
+        <h2>Add New Student</h2>
         <form method="POST" action="/admin/add_student">
             <div class="form-row">
                 <div class="form-group"><label>Roll Number *</label><input type="text" name="roll_no" placeholder="e.g., CS011" required></div>
@@ -87,18 +88,18 @@
                 <div class="form-group"><label>Year *</label><select name="year"><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3" selected>3rd Year</option><option value="4">4th Year</option></select></div>
                 <div class="form-group"><label>Semester *</label><select name="semester"><option value="1">Sem 1</option><option value="2">Sem 2</option><option value="3">Sem 3</option><option value="4">Sem 4</option><option value="5">Sem 5</option><option value="6" selected>Sem 6</option><option value="7">Sem 7</option><option value="8">Sem 8</option></select></div>
             </div>
-            <button type="submit" class="success">➕ Add Student</button>
+            <button type="submit" class="success">Add Student</button>
         </form>
     </div>
 
     <div class="card">
-        <h2>📋 Student List</h2>
+        <h2>Student List</h2>
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="🔍 Search by Roll No, Name...">
+            <input type="text" id="searchInput" placeholder="Search by Roll No, Name...">
             <select id="branchFilter"><option value="">All Branches</option><option value="CSE">CSE</option><option value="IT">IT</option><option value="ECE">ECE</option><option value="ME">ME</option><option value="CE">CE</option></select>
             <select id="yearFilter"><option value="">All Years</option><option value="1">1st Year</option><option value="2">2nd Year</option><option value="3">3rd Year</option><option value="4">4th Year</option></select>
-            <button onclick="searchStudent()">🔍 Search</button>
-            <button onclick="clearSearch()" style="background: var(--gray);">🗑️ Clear</button>
+            <button onclick="searchStudent()">Search</button>
+            <button onclick="clearSearch()" style="background: var(--gray);">Clear</button>
         </div>
         <div class="table-container">
             <table style="width:100%" id="studentTable">
@@ -117,8 +118,8 @@
                         <td>{% if student.year == 1 %}1st{% elif student.year == 2 %}2nd{% elif student.year == 3 %}3rd{% else %}4th{% endif %} Year</td>
                         <td>Sem {{ student.semester or 6 }}</td>
                         <td class="action-buttons">
-                            <a href="/admin/edit_student/{{ student.roll_no }}"><button class="btn-edit">✏️ Edit</button></a>
-                            <a href="/admin/delete_student/{{ student.roll_no }}" onclick="return confirm('Delete this student?')"><button class="btn-delete">🗑️ Delete</button></a>
+                            <a href="/admin/edit_student/{{ student.roll_no }}"><button class="btn-edit">Edit</button></a>
+                            <a href="/admin/delete_student/{{ student.roll_no }}" onclick="return confirm('Delete this student?')"><button class="btn-delete">Delete</button></a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -126,26 +127,26 @@
             </table>
         </div>
         <div class="export-bottom">
-            <button onclick="exportStudentList()" class="btn-export">📄 Export Student List as PDF</button>
+            <button onclick="exportStudentList()" class="btn-export">Export Student List as PDF</button>
         </div>
     </div>
 
     <div class="card">
-        <h2>📊 Student Statistics</h2>
+        <h2>Student Statistics</h2>
         <div class="stats-grid-full">
             {% set cse = students|selectattr('branch', 'equalto', 'CSE')|list|length %}
-            <div class="stat-card-branch branch-cse"><h3>{{ cse }}</h3><p>💻 CSE</p></div>
+            <div class="stat-card-branch branch-cse"><h3>{{ cse }}</h3><p>CSE</p></div>
             {% set it = students|selectattr('branch', 'equalto', 'IT')|list|length %}
-            <div class="stat-card-branch branch-it"><h3>{{ it }}</h3><p>🌐 IT</p></div>
+            <div class="stat-card-branch branch-it"><h3>{{ it }}</h3><p>IT</p></div>
             {% set ece = students|selectattr('branch', 'equalto', 'ECE')|list|length %}
-            <div class="stat-card-branch branch-ece"><h3>{{ ece }}</h3><p>📡 ECE</p></div>
+            <div class="stat-card-branch branch-ece"><h3>{{ ece }}</h3><p>ECE</p></div>
             {% set me = students|selectattr('branch', 'in', ['ME', 'MECH'])|list|length %}
-            <div class="stat-card-branch branch-mech"><h3>{{ me }}</h3><p>⚙️ ME</p></div>
+            <div class="stat-card-branch branch-mech"><h3>{{ me }}</h3><p>ME</p></div>
             {% set ce = students|selectattr('branch', 'in', ['CE', 'CIVIL'])|list|length %}
-            <div class="stat-card-branch branch-ce"><h3>{{ ce }}</h3><p>🏗️ CE</p></div>
+            <div class="stat-card-branch branch-ce"><h3>{{ ce }}</h3><p>CE</p></div>
         </div>
         <div style="margin-top:15px; padding:15px; background: var(--primary-soft); border-radius: var(--radius-lg); text-align:center;">
-            <strong>📊 Total Students: {{ students|length }}</strong>
+            <strong>Total Students: {{ students|length }}</strong>
         </div>
     </div>
 </div>

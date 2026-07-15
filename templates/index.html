@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -99,29 +100,29 @@
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h2>📋 Smart Attendance</h2>
+        <h2>Smart Attendance</h2>
         <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
     </div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/" {% if request.path == '/' %}class="active"{% endif %}>🏠 Home</a>
-        <a href="/login" {% if request.path == '/login' %}class="active"{% endif %}>🔐 Login</a>
+        <a href="/" {% if request.path == '/' %}class="active"{% endif %}>Home</a>
+        <a href="/login" {% if request.path == '/login' %}class="active"{% endif %}>Login</a>
     </div>
     
     <div class="sidebar-divider"></div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">GENERAL</div>
-        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>📜 Attendance</a>
-        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>📚 Subjects</a>
-        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>ℹ️ About</a>
+        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>Attendance</a>
+        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>Subjects</a>
+        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>About</a>
     </div>
 </div>
 
 <div class="main">
     <div class="header">
-        🎓 {{ settings.college_name }}, {{ settings.college_location }}
+        {{ settings.college_name }}, {{ settings.college_location }}
     </div>
 
     <div class="hero-section">
@@ -150,7 +151,7 @@
 
     <div class="notice-board-container">
         <div class="notice-header">
-            <span>📢</span>
+            <span>Notice</span>
             <h3 style="margin:0;">Notice Board</h3>
         </div>
         <div class="notice-list">
@@ -158,7 +159,7 @@
                 {% for notice in stats.recent_notices %}
                 <div class="notice-item">
                     <div class="notice-title">
-                        <span>📌</span>
+                        <span>Notice</span>
                         {{ notice.title }}
                         {% if loop.index == 1 %}
                             <span class="badge badge-danger" style="font-size:10px;">NEW</span>
@@ -172,7 +173,7 @@
                 {% endfor %}
             {% else %}
                 <div class="empty-notice" style="text-align:center; padding:30px; color:var(--text-muted);">
-                    <span>📭</span>
+                    <span>Notice</span>
                     <p>No notices available.</p>
                 </div>
             {% endif %}
@@ -180,11 +181,11 @@
     </div>
 
     <div class="card" style="text-align: center;">
-        <h2>🚀 Quick Access</h2>
+        <h2>Quick Access</h2>
         <div class="quick-access">
-            <a href="/login" class="access-btn student">👨‍🎓 Student Login</a>
-            <a href="/login" class="access-btn faculty">👨‍🏫 Faculty Login</a>
-            <a href="/login" class="access-btn admin">👑 Admin Login</a>
+            <a href="/login" class="access-btn student">Student Login</a>
+            <a href="/login" class="access-btn faculty">Faculty Login</a>
+            <a href="/login" class="access-btn admin">Admin Login</a>
         </div>
         <p style="margin-top: 15px; font-size: 11px; color: var(--text-muted);">
             Choose your role to access the attendance system

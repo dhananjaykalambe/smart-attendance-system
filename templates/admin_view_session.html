@@ -1,3 +1,4 @@
+<!-- admin_view_session.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -19,39 +20,39 @@
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h2>📋 Smart Attendance</h2>
+        <h2>Smart Attendance</h2>
         <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
     </div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/admin_dashboard">👑 Admin Dashboard</a>
-        <a href="/admin/manage_faculty">👥 Manage Faculty</a>
-        <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
-        <a href="/admin/manage_sessions" class="active">📊 Manage Sessions</a>
-        <a href="/admin/system_settings">⚙️ System Settings</a>
-        <a href="/admin/change_password">🔐 Change Password</a>
+        <a href="/admin_dashboard">Admin Dashboard</a>
+        <a href="/admin/manage_faculty">Manage Faculty</a>
+        <a href="/admin/manage_students">Manage Students</a>
+        <a href="/admin/manage_sessions" class="active">Manage Sessions</a>
+        <a href="/admin/system_settings">System Settings</a>
+        <a href="/admin/change_password">Change Password</a>
     </div>
     
     <div class="sidebar-divider"></div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">GENERAL</div>
-        <a href="/attendance">📜 All Attendance</a>
-        <a href="/subject_details">📚 Subjects</a>
-        <a href="/about">ℹ️ About</a>
+        <a href="/attendance">All Attendance</a>
+        <a href="/subject_details">Subjects</a>
+        <a href="/about">About</a>
     </div>
     
     <div class="sidebar-divider"></div>
     <div class="sidebar-section">
         <div class="sidebar-section-title">ACCOUNT</div>
-        <a href="/logout">🚪 Logout</a>
+        <a href="/logout">Logout</a>
     </div>
 </div>
 
 <div class="main">
     <div class="header" style="background: linear-gradient(135deg, var(--danger), var(--danger-dark));">
-        📋 Session Details: {{ session.session_id }}
+        Session Details: {{ session.session_id }}
     </div>
 
     <div class="card">
@@ -64,14 +65,14 @@
                 <tr><th>Duration</th><td>{{ session.duration }} minutes</td></tr>
                 <tr>
                     <th>Status</th>
-                    <td>{% if session.is_active %}<span class="badge badge-success">🟢 Active</span>{% else %}<span class="badge badge-danger">🔴 Closed</span>{% endif %}</td>
+                    <td>{% if session.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-danger">Closed</span>{% endif %}</td>
                 </tr>
             </table>
         </div>
     </div>
 
     <div class="card">
-        <h2>👥 Attendance Records ({{ records|length }} students)</h2>
+        <h2>Attendance Records ({{ records|length }} students)</h2>
         <div class="table-container">
             <table style="width:100%">
                 <thead>
@@ -95,8 +96,8 @@
     </div>
     
     <div class="action-buttons" style="margin-top: 20px;">
-        <a href="/admin/manage_sessions"><button style="background: var(--gray);">← Back to Sessions</button></a>
-        <a href="/export_report/{{ session.session_id }}"><button class="success">📄 Export PDF</button></a>
+        <a href="/admin/manage_sessions"><button style="background: var(--gray);">Back to Sessions</button></a>
+        <a href="/export_report/{{ session.session_id }}"><button class="success">Export PDF</button></a>
     </div>
 </div>
 

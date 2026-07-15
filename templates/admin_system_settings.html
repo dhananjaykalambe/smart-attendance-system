@@ -1,3 +1,4 @@
+<!-- admin_system_settings.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -19,39 +20,39 @@
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h2>📋 Smart Attendance</h2>
+        <h2>Smart Attendance</h2>
         <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
     </div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/admin_dashboard">👑 Admin Dashboard</a>
-        <a href="/admin/manage_faculty">👥 Manage Faculty</a>
-        <a href="/admin/manage_students">👨‍🎓 Manage Students</a>
-        <a href="/admin/manage_sessions">📊 Manage Sessions</a>
-        <a href="/admin/system_settings" class="active">⚙️ System Settings</a>
-        <a href="/admin/change_password">🔐 Change Password</a>
+        <a href="/admin_dashboard">Admin Dashboard</a>
+        <a href="/admin/manage_faculty">Manage Faculty</a>
+        <a href="/admin/manage_students">Manage Students</a>
+        <a href="/admin/manage_sessions">Manage Sessions</a>
+        <a href="/admin/system_settings" class="active">System Settings</a>
+        <a href="/admin/change_password">Change Password</a>
     </div>
     
     <div class="sidebar-divider"></div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">GENERAL</div>
-        <a href="/attendance">📜 All Attendance</a>
-        <a href="/subject_details">📚 Subjects</a>
-        <a href="/about">ℹ️ About</a>
+        <a href="/attendance">All Attendance</a>
+        <a href="/subject_details">Subjects</a>
+        <a href="/about">About</a>
     </div>
     
     <div class="sidebar-divider"></div>
     <div class="sidebar-section">
         <div class="sidebar-section-title">ACCOUNT</div>
-        <a href="/logout">🚪 Logout</a>
+        <a href="/logout">Logout</a>
     </div>
 </div>
 
 <div class="main">
     <div class="header" style="background: linear-gradient(135deg, var(--danger), var(--danger-dark));">
-        ⚙️ System Configuration
+        System Configuration
     </div>
 
     {% if message %}
@@ -59,7 +60,7 @@
     {% endif %}
 
     <div class="card">
-        <h2>🏫 College Information</h2>
+        <h2>College Information</h2>
         <form method="POST">
             <div class="form-group">
                 <label>College Name:</label>
@@ -80,28 +81,28 @@
                 <input type="text" name="academic_year" value="{{ settings.academic_year }}" required>
             </div>
             
-            <h2 style="margin-top: 30px;">⚙️ Attendance Settings</h2>
+            <h2 style="margin-top: 30px;">Attendance Settings</h2>
             <div class="form-group">
-                <label>⚠️ Low Attendance Threshold (%):</label>
+                <label>Low Attendance Threshold (%):</label>
                 <input type="number" name="attendance_threshold" value="{{ settings.attendance_threshold }}" min="0" max="100" required>
                 <small class="text-muted">Students below this percentage will receive alerts</small>
             </div>
             <div class="form-group">
-                <label>⏱️ QR Code Expiry (seconds):</label>
+                <label>QR Code Expiry (seconds):</label>
                 <input type="number" name="qr_expiry" value="{{ settings.qr_expiry_seconds }}" min="10" max="300" required>
                 <small class="text-muted">How long the QR code remains valid after generation</small>
             </div>
             <div class="form-group">
-                <label>⏰ Default Session Duration (minutes):</label>
+                <label>Default Session Duration (minutes):</label>
                 <input type="number" name="session_duration" value="{{ settings.session_duration_minutes }}" min="1" max="60" required>
                 <small class="text-muted">Default duration when creating a new session</small>
             </div>
             
-            <button type="submit" class="success">💾 Save All Settings</button>
+            <button type="submit" class="success">Save All Settings</button>
         </form>
         
         <div class="alert alert-info" style="margin-top: 20px;">
-            <strong>ℹ️ Note:</strong> Changes to college name will reflect immediately in all page headers and PDF reports.
+            <strong>Note:</strong> Changes to college name will reflect immediately in all page headers and PDF reports.
         </div>
     </div>
 </div>
