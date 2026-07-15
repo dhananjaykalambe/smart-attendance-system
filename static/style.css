@@ -1,48 +1,48 @@
 /* static/style.css */
 /* ====================================================================
-   SMART ATTENDANCE SYSTEM - PROFESSIONAL MODERN THEME
-   Version: 5.0 - CLEAN, MODERN, PROFESSIONAL
+   SMART ATTENDANCE SYSTEM - VIBRANT MODERN THEME
+   Version: 5.1 - ATTRACTIVE, VIBRANT, PROFESSIONAL
    ==================================================================== */
 
-/* CSS Variables - Modern Professional Theme */
+/* CSS Variables - Vibrant Modern Theme */
 :root {
-    --primary: #2c3e50;
-    --primary-dark: #1a252f;
-    --primary-light: #34495e;
-    --primary-soft: #ecf0f1;
-    --accent: #3498db;
-    --accent-hover: #2980b9;
-    --accent-soft: #ebf5fb;
-    --success: #27ae60;
-    --success-dark: #1e8449;
-    --success-soft: #eafaf1;
-    --warning: #f39c12;
-    --warning-dark: #d68910;
-    --warning-soft: #fef9e7;
-    --danger: #e74c3c;
-    --danger-dark: #c0392b;
-    --danger-soft: #fdedec;
-    --info: #1abc9c;
-    --info-dark: #16a085;
-    --info-soft: #e8f8f5;
-    --dark: #2c3e50;
-    --light: #f8f9fa;
-    --gray: #95a5a6;
-    --gray-dark: #7f8c8d;
-    --gray-light: #ecf0f1;
-    --card-bg: #ffffff;
-    --card-bg-hover: #f8f9fa;
-    --text-primary: #2c3e50;
-    --text-secondary: #5d6d7e;
-    --text-muted: #95a5a6;
-    --border-color: #e5e8eb;
+    --primary: #6C63FF;
+    --primary-dark: #5A52D5;
+    --primary-light: #8B83FF;
+    --primary-soft: #F0EEFF;
+    --accent: #FF6584;
+    --accent-hover: #E55A77;
+    --accent-soft: #FFEEF1;
+    --success: #00D2A0;
+    --success-dark: #00B889;
+    --success-soft: #E6FFF7;
+    --warning: #FFB347;
+    --warning-dark: #E69E3A;
+    --warning-soft: #FFF5E6;
+    --danger: #FF6B6B;
+    --danger-dark: #E55A5A;
+    --danger-soft: #FFEEEE;
+    --info: #4ECDC4;
+    --info-dark: #3DBDB5;
+    --info-soft: #E6F9F7;
+    --dark: #2D2D3F;
+    --light: #F8F9FE;
+    --gray: #A0A0B8;
+    --gray-dark: #7A7A92;
+    --gray-light: #EDEDF5;
+    --card-bg: #FFFFFF;
+    --card-bg-hover: #F8F9FE;
+    --text-primary: #2D2D3F;
+    --text-secondary: #6A6A82;
+    --text-muted: #A0A0B8;
+    --border-color: #E8E8F0;
     
-    --shadow-sm: 0 2px 4px rgba(44, 62, 80, 0.08);
-    --shadow-md: 0 4px 12px rgba(44, 62, 80, 0.12);
-    --shadow-lg: 0 8px 24px rgba(44, 62, 80, 0.15);
-    --shadow-xl: 0 16px 48px rgba(44, 62, 80, 0.18);
-    --shadow-glow: 0 0 30px rgba(52, 152, 219, 0.15);
-    --shadow-glow-accent: 0 0 30px rgba(241, 196, 15, 0.12);
+    --shadow-sm: 0 2px 8px rgba(108, 99, 255, 0.10);
+    --shadow-md: 0 4px 16px rgba(108, 99, 255, 0.15);
+    --shadow-lg: 0 8px 32px rgba(108, 99, 255, 0.18);
+    --shadow-xl: 0 16px 48px rgba(108, 99, 255, 0.20);
+    --shadow-glow: 0 0 40px rgba(108, 99, 255, 0.15);
+    --shadow-glow-accent: 0 0 40px rgba(255, 101, 132, 0.12);
     
     --radius-sm: 6px;
     --radius-md: 10px;
@@ -61,14 +61,14 @@
 
 body {
     font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
-    background: #f0f2f5;
+    background: linear-gradient(135deg, #F8F9FE 0%, #F0EEFF 50%, #FEF0F2 100%);
     min-height: 100vh;
     overflow-x: hidden;
     color: var(--text-primary);
     line-height: 1.6;
 }
 
-/* Scrollbar Styling - Clean Professional */
+/* Scrollbar Styling - Vibrant */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -80,22 +80,22 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--gray);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
     border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--gray-dark);
+    background: linear-gradient(135deg, var(--primary-dark), var(--accent-hover));
 }
 
 /* ====================================================================
-   ENHANCED SIDEBAR - Professional Clean Design
+   ENHANCED SIDEBAR - Vibrant Design
    ==================================================================== */
 
 .sidebar {
     width: 280px;
     height: 100vh;
-    background: #ffffff;
+    background: linear-gradient(180deg, #FFFFFF 0%, #F8F9FE 100%);
     color: var(--dark);
     padding: 0;
     position: fixed;
@@ -108,15 +108,31 @@ body {
     border-right: 1px solid var(--border-color);
 }
 
-/* Sidebar Header */
+/* Sidebar Header - Vibrant Gradient */
 .sidebar-header {
     text-align: center;
     padding: 28px 20px 20px;
     margin-bottom: 20px;
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--accent) 100%);
     position: relative;
     overflow: hidden;
     border-bottom: 3px solid var(--accent);
+}
+
+.sidebar-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: shimmer 8s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) rotate(45deg); }
 }
 
 .sidebar-header::after {
@@ -137,17 +153,18 @@ body {
     gap: 10px;
     margin: 0;
     color: white;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: -0.3px;
     position: relative;
     z-index: 1;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .sidebar-header p {
     font-size: 0.7rem;
-    opacity: 0.85;
+    opacity: 0.9;
     margin-top: 10px;
-    color: rgba(255,255,255,0.9);
+    color: rgba(255,255,255,0.95);
     position: relative;
     z-index: 1;
     font-weight: 300;
@@ -171,18 +188,18 @@ body {
     justify-content: center;
     margin: 0 auto 12px;
     font-size: 28px;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
     transition: var(--transition);
     color: white;
 }
 
 .profile-avatar:hover {
-    transform: scale(1.05);
-    box-shadow: var(--shadow-md);
+    transform: scale(1.05) rotate(-5deg);
+    box-shadow: var(--shadow-lg);
 }
 
 .profile-name {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--primary);
     margin-bottom: 4px;
     font-size: 14px;
@@ -193,7 +210,7 @@ body {
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 /* Sidebar Navigation */
@@ -209,7 +226,7 @@ body {
     color: var(--text-muted);
     padding: 8px 12px 4px;
     margin-top: 5px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .sidebar a {
@@ -234,10 +251,10 @@ body {
 }
 
 .sidebar a.active {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: linear-gradient(90deg, var(--primary-soft), transparent);
+    color: var(--primary);
     font-weight: 600;
-    border-right: 3px solid var(--accent);
+    border-right: 3px solid var(--primary);
 }
 
 .sidebar a span:first-child {
@@ -249,13 +266,13 @@ body {
 
 .sidebar a:hover span:first-child,
 .sidebar a.active span:first-child {
-    color: var(--accent);
+    color: var(--primary);
 }
 
 /* Sidebar Divider */
 .sidebar-divider {
     height: 1px;
-    background: var(--border-color);
+    background: linear-gradient(90deg, transparent, var(--border-color), transparent);
     margin: 16px 16px;
 }
 
@@ -264,13 +281,20 @@ body {
 .sidebar a[href*="logout"] {
     margin-top: 5px;
     border: 1px solid var(--border-color);
+    background: var(--danger-soft);
 }
 
 .sidebar a:last-child:hover,
 .sidebar a[href*="logout"]:hover {
-    background: var(--danger-soft);
-    color: var(--danger);
+    background: var(--danger);
+    color: white;
     border-color: var(--danger);
+    transform: translateX(4px);
+}
+
+.sidebar a:last-child:hover span:first-child,
+.sidebar a[href*="logout"]:hover span:first-child {
+    color: white;
 }
 
 /* Sidebar Footer */
@@ -293,7 +317,7 @@ body {
     top: 16px;
     left: 16px;
     z-index: 200;
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
     color: white;
     border: none;
     border-radius: var(--radius-sm);
@@ -307,6 +331,15 @@ body {
     display: none;
     align-items: center;
     justify-content: center;
+}
+
+.menu-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-lg);
+}
+
+.menu-toggle:active {
+    transform: scale(0.95);
 }
 
 .hamburger-icon {
@@ -351,15 +384,6 @@ body {
     transform: translateY(-8.5px) rotate(-45deg);
 }
 
-.menu-toggle:hover {
-    transform: scale(1.02);
-    box-shadow: var(--shadow-lg);
-}
-
-.menu-toggle:active {
-    transform: scale(0.98);
-}
-
 /* Hide the menu toggle on desktop */
 @media (min-width: 769px) {
     .menu-toggle {
@@ -375,7 +399,7 @@ body {
         top: 14px !important;
         left: 14px !important;
         z-index: 10000 !important;
-        background: var(--primary) !important;
+        background: linear-gradient(135deg, var(--primary), var(--accent)) !important;
         border: none !important;
         border-radius: var(--radius-sm) !important;
         padding: 10px 12px !important;
@@ -428,8 +452,8 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0,0,0,0.4);
-    backdrop-filter: blur(2px);
+    background: rgba(45, 45, 63, 0.5);
+    backdrop-filter: blur(4px);
     z-index: 140;
 }
 
@@ -450,22 +474,30 @@ body {
 }
 
 /* ====================================================================
-   HEADER - Professional Gradient
+   HEADER - Vibrant Gradient
    ==================================================================== */
 
 .header {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 40%, var(--accent) 100%);
+    background-size: 200% 200%;
+    animation: gradientShift 6s ease infinite;
     color: white;
     padding: 20px 28px;
     text-align: center;
     border-radius: var(--radius-lg);
     margin-bottom: 30px;
     font-size: 1.05rem;
-    font-weight: 500;
-    box-shadow: var(--shadow-sm);
+    font-weight: 600;
+    box-shadow: var(--shadow-md);
     position: relative;
     overflow: hidden;
     letter-spacing: 0.2px;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .header::before {
@@ -475,7 +507,7 @@ body {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
     animation: headerShine 4s infinite;
 }
 
@@ -485,7 +517,7 @@ body {
 }
 
 /* ====================================================================
-   CARDS - Clean Professional
+   CARDS - Vibrant Professional
    ==================================================================== */
 
 .card {
@@ -496,11 +528,30 @@ body {
     margin-bottom: 28px;
     transition: var(--transition);
     border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--accent), var(--success));
+    transform: scaleX(0);
+    transition: transform 0.5s ease;
+}
+
+.card:hover::after {
+    transform: scaleX(1);
 }
 
 .card:hover {
+    transform: translateY(-4px);
     box-shadow: var(--shadow-md);
-    border-color: #d5d8dc;
+    border-color: var(--primary-light);
 }
 
 .card h2 {
@@ -516,7 +567,7 @@ body {
 }
 
 /* ====================================================================
-   STATS GRID - Clean Cards
+   STATS GRID - Vibrant Cards
    ==================================================================== */
 
 .stats-grid {
@@ -535,19 +586,34 @@ body {
     transition: var(--transition);
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    transition: height 0.3s ease;
+}
+
+.stat-card:hover::before {
+    height: 6px;
 }
 
 .stat-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-6px);
     box-shadow: var(--shadow-md);
-    border-color: var(--accent);
+    border-color: transparent;
 }
 
 .stat-card h3 {
     font-size: 2.2rem;
     margin-bottom: 8px;
     font-weight: 700;
-    color: var(--primary);
 }
 
 .stat-card p {
@@ -557,56 +623,84 @@ body {
 }
 
 .stat-card.primary { border-top: 4px solid var(--primary); }
-.stat-card.success { border-top: 4px solid var(--success); }
-.stat-card.warning { border-top: 4px solid var(--warning); }
-.stat-card.info { border-top: 4px solid var(--info); }
-.stat-card.danger { border-top: 4px solid var(--danger); }
-
+.stat-card.primary::before { background: var(--primary); }
 .stat-card.primary h3 { color: var(--primary); }
+
+.stat-card.success { border-top: 4px solid var(--success); }
+.stat-card.success::before { background: var(--success); }
 .stat-card.success h3 { color: var(--success); }
+
+.stat-card.warning { border-top: 4px solid var(--warning); }
+.stat-card.warning::before { background: var(--warning); }
 .stat-card.warning h3 { color: var(--warning); }
+
+.stat-card.info { border-top: 4px solid var(--info); }
+.stat-card.info::before { background: var(--info); }
 .stat-card.info h3 { color: var(--info); }
+
+.stat-card.danger { border-top: 4px solid var(--danger); }
+.stat-card.danger::before { background: var(--danger); }
 .stat-card.danger h3 { color: var(--danger); }
 
 /* ====================================================================
-   BUTTONS - Clean Professional
+   BUTTONS - Vibrant Professional
    ==================================================================== */
 
 button, .btn {
     width: 100%;
     padding: 12px 24px;
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
     color: white;
     border: none;
     border-radius: var(--radius-sm);
     cursor: pointer;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     transition: var(--transition);
     letter-spacing: 0.3px;
+    position: relative;
+    overflow: hidden;
+}
+
+button::before, .btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+button:hover::before, .btn:hover::before {
+    width: 300px;
+    height: 300px;
 }
 
 button:hover, .btn:hover {
-    background: var(--primary-dark);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
 }
 
 button:active, .btn:active {
     transform: translateY(0);
 }
 
-button.success, .btn-success { background: var(--success); }
-button.success:hover, .btn-success:hover { background: var(--success-dark); }
+button.success, .btn-success { background: linear-gradient(135deg, var(--success-dark), var(--success)); }
+button.success:hover, .btn-success:hover { background: linear-gradient(135deg, var(--success), var(--success-dark)); }
 
-button.danger, .btn-danger { background: var(--danger); }
-button.danger:hover, .btn-danger:hover { background: var(--danger-dark); }
+button.danger, .btn-danger { background: linear-gradient(135deg, var(--danger-dark), var(--danger)); }
+button.danger:hover, .btn-danger:hover { background: linear-gradient(135deg, var(--danger), var(--danger-dark)); }
 
-button.warning, .btn-warning { background: var(--warning); }
-button.warning:hover, .btn-warning:hover { background: var(--warning-dark); }
+button.warning, .btn-warning { background: linear-gradient(135deg, var(--warning-dark), var(--warning)); }
+button.warning:hover, .btn-warning:hover { background: linear-gradient(135deg, var(--warning), var(--warning-dark)); }
 
-button.info, .btn-info { background: var(--info); }
-button.info:hover, .btn-info:hover { background: var(--info-dark); }
+button.info, .btn-info { background: linear-gradient(135deg, var(--info-dark), var(--info)); }
+button.info:hover, .btn-info:hover { background: linear-gradient(135deg, var(--info), var(--info-dark)); }
 
 .btn-small {
     width: auto;
@@ -617,15 +711,15 @@ button.info:hover, .btn-info:hover { background: var(--info-dark); }
     border-radius: 4px;
 }
 
-.btn-edit { background: var(--warning); color: white; }
-.btn-edit:hover { background: var(--warning-dark); }
-.btn-delete { background: var(--danger); color: white; }
-.btn-delete:hover { background: var(--danger-dark); }
-.btn-view { background: var(--info); color: white; }
-.btn-view:hover { background: var(--info-dark); }
+.btn-edit { background: linear-gradient(135deg, var(--warning-dark), var(--warning)); color: white; }
+.btn-edit:hover { background: linear-gradient(135deg, var(--warning), var(--warning-dark)); }
+.btn-delete { background: linear-gradient(135deg, var(--danger-dark), var(--danger)); color: white; }
+.btn-delete:hover { background: linear-gradient(135deg, var(--danger), var(--danger-dark)); }
+.btn-view { background: linear-gradient(135deg, var(--info-dark), var(--info)); color: white; }
+.btn-view:hover { background: linear-gradient(135deg, var(--info), var(--info-dark)); }
 
 /* ====================================================================
-   FORMS - Clean Professional
+   FORMS - Vibrant Professional
    ==================================================================== */
 
 input, select, textarea {
@@ -633,7 +727,7 @@ input, select, textarea {
     padding: 11px 15px;
     margin: 8px 0;
     border-radius: var(--radius-sm);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     font-size: 14px;
     transition: var(--transition);
     background: var(--card-bg);
@@ -642,8 +736,9 @@ input, select, textarea {
 
 input:focus, select:focus, textarea:focus {
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.12);
+    background: white;
 }
 
 input::placeholder, textarea::placeholder {
@@ -670,7 +765,7 @@ input::placeholder, textarea::placeholder {
 
 .form-group label {
     display: block;
-    font-weight: 500;
+    font-weight: 600;
     margin-bottom: 6px;
     color: var(--text-secondary);
     font-size: 13px;
@@ -678,7 +773,7 @@ input::placeholder, textarea::placeholder {
 }
 
 /* ====================================================================
-   TABLES - Clean Professional
+   TABLES - Vibrant Professional
    ==================================================================== */
 
 .table-container {
@@ -733,10 +828,10 @@ table:not(.no-center) {
 }
 
 th {
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
     color: white;
     padding: 12px 16px;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 13px;
     text-align: center;
     letter-spacing: 0.3px;
@@ -756,11 +851,11 @@ tr:hover {
 }
 
 tbody tr:nth-child(even) {
-    background: #fafbfc;
+    background: #FAFAFE;
 }
 
 /* ====================================================================
-   BADGES - Clean Professional
+   BADGES - Vibrant Professional
    ==================================================================== */
 
 .badge {
@@ -768,7 +863,7 @@ tbody tr:nth-child(even) {
     padding: 3px 12px;
     border-radius: 20px;
     font-size: 11px;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.2px;
 }
 
@@ -776,10 +871,10 @@ tbody tr:nth-child(even) {
 .badge-danger { background: var(--danger-soft); color: var(--danger-dark); }
 .badge-warning { background: var(--warning-soft); color: var(--warning-dark); }
 .badge-info { background: var(--info-soft); color: var(--info-dark); }
-.badge-primary { background: var(--accent-soft); color: var(--accent); }
+.badge-primary { background: var(--primary-soft); color: var(--primary); }
 
 /* ====================================================================
-   PROGRESS BAR - Clean Professional
+   PROGRESS BAR - Vibrant Professional
    ==================================================================== */
 
 .progress-bar-container {
@@ -790,17 +885,18 @@ tbody tr:nth-child(even) {
 }
 
 .progress-bar {
-    background: var(--success);
+    background: linear-gradient(90deg, var(--primary), var(--accent));
     height: 100%;
     border-radius: 10px;
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.progress-bar.danger { background: var(--danger); }
-.progress-bar.warning { background: var(--warning); }
+.progress-bar.danger { background: linear-gradient(90deg, var(--danger), var(--danger-dark)); }
+.progress-bar.warning { background: linear-gradient(90deg, var(--warning), var(--warning-dark)); }
+.progress-bar.success { background: linear-gradient(90deg, var(--success), var(--success-dark)); }
 
 /* ====================================================================
-   ALERTS - Clean Professional
+   ALERTS - Vibrant Professional
    ==================================================================== */
 
 .alert {
@@ -821,7 +917,7 @@ tbody tr:nth-child(even) {
 .alert-info { background: var(--info-soft); border-left-color: var(--info); color: var(--info-dark); }
 
 /* ====================================================================
-   SEARCH BOX - Clean Professional
+   SEARCH BOX - Vibrant Professional
    ==================================================================== */
 
 .search-box {
@@ -857,7 +953,7 @@ tbody tr:nth-child(even) {
 }
 
 /* ====================================================================
-   NOTICE BOARD - Clean Professional
+   NOTICE BOARD - Vibrant Professional
    ==================================================================== */
 
 .notice-board-container {
@@ -869,7 +965,7 @@ tbody tr:nth-child(even) {
 }
 
 .notice-header {
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
     padding: 14px 24px;
     display: flex;
     align-items: center;
@@ -880,7 +976,7 @@ tbody tr:nth-child(even) {
 .notice-header h3 {
     margin: 0;
     color: white;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 1.1rem;
 }
 
@@ -896,7 +992,7 @@ tbody tr:nth-child(even) {
 }
 
 .notice-title {
-    font-weight: 500;
+    font-weight: 600;
     color: var(--primary);
     display: flex;
     align-items: center;
@@ -919,7 +1015,7 @@ tbody tr:nth-child(even) {
 }
 
 /* ====================================================================
-   COUNTDOWN TIMER - Clean Professional
+   COUNTDOWN TIMER - Vibrant Professional
    ==================================================================== */
 
 .countdown-container {
@@ -929,9 +1025,9 @@ tbody tr:nth-child(even) {
 
 .countdown-timer {
     font-size: 3.2rem;
-    font-weight: 600;
+    font-weight: 700;
     font-family: 'Inter', 'Segoe UI', monospace;
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
     color: white;
     display: inline-block;
     padding: 20px 44px;
@@ -941,13 +1037,13 @@ tbody tr:nth-child(even) {
 }
 
 .countdown-timer.warning {
-    background: var(--danger);
+    background: linear-gradient(135deg, var(--danger), var(--danger-dark));
     animation: pulse 0.5s infinite;
 }
 
 @keyframes pulse {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.02); }
+    50% { transform: scale(1.03); }
 }
 
 /* ====================================================================
@@ -1004,7 +1100,7 @@ tbody tr:nth-child(even) {
         top: 14px !important;
         left: 14px !important;
         z-index: 10000 !important;
-        background: var(--primary) !important;
+        background: linear-gradient(135deg, var(--primary), var(--accent)) !important;
         border: none !important;
         border-radius: var(--radius-sm) !important;
         padding: 10px 12px !important;
@@ -1071,8 +1167,8 @@ tbody tr:nth-child(even) {
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0,0,0,0.4);
-        backdrop-filter: blur(2px);
+        background: rgba(45, 45, 63, 0.5);
+        backdrop-filter: blur(4px);
         z-index: 1000;
         display: none;
     }
@@ -1417,7 +1513,7 @@ tbody tr:nth-child(even) {
     height: 20px;
     border: 2px solid var(--border-color);
     border-radius: 50%;
-    border-top-color: var(--accent);
+    border-top-color: var(--primary);
     animation: spin 0.8s ease-in-out infinite;
 }
 
@@ -1502,7 +1598,7 @@ tbody tr:nth-child(even) {
         top: 14px !important;
         left: 14px !important;
         z-index: 10000 !important;
-        background: var(--primary) !important;
+        background: linear-gradient(135deg, var(--primary), var(--accent)) !important;
         border: none !important;
         border-radius: var(--radius-sm) !important;
         padding: 10px 12px !important;
