@@ -151,7 +151,7 @@
 
     <div class="notice-board-container">
         <div class="notice-header">
-            <span>Notice</span>
+            <span>📢</span>
             <h3 style="margin:0;">Notice Board</h3>
         </div>
         <div class="notice-list">
@@ -159,7 +159,6 @@
                 {% for notice in stats.recent_notices %}
                 <div class="notice-item">
                     <div class="notice-title">
-                        <span>Notice</span>
                         {{ notice.title }}
                         {% if loop.index == 1 %}
                             <span class="badge badge-danger" style="font-size:10px;">NEW</span>
@@ -173,7 +172,7 @@
                 {% endfor %}
             {% else %}
                 <div class="empty-notice" style="text-align:center; padding:30px; color:var(--text-muted);">
-                    <span>Notice</span>
+                    <span>📭</span>
                     <p>No notices available.</p>
                 </div>
             {% endif %}
