@@ -5,6 +5,53 @@
 <title>System Settings</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+    .settings-section {
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+    .settings-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+    .settings-section h3 {
+        color: var(--primary);
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+        border-left: 3px solid var(--primary);
+        padding-left: 12px;
+    }
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 8px 0;
+    }
+    .checkbox-group input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+        cursor: pointer;
+        accent-color: var(--primary);
+    }
+    .checkbox-group label {
+        margin: 0;
+        cursor: pointer;
+        font-weight: normal;
+        color: var(--text-secondary);
+    }
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
 </head>
 <body>
 
@@ -51,8 +98,8 @@
 </div>
 
 <div class="main">
-    <div class="header" style="background: linear-gradient(135deg, var(--danger), var(--danger-dark));">
-        System Configuration
+    <div class="header" style="background: var(--primary); color: white;">
+        ⚙️ System Configuration
     </div>
 
     {% if message %}
@@ -60,49 +107,113 @@
     {% endif %}
 
     <div class="card">
-        <h2>College Information</h2>
         <form method="POST">
-            <div class="form-group">
-                <label>College Name:</label>
-                <input type="text" name="college_name" value="{{ settings.college_name }}" required>
-                <small class="text-muted">This appears in headers and PDF reports</small>
-            </div>
-            <div class="form-group">
-                <label>College Location:</label>
-                <input type="text" name="college_location" value="{{ settings.college_location }}" required>
-            </div>
-            <div class="form-group">
-                <label>Header Display Text:</label>
-                <input type="text" name="college_header" value="{{ settings.get('college_header', settings.college_name) }}" placeholder="Optional custom header">
-                <small class="text-muted">If empty, college name will be used</small>
-            </div>
-            <div class="form-group">
-                <label>Academic Year:</label>
-                <input type="text" name="academic_year" value="{{ settings.academic_year }}" required>
-            </div>
-            
-            <h2 style="margin-top: 30px;">Attendance Settings</h2>
-            <div class="form-group">
-                <label>Low Attendance Threshold (%):</label>
-                <input type="number" name="attendance_threshold" value="{{ settings.attendance_threshold }}" min="0" max="100" required>
-                <small class="text-muted">Students below this percentage will receive alerts</small>
-            </div>
-            <div class="form-group">
-                <label>QR Code Expiry (seconds):</label>
-                <input type="number" name="qr_expiry" value="{{ settings.qr_expiry_seconds }}" min="10" max="300" required>
-                <small class="text-muted">How long the QR code remains valid after generation</small>
-            </div>
-            <div class="form-group">
-                <label>Default Session Duration (minutes):</label>
-                <input type="number" name="session_duration" value="{{ settings.session_duration_minutes }}" min="1" max="60" required>
-                <small class="text-muted">Default duration when creating a new session</small>
+            <!-- College Information -->
+            <div class="settings-section">
+                <h3>🏛️ College Information</h3>
+                <div class="form-group">
+                    <label>College Name:</label>
+                    <input type="text" name="college_name" value="{{ settings.college_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label>College Location:</label>
+                    <input type="text" name="college_location" value="{{ settings.college_location }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Header Display Text:</label>
+                    <input type="text" name="college_header" value="{{ settings.get('college_header', settings.college_name) }}">
+                    <small class="text-muted">Optional custom header</small>
+                </div>
+                <div class="form-group">
+                    <label>Academic Year:</label>
+                    <input type="text" name="academic_year" value="{{ settings.academic_year }}" required>
+                </div>
             </div>
             
-            <button type="submit" class="success">Save All Settings</button>
+            <!-- Attendance Settings -->
+            <div class="settings-section">
+                <h3>📊 Attendance Settings</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Low Attendance Threshold (%):</label>
+                        <input type="number" name="attendance_threshold" value="{{ settings.attendance_threshold }}" min="0" max="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Default Session Duration (minutes):</label>
+                        <input type="number" name="session_duration" value="{{ settings.session_duration_minutes }}" min="1" max="60" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>QR Code Expiry (seconds):</label>
+                    <input type="number" name="qr_expiry" value="{{ settings.qr_expiry_seconds }}" min="10" max="300" required>
+                    <small class="text-muted">Legacy QR expiry (for backward compatibility)</small>
+                </div>
+            </div>
+            
+            <!-- Dynamic QR Settings (NEW) -->
+            <div class="settings-section">
+                <h3>🔄 Dynamic QR & Verification</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>QR Refresh Interval (seconds):</label>
+                        <input type="number" name="qr_refresh_interval" value="{{ settings.get('qr_refresh_interval', 15) }}" min="5" max="60" required>
+                        <small class="text-muted">How often QR code refreshes</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Verification Code Length:</label>
+                        <input type="number" name="verification_code_length" value="{{ settings.get('verification_code_length', 6) }}" min="4" max="8" required>
+                        <small class="text-muted">Number of digits in verification code</small>
+                    </div>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" name="enable_verification_code" id="enableVerification" 
+                           {% if settings.get('enable_verification_code', True) %}checked{% endif %}>
+                    <label for="enableVerification">Enable Live Verification Code</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" name="enable_device_fingerprinting" id="enableFingerprint" 
+                           {% if settings.get('enable_device_fingerprinting', True) %}checked{% endif %}>
+                    <label for="enableFingerprint">Enable Device Fingerprinting</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" name="enable_location_tracking" id="enableLocation" 
+                           {% if settings.get('enable_location_tracking', True) %}checked{% endif %}>
+                    <label for="enableLocation">Enable Location Tracking</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" name="enable_ip_tracking" id="enableIP" 
+                           {% if settings.get('enable_ip_tracking', True) %}checked{% endif %}>
+                    <label for="enableIP">Enable IP Tracking</label>
+                </div>
+            </div>
+            
+            <!-- Security Settings -->
+            <div class="settings-section">
+                <h3>🔒 Security Settings</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Max Login Attempts:</label>
+                        <input type="number" name="max_login_attempts" value="{{ settings.max_login_attempts }}" min="1" max="10" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Session Timeout (minutes):</label>
+                        <input type="number" name="session_timeout_minutes" value="{{ settings.session_timeout_minutes }}" min="5" max="120" required>
+                    </div>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" name="maintenance_mode" id="maintenanceMode" 
+                           {% if settings.maintenance_mode %}checked{% endif %}>
+                    <label for="maintenanceMode">Enable Maintenance Mode</label>
+                </div>
+            </div>
+            
+            <button type="submit" class="success" style="width: 100%; padding: 14px; font-size: 16px;">💾 Save All Settings</button>
         </form>
         
         <div class="alert alert-info" style="margin-top: 20px;">
-            <strong>Note:</strong> Changes to college name will reflect immediately in all page headers and PDF reports.
+            <strong>ℹ️ Dynamic QR System:</strong><br>
+            When enabled, QR codes refresh automatically every {{ settings.get('qr_refresh_interval', 15) }} seconds 
+            with a new verification code. This prevents screenshot sharing and ensures real-time attendance marking.
         </div>
     </div>
 </div>

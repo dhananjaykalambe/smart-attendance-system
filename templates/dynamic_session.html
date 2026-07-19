@@ -1,0 +1,408 @@
+<!-- dynamic_session.html -->
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dynamic QR Session</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+<style>
+    .qr-container {
+        background: white;
+        padding: 25px;
+        border-radius: var(--radius-lg);
+        display: inline-block;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        margin: 10px 0;
+    }
+    .qr-container img {
+        border-radius: var(--radius-md);
+        width: 250px;
+        height: 250px;
+    }
+    .verification-code {
+        font-size: 2.5rem;
+        font-weight: bold;
+        letter-spacing: 8px;
+        color: var(--primary);
+        background: var(--primary-soft);
+        padding: 10px 25px;
+        border-radius: var(--radius-md);
+        display: inline-block;
+        font-family: monospace;
+        border: 2px dashed var(--primary);
+    }
+    .session-info {
+        background: var(--primary-soft);
+        padding: 15px 20px;
+        border-radius: var(--radius-md);
+        margin: 15px 0;
+        border-left: 4px solid var(--primary);
+    }
+    .session-info p {
+        margin: 5px 0;
+        color: var(--text-secondary);
+    }
+    .session-info strong {
+        color: var(--primary);
+    }
+    .countdown-container {
+        text-align: center;
+        margin: 20px 0;
+    }
+    .countdown-timer {
+        font-size: 3.5rem;
+        font-weight: bold;
+        font-family: monospace;
+        background: var(--primary);
+        color: white;
+        display: inline-block;
+        padding: 20px 40px;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+    }
+    .countdown-timer.warning {
+        background: var(--danger);
+    }
+    .status-text {
+        margin-top: 10px;
+        font-size: 14px;
+    }
+    .status-text.active { color: var(--success); font-weight: bold; }
+    .status-text.expired { color: var(--danger); font-weight: bold; }
+    .refresh-indicator {
+        color: var(--text-muted);
+        font-size: 12px;
+        margin-top: 10px;
+    }
+    .info-box {
+        background: var(--light);
+        padding: 15px;
+        border-radius: var(--radius-md);
+        margin: 20px 0;
+        text-align: left;
+        border-left: 4px solid var(--primary);
+    }
+    .info-box p { margin: 5px 0; color: var(--text-secondary); }
+    .info-box strong { color: var(--primary); }
+    .qr-url {
+        font-size: 11px;
+        word-break: break-all;
+        background: var(--light);
+        padding: 10px;
+        border-radius: var(--radius-md);
+        margin-top: 15px;
+        text-align: left;
+    }
+    @media (max-width: 768px) {
+        .countdown-timer { font-size: 2rem; padding: 15px 25px; }
+        .qr-container img { width: 180px; height: 180px; }
+        .verification-code { font-size: 1.8rem; letter-spacing: 4px; padding: 8px 18px; }
+    }
+    @media (max-width: 480px) {
+        .qr-container img { width: 150px; height: 150px; }
+        .countdown-timer { font-size: 1.5rem; padding: 12px 20px; }
+        .verification-code { font-size: 1.4rem; letter-spacing: 3px; padding: 6px 14px; }
+    }
+</style>
+</head>
+<body>
+
+<button class="menu-toggle" onclick="toggleSidebar()">
+    <div class="hamburger-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</button>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h2>Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/faculty_dashboard">Dashboard</a>
+        <a href="/create_session">Create Session</a>
+        <a href="/add_student">Manage Students</a>
+        <a href="/students_report">Reports</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance">All Attendance</a>
+        <a href="/subject_details">Subjects</a>
+        <a href="/about">About</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">Logout</a>
+    </div>
+</div>
+
+<div class="main">
+    <div class="header" style="background: var(--primary); color: white;">
+        Dynamic QR Session - {{ subject }}
+    </div>
+
+    <div class="card" style="text-align:center;">
+        <h2 style="text-align:center;">{{ subject }}</h2>
+        <h4 style="color: var(--text-secondary);">Session ID: <code style="background: var(--primary-soft); padding: 3px 10px; border-radius: var(--radius-sm);">{{ session_id }}</code></h4>
+        
+        <div class="countdown-container">
+            <div class="countdown-timer" id="countdownTimer">--:--</div>
+            <div class="status-text active" id="statusText">● Session Active</div>
+        </div>
+        
+        <!-- Verification Code -->
+        <div style="margin: 20px 0;">
+            <p style="color: var(--text-secondary); font-size: 14px;">Live Verification Code</p>
+            <div class="verification-code" id="verificationCode">{{ verification_code }}</div>
+            <p style="color: var(--text-muted); font-size: 12px; margin-top: 5px;">Students must enter this code along with QR scan</p>
+        </div>
+        
+        <!-- QR Code -->
+        <div class="qr-container">
+            <img src="data:image/png;base64,{{ qr_base64 }}" id="qrImage" alt="QR Code">
+        </div>
+        
+        <div class="refresh-indicator" id="refreshIndicator">
+            ⏳ QR refreshes every {{ refresh_interval }} seconds
+        </div>
+        
+        <div class="info-box">
+            <p><strong>How it works:</strong></p>
+            <p>1. Students scan the QR code using their device</p>
+            <p>2. They must enter the <strong>Live Verification Code</strong> shown above</p>
+            <p>3. Both QR and verification code refresh every {{ refresh_interval }} seconds</p>
+            <p>4. This prevents screenshot sharing and ensures real-time attendance</p>
+        </div>
+        
+        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+            <p style="color: var(--text-secondary);">
+                <strong>Total Students:</strong> <span id="totalStudents">-</span>
+            </p>
+        </div>
+        
+        <div class="qr-url">
+            <strong>QR Data (for manual entry):</strong><br>
+            <span id="qrDataDisplay">{{ session_id }}|[TOKEN]</span>
+            <button onclick="copyQrData()" class="btn-small" style="width: auto; margin-top: 5px;">Copy QR Data</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ====================================================================
+    // DYNAMIC QR REFRESH LOGIC
+    // ====================================================================
+    
+    const sessionId = "{{ session_id }}";
+    const refreshInterval = {{ refresh_interval }};
+    const endTimeStr = "{{ end_time }}";
+    let endTime = new Date(endTimeStr);
+    let refreshTimer = null;
+    let countdownInterval = null;
+    
+    // Elements
+    const countdownElement = document.getElementById('countdownTimer');
+    const statusTextSpan = document.getElementById('statusText');
+    const verificationCodeSpan = document.getElementById('verificationCode');
+    const qrImage = document.getElementById('qrImage');
+    const refreshIndicator = document.getElementById('refreshIndicator');
+    const totalStudentsSpan = document.getElementById('totalStudents');
+    const qrDataDisplay = document.getElementById('qrDataDisplay');
+    
+    // ====================================================================
+    // UPDATE COUNTDOWN
+    // ====================================================================
+    
+    function updateCountdown() {
+        const now = new Date();
+        const remainingSeconds = Math.max(0, Math.floor((endTime - now) / 1000));
+        
+        if (remainingSeconds <= 0) {
+            countdownElement.innerHTML = "00:00";
+            countdownElement.classList.add('warning');
+            statusTextSpan.innerHTML = "● SESSION EXPIRED";
+            statusTextSpan.className = "status-text expired";
+            statusTextSpan.style.color = "var(--danger)";
+            clearInterval(countdownInterval);
+            clearInterval(refreshTimer);
+            refreshIndicator.innerHTML = "⏰ Session has ended";
+            return;
+        }
+        
+        const minutes = Math.floor(remainingSeconds / 60);
+        const seconds = remainingSeconds % 60;
+        const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        countdownElement.innerHTML = formattedTime;
+        
+        if (remainingSeconds <= 30) {
+            countdownElement.classList.add('warning');
+        } else {
+            countdownElement.classList.remove('warning');
+        }
+    }
+    
+    // ====================================================================
+    // REFRESH QR CODE
+    // ====================================================================
+    
+    function refreshQR() {
+        fetch(`/api/qr/refresh/${sessionId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    console.error('QR refresh error:', data.error);
+                    return;
+                }
+                
+                // Update QR code
+                qrImage.src = 'data:image/png;base64,' + data.qr_base64;
+                
+                // Update verification code
+                verificationCodeSpan.textContent = data.verification_code;
+                
+                // Update QR data display
+                qrDataDisplay.textContent = sessionId + '|' + data.verification_code;
+                
+                // Update indicator
+                refreshIndicator.innerHTML = `✅ QR refreshed at ${new Date().toLocaleTimeString()}`;
+                
+                // Update session end time if provided
+                if (data.expires_at) {
+                    const newExpiry = new Date(data.expires_at);
+                    // Only extend if the new expiry is later than current
+                    if (newExpiry > endTime) {
+                        endTime = newExpiry;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('QR refresh failed:', error);
+                refreshIndicator.innerHTML = '⚠️ Failed to refresh QR. Retrying...';
+            });
+    }
+    
+    // ====================================================================
+    // FETCH TOTAL STUDENTS
+    // ====================================================================
+    
+    function fetchTotalStudents() {
+        // This would typically fetch from an API endpoint
+        // For now, we'll show a placeholder or use existing data
+        fetch(`/api/qr/status/${sessionId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'active') {
+                    // You can add a student count endpoint later
+                }
+            })
+            .catch(() => {});
+    }
+    
+    // ====================================================================
+    // COPY QR DATA
+    // ====================================================================
+    
+    function copyQrData() {
+        const data = qrDataDisplay.textContent;
+        navigator.clipboard.writeText(data).then(function() {
+            alert('QR data copied to clipboard!');
+        });
+    }
+    
+    // ====================================================================
+    // CHECK SESSION STATUS
+    // ====================================================================
+    
+    function checkSessionStatus() {
+        const now = new Date();
+        if (now >= endTime) {
+            clearInterval(refreshTimer);
+            clearInterval(countdownInterval);
+            countdownElement.innerHTML = "00:00";
+            countdownElement.classList.add('warning');
+            statusTextSpan.innerHTML = "● SESSION EXPIRED";
+            statusTextSpan.className = "status-text expired";
+            refreshIndicator.innerHTML = "⏰ Session has ended";
+            return false;
+        }
+        return true;
+    }
+    
+    // ====================================================================
+    // INITIALIZATION
+    // ====================================================================
+    
+    // Start countdown
+    updateCountdown();
+    countdownInterval = setInterval(function() {
+        if (!checkSessionStatus()) {
+            clearInterval(countdownInterval);
+            clearInterval(refreshTimer);
+            return;
+        }
+        updateCountdown();
+    }, 1000);
+    
+    // Start QR refresh
+    refreshTimer = setInterval(function() {
+        if (!checkSessionStatus()) {
+            clearInterval(refreshTimer);
+            return;
+        }
+        refreshQR();
+    }, refreshInterval * 1000);
+    
+    // Fetch student count periodically
+    fetchTotalStudents();
+    setInterval(fetchTotalStudents, 30000);
+</script>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuBtn = document.querySelector('.menu-toggle');
+        if (sidebar) {
+            sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('active');
+            if (menuBtn) menuBtn.classList.toggle('open');
+        }
+    }
+    
+    function closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuBtn = document.querySelector('.menu-toggle');
+        if (sidebar) {
+            sidebar.classList.remove('open');
+            if (overlay) overlay.classList.remove('active');
+            if (menuBtn) menuBtn.classList.remove('open');
+        }
+    }
+    
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
+    });
+    
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && window.innerWidth <= 768) closeSidebar(); });
+    window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+</script>
+</body>
+</html>
