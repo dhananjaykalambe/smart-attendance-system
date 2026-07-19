@@ -418,16 +418,41 @@ def get_dashboard_stats():
     from utils.database import db
     from datetime import datetime
     
-    total_students = db.students.count_documents({})
-    total_faculty = db.faculty.count_documents({})
-    total_sessions = db.sessions.count_documents({})
-    total_attendance = db.attendance.count_documents({})
+    try:
+        total_students = db.students.count_documents({})
+    except:
+        total_students = 0
     
-    today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    today_sessions = db.sessions.count_documents({"created_at": {"$gte": today_start}})
-    active_sessions = db.sessions.count_documents({"end_time": {"$gt": datetime.now()}, "is_active": True})
+    try:
+        total_faculty = db.faculty.count_documents({})
+    except:
+        total_faculty = 0
     
-    recent_notices = list(db.notices.find({}).sort("created_at", -1).limit(5))
+    try:
+        total_sessions = db.sessions.count_documents({})
+    except:
+        total_sessions = 0
+    
+    try:
+        total_attendance = db.attendance.count_documents({})
+    except:
+        total_attendance = 0
+    
+    try:
+        today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        today_sessions = db.sessions.count_documents({"created_at": {"$gte": today_start}})
+    except:
+        today_sessions = 0
+    
+    try:
+        active_sessions = db.sessions.count_documents({"end_time": {"$gt": datetime.now()}, "is_active": True})
+    except:
+        active_sessions = 0
+    
+    try:
+        recent_notices = list(db.notices.find({}).sort("created_at", -1).limit(5))
+    except:
+        recent_notices = []
     
     return {
         "total_students": total_students,
