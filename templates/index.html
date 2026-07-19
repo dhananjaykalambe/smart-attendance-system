@@ -149,22 +149,18 @@
     <!-- Statistics Cards -->
     <div class="quick-stats">
         <div class="quick-stat">
-            <span class="stat-icon">👨‍🎓</span>
             <h3>{{ stats.total_students if stats and stats.total_students is defined else 0 }}</h3>
             <p>Total Students</p>
         </div>
         <div class="quick-stat">
-            <span class="stat-icon">👨‍🏫</span>
             <h3>{{ stats.total_faculty if stats and stats.total_faculty is defined else 0 }}</h3>
             <p>Total Faculty</p>
         </div>
         <div class="quick-stat">
-            <span class="stat-icon">📚</span>
             <h3>{{ stats.today_sessions if stats and stats.today_sessions is defined else 0 }}</h3>
             <p>Today's Lectures</p>
         </div>
         <div class="quick-stat">
-            <span class="stat-icon">🟢</span>
             <h3>{{ stats.active_sessions if stats and stats.active_sessions is defined else 0 }}</h3>
             <p>Active Sessions</p>
         </div>
