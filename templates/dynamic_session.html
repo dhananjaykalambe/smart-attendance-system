@@ -6,103 +6,276 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
 <style>
+    .session-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .qr-display-area {
+        background: white;
+        border-radius: var(--radius-md);
+        padding: 30px;
+        text-align: center;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .qr-display-area .session-id {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        margin-bottom: 5px;
+    }
+    
+    .qr-display-area .session-id code {
+        background: var(--primary-soft);
+        padding: 4px 14px;
+        border-radius: var(--radius-sm);
+        font-size: 1.1rem;
+        color: var(--primary);
+        font-weight: 700;
+        letter-spacing: 2px;
+    }
+    
+    .qr-display-area .subject-title {
+        font-size: 1.8rem;
+        color: var(--primary);
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    
     .qr-container {
         background: white;
-        padding: 25px;
-        border-radius: var(--radius-lg);
+        padding: 20px;
+        border-radius: var(--radius-md);
         display: inline-block;
-        box-shadow: var(--shadow-md);
-        border: 1px solid var(--border-color);
+        border: 2px solid var(--border-color);
         margin: 10px 0;
     }
+    
     .qr-container img {
-        border-radius: var(--radius-md);
-        width: 250px;
-        height: 250px;
+        border-radius: var(--radius-sm);
+        width: 220px;
+        height: 220px;
+        display: block;
     }
+    
+    .verification-code-area {
+        margin: 20px 0;
+        padding: 15px;
+        background: var(--primary-soft);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+    }
+    
+    .verification-code-area .label {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-bottom: 5px;
+        display: block;
+    }
+    
     .verification-code {
-        font-size: 2.5rem;
-        font-weight: bold;
+        font-size: 2.2rem;
+        font-weight: 700;
         letter-spacing: 8px;
         color: var(--primary);
-        background: var(--primary-soft);
+        background: white;
         padding: 10px 25px;
-        border-radius: var(--radius-md);
+        border-radius: var(--radius-sm);
         display: inline-block;
         font-family: monospace;
         border: 2px dashed var(--primary);
     }
-    .session-info {
-        background: var(--primary-soft);
-        padding: 15px 20px;
-        border-radius: var(--radius-md);
-        margin: 15px 0;
-        border-left: 4px solid var(--primary);
-    }
-    .session-info p {
-        margin: 5px 0;
-        color: var(--text-secondary);
-    }
-    .session-info strong {
-        color: var(--primary);
-    }
-    .countdown-container {
-        text-align: center;
+    
+    .timer-section {
         margin: 20px 0;
+        padding: 20px;
+        background: var(--light);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
     }
+    
+    .timer-section .timer-label {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+        display: block;
+    }
+    
     .countdown-timer {
-        font-size: 3.5rem;
-        font-weight: bold;
+        font-size: 3rem;
+        font-weight: 700;
         font-family: monospace;
         background: var(--primary);
         color: white;
         display: inline-block;
-        padding: 20px 40px;
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-md);
+        padding: 15px 35px;
+        border-radius: var(--radius-sm);
+        min-width: 120px;
+        transition: all 0.3s ease;
     }
+    
     .countdown-timer.warning {
         background: var(--danger);
+        animation: pulse-warning 0.8s ease-in-out infinite;
     }
-    .status-text {
-        margin-top: 10px;
-        font-size: 14px;
+    
+    @keyframes pulse-warning {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
     }
-    .status-text.active { color: var(--success); font-weight: bold; }
-    .status-text.expired { color: var(--danger); font-weight: bold; }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-top: 8px;
+    }
+    
+    .status-badge.active {
+        background: var(--success-soft);
+        color: var(--success-dark);
+    }
+    
+    .status-badge.expired {
+        background: var(--danger-soft);
+        color: var(--danger-dark);
+    }
+    
+    .status-badge .dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 6px;
+    }
+    
+    .status-badge.active .dot {
+        background: var(--success);
+    }
+    
+    .status-badge.expired .dot {
+        background: var(--danger);
+    }
+    
+    .info-box {
+        background: var(--primary-soft);
+        padding: 15px 20px;
+        border-radius: var(--radius-sm);
+        margin: 20px 0;
+        text-align: left;
+        border-left: 4px solid var(--primary);
+    }
+    
+    .info-box p {
+        margin: 4px 0;
+        color: var(--text-secondary);
+        font-size: 13px;
+    }
+    
+    .info-box strong {
+        color: var(--primary);
+    }
+    
     .refresh-indicator {
         color: var(--text-muted);
         font-size: 12px;
         margin-top: 10px;
     }
-    .info-box {
-        background: var(--light);
-        padding: 15px;
-        border-radius: var(--radius-md);
-        margin: 20px 0;
-        text-align: left;
-        border-left: 4px solid var(--primary);
+    
+    .action-buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 20px;
     }
-    .info-box p { margin: 5px 0; color: var(--text-secondary); }
-    .info-box strong { color: var(--primary); }
-    .qr-url {
+    
+    .action-buttons .btn {
+        padding: 10px 25px;
+        min-width: 120px;
+    }
+    
+    .qr-url-box {
         font-size: 11px;
         word-break: break-all;
-        background: var(--light);
-        padding: 10px;
-        border-radius: var(--radius-md);
+        background: var(--gray-100);
+        padding: 12px 15px;
+        border-radius: var(--radius-sm);
         margin-top: 15px;
         text-align: left;
+        border: 1px solid var(--border-color);
     }
+    
+    .qr-url-box strong {
+        color: var(--primary);
+    }
+    
+    .qr-url-box .url-text {
+        color: var(--text-secondary);
+        font-family: monospace;
+        font-size: 12px;
+        display: block;
+        margin-top: 4px;
+    }
+    
     @media (max-width: 768px) {
-        .countdown-timer { font-size: 2rem; padding: 15px 25px; }
-        .qr-container img { width: 180px; height: 180px; }
-        .verification-code { font-size: 1.8rem; letter-spacing: 4px; padding: 8px 18px; }
+        .qr-container img {
+            width: 170px;
+            height: 170px;
+        }
+        .countdown-timer {
+            font-size: 2rem;
+            padding: 12px 25px;
+            min-width: 90px;
+        }
+        .verification-code {
+            font-size: 1.6rem;
+            letter-spacing: 5px;
+            padding: 8px 18px;
+        }
+        .qr-display-area {
+            padding: 20px;
+        }
+        .qr-display-area .subject-title {
+            font-size: 1.4rem;
+        }
+        .action-buttons .btn {
+            padding: 8px 18px;
+            min-width: 100px;
+            font-size: 13px;
+        }
     }
+    
     @media (max-width: 480px) {
-        .qr-container img { width: 150px; height: 150px; }
-        .countdown-timer { font-size: 1.5rem; padding: 12px 20px; }
-        .verification-code { font-size: 1.4rem; letter-spacing: 3px; padding: 6px 14px; }
+        .qr-container img {
+            width: 140px;
+            height: 140px;
+        }
+        .countdown-timer {
+            font-size: 1.5rem;
+            padding: 10px 18px;
+            min-width: 70px;
+        }
+        .verification-code {
+            font-size: 1.3rem;
+            letter-spacing: 4px;
+            padding: 6px 14px;
+        }
+        .qr-display-area {
+            padding: 15px;
+        }
+        .qr-display-area .subject-title {
+            font-size: 1.2rem;
+        }
+        .info-box {
+            padding: 12px 15px;
+        }
+        .info-box p {
+            font-size: 12px;
+        }
     }
 </style>
 </head>
@@ -150,52 +323,75 @@
 
 <div class="main">
     <div class="header" style="background: var(--primary); color: white;">
-        Dynamic QR Session - {{ subject }}
+        Dynamic QR Session
     </div>
 
-    <div class="card" style="text-align:center;">
-        <h2 style="text-align:center;">{{ subject }}</h2>
-        <h4 style="color: var(--text-secondary);">Session ID: <code style="background: var(--primary-soft); padding: 3px 10px; border-radius: var(--radius-sm);">{{ session_id }}</code></h4>
-        
-        <div class="countdown-container">
-            <div class="countdown-timer" id="countdownTimer">--:--</div>
-            <div class="status-text active" id="statusText">● Session Active</div>
-        </div>
-        
-        <!-- Verification Code -->
-        <div style="margin: 20px 0;">
-            <p style="color: var(--text-secondary); font-size: 14px;">Live Verification Code</p>
-            <div class="verification-code" id="verificationCode">{{ verification_code }}</div>
-            <p style="color: var(--text-muted); font-size: 12px; margin-top: 5px;">Students must enter this code along with QR scan</p>
-        </div>
-        
-        <!-- QR Code -->
-        <div class="qr-container">
-            <img src="data:image/png;base64,{{ qr_base64 }}" id="qrImage" alt="QR Code">
-        </div>
-        
-        <div class="refresh-indicator" id="refreshIndicator">
-            ⏳ QR refreshes every {{ refresh_interval }} seconds
-        </div>
-        
-        <div class="info-box">
-            <p><strong>How it works:</strong></p>
-            <p>1. Students scan the QR code using their device</p>
-            <p>2. They must enter the <strong>Live Verification Code</strong> shown above</p>
-            <p>3. Both QR and verification code refresh every {{ refresh_interval }} seconds</p>
-            <p>4. This prevents screenshot sharing and ensures real-time attendance</p>
-        </div>
-        
-        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color);">
-            <p style="color: var(--text-secondary);">
-                <strong>Total Students:</strong> <span id="totalStudents">-</span>
-            </p>
-        </div>
-        
-        <div class="qr-url">
-            <strong>QR Data (for manual entry):</strong><br>
-            <span id="qrDataDisplay">{{ session_id }}|[TOKEN]</span>
-            <button onclick="copyQrData()" class="btn-small" style="width: auto; margin-top: 5px;">Copy QR Data</button>
+    <div class="session-container">
+        <div class="qr-display-area">
+            <!-- Subject and Session ID -->
+            <div class="subject-title">{{ subject }}</div>
+            <div class="session-id">
+                Session: <code>{{ session_id }}</code>
+            </div>
+            
+            <!-- Timer Section -->
+            <div class="timer-section">
+                <span class="timer-label">⏱️ Session Timer</span>
+                <div>
+                    <div class="countdown-timer" id="countdownTimer">--:--</div>
+                </div>
+                <div>
+                    <span class="status-badge active" id="statusBadge">
+                        <span class="dot"></span> Active
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Verification Code -->
+            <div class="verification-code-area">
+                <span class="label">🔑 Live Verification Code</span>
+                <div>
+                    <div class="verification-code" id="verificationCode">{{ verification_code }}</div>
+                </div>
+                <p style="color: var(--text-muted); font-size: 12px; margin-top: 8px;">
+                    Students must enter this code along with QR scan
+                </p>
+            </div>
+            
+            <!-- QR Code -->
+            <div class="qr-container">
+                <img src="data:image/png;base64,{{ qr_base64 }}" id="qrImage" alt="QR Code">
+            </div>
+            
+            <div class="refresh-indicator" id="refreshIndicator">
+                🔄 QR refreshes every {{ refresh_interval }} seconds
+            </div>
+            
+            <!-- Info Box -->
+            <div class="info-box">
+                <p><strong>📌 How it works:</strong></p>
+                <p>1. Students scan the QR code using their device</p>
+                <p>2. They must enter the <strong>Live Verification Code</strong> shown above</p>
+                <p>3. Both QR and verification code refresh every {{ refresh_interval }} seconds</p>
+                <p>4. This prevents screenshot sharing and ensures real-time attendance</p>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="/faculty_dashboard">
+                    <button class="btn btn-secondary">← Dashboard</button>
+                </a>
+                <a href="/create_session">
+                    <button class="btn btn-success">+ New Session</button>
+                </a>
+                <button class="btn btn-info" onclick="copyQrData()">📋 Copy QR Data</button>
+            </div>
+            
+            <!-- QR URL -->
+            <div class="qr-url-box">
+                <strong>QR Data:</strong>
+                <span class="url-text" id="qrDataDisplay">{{ session_id }}|[TOKEN]</span>
+            </div>
         </div>
     </div>
 </div>
@@ -214,11 +410,10 @@
     
     // Elements
     const countdownElement = document.getElementById('countdownTimer');
-    const statusTextSpan = document.getElementById('statusText');
+    const statusBadge = document.getElementById('statusBadge');
     const verificationCodeSpan = document.getElementById('verificationCode');
     const qrImage = document.getElementById('qrImage');
     const refreshIndicator = document.getElementById('refreshIndicator');
-    const totalStudentsSpan = document.getElementById('totalStudents');
     const qrDataDisplay = document.getElementById('qrDataDisplay');
     
     // ====================================================================
@@ -232,12 +427,11 @@
         if (remainingSeconds <= 0) {
             countdownElement.innerHTML = "00:00";
             countdownElement.classList.add('warning');
-            statusTextSpan.innerHTML = "● SESSION EXPIRED";
-            statusTextSpan.className = "status-text expired";
-            statusTextSpan.style.color = "var(--danger)";
+            statusBadge.className = 'status-badge expired';
+            statusBadge.innerHTML = '<span class="dot"></span> Expired';
             clearInterval(countdownInterval);
             clearInterval(refreshTimer);
-            refreshIndicator.innerHTML = "⏰ Session has ended";
+            refreshIndicator.innerHTML = '⏰ Session has ended';
             return;
         }
         
@@ -281,12 +475,12 @@
                 qrDataDisplay.textContent = sessionId + '|' + data.verification_code;
                 
                 // Update indicator
-                refreshIndicator.innerHTML = `✅ QR refreshed at ${new Date().toLocaleTimeString()}`;
+                const now = new Date();
+                refreshIndicator.innerHTML = `✅ QR refreshed at ${now.toLocaleTimeString()}`;
                 
                 // Update session end time if provided
                 if (data.expires_at) {
                     const newExpiry = new Date(data.expires_at);
-                    // Only extend if the new expiry is later than current
                     if (newExpiry > endTime) {
                         endTime = newExpiry;
                     }
@@ -299,29 +493,21 @@
     }
     
     // ====================================================================
-    // FETCH TOTAL STUDENTS
-    // ====================================================================
-    
-    function fetchTotalStudents() {
-        // This would typically fetch from an API endpoint
-        // For now, we'll show a placeholder or use existing data
-        fetch(`/api/qr/status/${sessionId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'active') {
-                    // You can add a student count endpoint later
-                }
-            })
-            .catch(() => {});
-    }
-    
-    // ====================================================================
     // COPY QR DATA
     // ====================================================================
     
     function copyQrData() {
         const data = qrDataDisplay.textContent;
         navigator.clipboard.writeText(data).then(function() {
+            alert('QR data copied to clipboard!');
+        }).catch(function() {
+            // Fallback
+            const textArea = document.createElement('textarea');
+            textArea.value = data;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
             alert('QR data copied to clipboard!');
         });
     }
@@ -337,9 +523,9 @@
             clearInterval(countdownInterval);
             countdownElement.innerHTML = "00:00";
             countdownElement.classList.add('warning');
-            statusTextSpan.innerHTML = "● SESSION EXPIRED";
-            statusTextSpan.className = "status-text expired";
-            refreshIndicator.innerHTML = "⏰ Session has ended";
+            statusBadge.className = 'status-badge expired';
+            statusBadge.innerHTML = '<span class="dot"></span> Expired';
+            refreshIndicator.innerHTML = '⏰ Session has ended';
             return false;
         }
         return true;
@@ -369,9 +555,10 @@
         refreshQR();
     }, refreshInterval * 1000);
     
-    // Fetch student count periodically
-    fetchTotalStudents();
-    setInterval(fetchTotalStudents, 30000);
+    // Initial QR data display
+    document.addEventListener('DOMContentLoaded', function() {
+        qrDataDisplay.textContent = sessionId + '|' + verificationCodeSpan.textContent;
+    });
 </script>
 
 <script>
