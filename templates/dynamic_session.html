@@ -6,26 +6,29 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
     .session-container {
-        max-width: 950px;
+        max-width: 1000px;
         margin: 0 auto;
     }
     
     .qr-display-area {
         background: white;
-        border-radius: var(--radius-md);
-        padding: 35px 40px 30px;
+        border-radius: 20px;
+        padding: 40px 45px 30px;
         border: 1px solid var(--border-color);
-        box-shadow: var(--shadow-sm);
+        box-shadow: 0 4px 25px rgba(26, 58, 107, 0.08);
     }
     
     /* Subject Title */
     .subject-title {
-        font-size: 2rem;
+        font-size: 2.2rem;
         color: var(--primary);
-        font-weight: 700;
+        font-weight: 800;
         text-align: center;
-        margin-bottom: 5px;
+        margin-bottom: 2px;
+        letter-spacing: -0.5px;
     }
     
     /* Session ID */
@@ -33,66 +36,77 @@
         text-align: center;
         color: var(--text-secondary);
         font-size: 1rem;
-        margin-bottom: 25px;
+        margin-bottom: 30px;
+        font-weight: 500;
     }
     
     .session-id code {
-        background: var(--primary-soft);
-        padding: 4px 20px;
-        border-radius: 20px;
-        font-size: 1.3rem;
+        background: linear-gradient(135deg, var(--primary-soft), #dce4f0);
+        padding: 6px 24px;
+        border-radius: 30px;
+        font-size: 1.4rem;
         color: var(--primary);
         font-weight: 700;
         letter-spacing: 4px;
         font-family: 'Courier New', monospace;
+        border: 2px solid rgba(26, 58, 107, 0.15);
     }
     
-    /* QR + Verification Code Container */
+    /* ================================================================
+       QR + VERIFICATION - FLEX CONTAINER
+       ================================================================ */
+    
     .qr-verification-container {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 40px;
-        margin: 15px 0 10px;
+        gap: 50px;
+        margin: 10px 0 15px;
         flex-wrap: wrap;
     }
     
-    /* QR Code Container */
+    /* ================================================================
+       QR CODE - ATTRACTIVE GRADIENT BACKGROUND
+       ================================================================ */
+    
     .qr-wrapper {
         text-align: center;
     }
     
     .qr-container {
-        background: white;
-        padding: 15px;
-        border-radius: 20px;
-        border: 3px solid var(--primary);
+        background: linear-gradient(145deg, #ffffff, #f0f4ff);
+        padding: 18px;
+        border-radius: 24px;
         display: inline-block;
-        box-shadow: 0 4px 20px rgba(26, 58, 107, 0.15);
-        transition: var(--transition);
+        box-shadow: 0 8px 32px rgba(26, 58, 107, 0.12), inset 0 1px 0 rgba(255,255,255,0.8);
+        border: 1px solid rgba(26, 58, 107, 0.08);
+        transition: all 0.3s ease;
     }
     
     .qr-container:hover {
-        box-shadow: 0 6px 30px rgba(26, 58, 107, 0.25);
-        transform: scale(1.01);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(26, 58, 107, 0.18);
     }
     
     .qr-container img {
-        border-radius: 12px;
-        width: 200px;
-        height: 200px;
+        border-radius: 16px;
+        width: 210px;
+        height: 210px;
         display: block;
+        background: white;
     }
     
     .qr-label {
-        font-size: 12px;
+        font-size: 13px;
         color: var(--text-muted);
-        margin-top: 8px;
+        margin-top: 10px;
         display: block;
+        font-weight: 500;
+        letter-spacing: 0.5px;
     }
     
     /* ================================================================
-       ATTRACTIVE VERIFICATION CODE - CIRCULAR DESIGN
+       VERIFICATION CODE - ATTRACTIVE GRADIENT BLOCK
        ================================================================ */
     
     .verification-wrapper {
@@ -104,110 +118,134 @@
         color: var(--text-secondary);
         font-weight: 600;
         display: block;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
         letter-spacing: 2px;
         text-transform: uppercase;
     }
     
-    .verification-circle {
-        width: 180px;
-        height: 180px;
-        border-radius: 50%;
-        background: linear-gradient(145deg, var(--primary), var(--primary-light));
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 8px 32px rgba(26, 58, 107, 0.30), inset 0 -4px 15px rgba(0,0,0,0.15);
-        transition: var(--transition);
-        position: relative;
-        margin: 0 auto;
-    }
-    
-    .verification-circle::before {
-        content: '';
-        position: absolute;
-        inset: -4px;
-        border-radius: 50%;
-        padding: 4px;
-        background: linear-gradient(135deg, var(--primary), var(--primary-light), var(--secondary-light));
-        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        pointer-events: none;
-    }
-    
-    .verification-circle::after {
-        content: '🔐';
-        position: absolute;
-        top: 15px;
-        right: 20px;
-        font-size: 18px;
-        opacity: 0.6;
-    }
-    
-    .verification-circle:hover {
-        transform: scale(1.03);
-        box-shadow: 0 12px 40px rgba(26, 58, 107, 0.40);
-    }
-    
-    .verification-code {
-        font-size: 2.6rem;
-        font-weight: 700;
-        letter-spacing: 8px;
-        color: white;
-        font-family: 'Courier New', monospace;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.15);
-        line-height: 1;
-    }
-    
-    .verification-sub {
-        font-size: 11px;
-        color: rgba(255,255,255,0.7);
-        margin-top: 6px;
-        letter-spacing: 2px;
-        font-weight: 400;
-    }
-    
-    /* ================================================================
-       ATTRACTIVE TIMER - ROUNDED/CIRCULAR DESIGN
-       ================================================================ */
-    
-    .timer-section {
-        margin: 20px auto 10px;
-        padding: 5px;
-        text-align: center;
-        max-width: 450px;
-    }
-    
-    .timer-card {
-        background: linear-gradient(145deg, var(--primary), var(--primary-dark));
-        border-radius: 60px 60px 30px 30px;
-        padding: 18px 30px 22px;
-        box-shadow: 0 6px 30px rgba(26, 58, 107, 0.30), inset 0 2px 20px rgba(255,255,255,0.10);
+    .verification-block {
+        background: linear-gradient(145deg, #1a3a6b, #2a5298, #3a6db5);
+        padding: 25px 35px;
+        border-radius: 20px;
+        min-width: 200px;
+        box-shadow: 0 8px 35px rgba(26, 58, 107, 0.30), inset 0 2px 0 rgba(255,255,255,0.15);
         position: relative;
         overflow: hidden;
+        transition: all 0.3s ease;
     }
     
-    .timer-card::before {
+    .verification-block::before {
         content: '';
         position: absolute;
         top: -50%;
         left: -50%;
         width: 200%;
         height: 200%;
-        background: radial-gradient(ellipse at center, rgba(255,255,255,0.05) 0%, transparent 70%);
-        animation: shimmer 4s ease-in-out infinite;
+        background: radial-gradient(ellipse at 30% 50%, rgba(255,255,255,0.08) 0%, transparent 60%);
+        animation: glowMove 6s ease-in-out infinite;
     }
     
-    @keyframes shimmer {
-        0%, 100% { transform: translate(0, 0); }
+    @keyframes glowMove {
+        0%, 100% { transform: translate(-10%, -10%); }
         50% { transform: translate(10%, 10%); }
+    }
+    
+    .verification-block::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    }
+    
+    .verification-block:hover {
+        transform: scale(1.02);
+        box-shadow: 0 12px 45px rgba(26, 58, 107, 0.40);
+    }
+    
+    .verification-code {
+        font-size: 3rem;
+        font-weight: 800;
+        letter-spacing: 12px;
+        color: white;
+        font-family: 'Courier New', monospace;
+        text-shadow: 0 2px 20px rgba(0,0,0,0.15);
+        line-height: 1.2;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .verification-sub {
+        font-size: 11px;
+        color: rgba(255,255,255,0.7);
+        margin-top: 6px;
+        letter-spacing: 3px;
+        font-weight: 500;
+        text-transform: uppercase;
+        position: relative;
+        z-index: 1;
+        display: block;
+    }
+    
+    .verification-icon {
+        position: absolute;
+        top: 12px;
+        right: 18px;
+        font-size: 20px;
+        opacity: 0.3;
+        z-index: 1;
+    }
+    
+    /* ================================================================
+       TIMER - ATTRACTIVE GRADIENT BLOCK (FIXED)
+       ================================================================ */
+    
+    .timer-section {
+        margin: 20px auto 10px;
+        max-width: 480px;
+    }
+    
+    .timer-block {
+        background: linear-gradient(145deg, #1a3a6b, #2a5298, #1e4d8c);
+        padding: 22px 30px 25px;
+        border-radius: 20px;
+        box-shadow: 0 8px 35px rgba(26, 58, 107, 0.30), inset 0 2px 0 rgba(255,255,255,0.10);
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }
+    
+    .timer-block::before {
+        content: '';
+        position: absolute;
+        top: -60%;
+        right: -30%;
+        width: 80%;
+        height: 150%;
+        background: radial-gradient(ellipse, rgba(255,255,255,0.05) 0%, transparent 70%);
+        animation: timerShine 8s ease-in-out infinite;
+    }
+    
+    @keyframes timerShine {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(-20%, -10%); }
+    }
+    
+    .timer-block::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
     }
     
     .timer-label {
         font-size: 12px;
-        color: rgba(255,255,255,0.7);
+        color: rgba(255,255,255,0.6);
         display: block;
         font-weight: 500;
         letter-spacing: 3px;
@@ -223,55 +261,56 @@
         gap: 15px;
         position: relative;
         z-index: 1;
-        margin-top: 2px;
+        margin-top: 4px;
     }
     
     .timer-icon {
-        font-size: 24px;
-        color: rgba(255,255,255,0.6);
-        animation: timerIconPulse 2s ease-in-out infinite;
+        font-size: 28px;
+        color: rgba(255,255,255,0.5);
+        animation: iconPulse 2s ease-in-out infinite;
     }
     
-    @keyframes timerIconPulse {
-        0%, 100% { opacity: 0.6; transform: scale(1); }
+    @keyframes iconPulse {
+        0%, 100% { opacity: 0.5; transform: scale(1); }
         50% { opacity: 1; transform: scale(1.05); }
     }
     
     .countdown-timer {
-        font-size: 3.5rem;
-        font-weight: 700;
+        font-size: 3.8rem;
+        font-weight: 800;
         font-family: 'Courier New', monospace;
         color: white;
         letter-spacing: 6px;
-        text-shadow: 0 2px 20px rgba(0,0,0,0.2);
+        text-shadow: 0 2px 25px rgba(0,0,0,0.15);
         transition: all 0.3s ease;
-        line-height: 1.2;
-        min-width: 130px;
+        line-height: 1.1;
+        min-width: 140px;
     }
     
     .countdown-timer.warning {
-        color: #ffdddd;
-        animation: timerPulse 0.8s ease-in-out infinite;
+        color: #ffe0e0;
+        animation: timerWarning 0.8s ease-in-out infinite;
     }
     
-    @keyframes timerPulse {
+    @keyframes timerWarning {
         0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
+        50% { transform: scale(1.04); }
     }
     
     .status-badge {
         display: inline-block;
-        padding: 4px 18px;
+        padding: 5px 22px;
         border-radius: 30px;
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 600;
-        margin-top: 4px;
-        background: rgba(255,255,255,0.15);
+        margin-top: 6px;
+        background: rgba(255,255,255,0.12);
         color: rgba(255,255,255,0.9);
         letter-spacing: 1px;
         backdrop-filter: blur(4px);
         position: relative;
         z-index: 1;
+        border: 1px solid rgba(255,255,255,0.08);
     }
     
     .status-badge .dot {
@@ -279,51 +318,54 @@
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        margin-right: 6px;
+        margin-right: 8px;
         background: #4ade80;
         animation: dotPulse 1.5s ease-in-out infinite;
-        box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+        box-shadow: 0 0 15px rgba(74, 222, 128, 0.4);
     }
     
     .status-badge.expired .dot {
         background: #f87171;
         animation: none;
-        box-shadow: 0 0 10px rgba(248, 113, 113, 0.5);
+        box-shadow: 0 0 15px rgba(248, 113, 113, 0.4);
     }
     
     @keyframes dotPulse {
         0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.5; transform: scale(0.8); }
+        50% { opacity: 0.4; transform: scale(0.8); }
     }
     
-    /* Refresh Indicator */
-    .refresh-indicator {
-        text-align: center;
-        color: var(--text-muted);
-        font-size: 12px;
-        margin-top: 15px;
-        padding: 6px 15px;
-        background: var(--primary-soft);
-        border-radius: 30px;
-        display: inline-block;
-        margin-left: auto;
-        margin-right: auto;
-        width: auto;
-        border: 1px solid var(--border-color);
-    }
+    /* ================================================================
+       REFRESH INDICATOR
+       ================================================================ */
     
     .refresh-indicator-container {
         text-align: center;
+        margin-top: 12px;
     }
     
-    /* Info Box */
+    .refresh-indicator {
+        color: var(--text-muted);
+        font-size: 12px;
+        padding: 6px 20px;
+        background: linear-gradient(135deg, var(--primary-soft), #f0f4ff);
+        border-radius: 30px;
+        display: inline-block;
+        border: 1px solid var(--border-color);
+        font-weight: 500;
+    }
+    
+    /* ================================================================
+       INFO BOX
+       ================================================================ */
+    
     .info-box {
-        background: var(--primary-soft);
-        padding: 15px 20px;
-        border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, var(--primary-soft), #f0f4ff);
+        padding: 18px 22px;
+        border-radius: 14px;
         margin: 20px 0 15px;
         text-align: left;
-        border-left: 4px solid var(--primary);
+        border-left: 5px solid var(--primary);
     }
     
     .info-box p {
@@ -336,26 +378,29 @@
         color: var(--primary);
     }
     
-    /* Action Buttons */
+    /* ================================================================
+       ACTION BUTTONS
+       ================================================================ */
+    
     .action-buttons {
         display: flex;
-        gap: 12px;
+        gap: 14px;
         justify-content: center;
         flex-wrap: wrap;
-        margin-top: 15px;
-        padding-top: 15px;
-        border-top: 1px solid var(--border-color);
+        margin-top: 18px;
+        padding-top: 18px;
+        border-top: 2px solid var(--border-color);
     }
     
     .action-buttons .btn {
-        padding: 10px 25px;
-        min-width: 120px;
+        padding: 11px 28px;
+        min-width: 130px;
         border-radius: 30px;
         font-weight: 600;
         font-size: 14px;
         border: none;
         cursor: pointer;
-        transition: var(--transition);
+        transition: all 0.3s ease;
         text-decoration: none;
         display: inline-block;
         text-align: center;
@@ -368,24 +413,27 @@
     .action-buttons .btn-secondary:hover {
         background: var(--gray-300);
         transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     }
     
     .action-buttons .btn-success {
-        background: var(--success);
+        background: linear-gradient(135deg, var(--success), var(--success-dark));
         color: white;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.25);
     }
     .action-buttons .btn-success:hover {
-        background: var(--success-dark);
         transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(40, 167, 69, 0.35);
     }
     
     .action-buttons .btn-info {
-        background: var(--info);
+        background: linear-gradient(135deg, var(--info), var(--info-dark));
         color: white;
+        box-shadow: 0 4px 15px rgba(23, 162, 184, 0.25);
     }
     .action-buttons .btn-info:hover {
-        background: var(--info-dark);
         transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(23, 162, 184, 0.35);
     }
     
     /* ================================================================
@@ -397,117 +445,117 @@
             padding: 25px 20px 20px;
         }
         .subject-title {
-            font-size: 1.6rem;
+            font-size: 1.8rem;
         }
         .qr-verification-container {
-            gap: 25px;
+            gap: 30px;
+        }
+        .qr-container img {
+            width: 180px;
+            height: 180px;
+        }
+        .verification-code {
+            font-size: 2.5rem;
+            letter-spacing: 10px;
+        }
+        .verification-block {
+            padding: 20px 25px;
+            min-width: 160px;
+        }
+        .countdown-timer {
+            font-size: 3rem;
+            min-width: 110px;
+        }
+        .timer-block {
+            padding: 18px 20px 20px;
+        }
+    }
+    
+    @media (max-width: 640px) {
+        .qr-display-area {
+            padding: 18px 14px 15px;
+        }
+        .subject-title {
+            font-size: 1.4rem;
+        }
+        .session-id code {
+            font-size: 1.1rem;
+            letter-spacing: 3px;
+            padding: 5px 16px;
+        }
+        .qr-verification-container {
+            flex-direction: column;
+            gap: 22px;
         }
         .qr-container img {
             width: 170px;
             height: 170px;
         }
-        .verification-circle {
-            width: 150px;
-            height: 150px;
-        }
-        .verification-code {
-            font-size: 2.2rem;
-            letter-spacing: 6px;
-        }
-        .countdown-timer {
-            font-size: 2.8rem;
-            min-width: 110px;
-        }
-        .timer-card {
-            border-radius: 40px 40px 20px 20px;
-            padding: 15px 20px 18px;
-        }
-    }
-    
-    @media (max-width: 600px) {
-        .qr-display-area {
-            padding: 18px 12px 15px;
-        }
-        .subject-title {
-            font-size: 1.3rem;
-        }
-        .session-id code {
-            font-size: 1rem;
-            letter-spacing: 2px;
-            padding: 3px 14px;
-        }
-        .qr-verification-container {
-            flex-direction: column;
-            gap: 20px;
-        }
-        .qr-container img {
-            width: 150px;
-            height: 150px;
-        }
         .qr-container {
-            padding: 12px;
+            padding: 14px;
+        }
+        .verification-block {
+            padding: 18px 22px;
+            min-width: 140px;
             border-radius: 16px;
         }
-        .verification-circle {
-            width: 140px;
-            height: 140px;
-        }
         .verification-code {
-            font-size: 2rem;
-            letter-spacing: 5px;
+            font-size: 2.2rem;
+            letter-spacing: 8px;
         }
-        .verification-circle::after {
-            top: 10px;
-            right: 12px;
-            font-size: 14px;
-        }
-        .timer-card {
-            border-radius: 30px 30px 15px 15px;
-            padding: 12px 15px 15px;
+        .timer-block {
+            padding: 14px 16px 18px;
+            border-radius: 16px;
         }
         .countdown-timer {
-            font-size: 2.2rem;
+            font-size: 2.4rem;
             min-width: 90px;
             letter-spacing: 4px;
         }
         .timer-icon {
-            font-size: 18px;
+            font-size: 22px;
         }
         .timer-row {
             gap: 10px;
         }
         .action-buttons .btn {
-            padding: 8px 16px;
-            min-width: 90px;
-            font-size: 12px;
-            border-radius: 25px;
+            padding: 9px 18px;
+            min-width: 100px;
+            font-size: 13px;
         }
         .info-box p {
             font-size: 12px;
         }
-        .refresh-indicator {
-            font-size: 11px;
-            padding: 4px 12px;
+        .info-box {
+            padding: 14px 16px;
         }
     }
     
-    @media (max-width: 380px) {
-        .verification-circle {
-            width: 120px;
-            height: 120px;
+    @media (max-width: 400px) {
+        .qr-container img {
+            width: 140px;
+            height: 140px;
         }
         .verification-code {
-            font-size: 1.6rem;
-            letter-spacing: 4px;
+            font-size: 1.8rem;
+            letter-spacing: 6px;
+        }
+        .verification-block {
+            padding: 14px 18px;
+            min-width: 120px;
         }
         .countdown-timer {
-            font-size: 1.8rem;
+            font-size: 2rem;
             min-width: 70px;
             letter-spacing: 3px;
         }
-        .qr-container img {
-            width: 120px;
-            height: 120px;
+        .subject-title {
+            font-size: 1.2rem;
+        }
+        .session-id code {
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            padding: 4px 12px;
         }
     }
 </style>
@@ -569,7 +617,7 @@
                 Session: <code>{{ session_id }}</code>
             </div>
             
-            <!-- QR Code + Verification Code Side by Side -->
+            <!-- QR + Verification Code -->
             <div class="qr-verification-container">
                 <!-- QR Code -->
                 <div class="qr-wrapper">
@@ -579,23 +627,24 @@
                     <span class="qr-label">📷 Scan to mark attendance</span>
                 </div>
                 
-                <!-- Live Verification Code - Circular Design -->
+                <!-- Live Verification Code -->
                 <div class="verification-wrapper">
                     <span class="verification-label">🔑 Live Verification Code</span>
-                    <div class="verification-circle">
+                    <div class="verification-block">
+                        <span class="verification-icon">🔐</span>
                         <span class="verification-code" id="verificationCode">{{ verification_code }}</span>
                         <span class="verification-sub">ENTER THIS CODE</span>
                     </div>
                 </div>
             </div>
             
-            <!-- Timer Section - Rounded Card Design -->
+            <!-- Timer - FIXED -->
             <div class="timer-section">
-                <div class="timer-card">
+                <div class="timer-block">
                     <span class="timer-label">⏱️ Session Timer</span>
                     <div class="timer-row">
                         <span class="timer-icon">⏳</span>
-                        <span class="countdown-timer" id="countdownTimer">--:--</span>
+                        <span class="countdown-timer" id="countdownTimer">Loading...</span>
                     </div>
                     <span class="status-badge active" id="statusBadge">
                         <span class="dot"></span> Active
@@ -614,7 +663,7 @@
             <div class="info-box">
                 <p><strong>📌 How it works:</strong></p>
                 <p>1. Students scan the QR code using their device camera</p>
-                <p>2. They must enter the <strong>Live Verification Code</strong> shown in the circle above</p>
+                <p>2. They must enter the <strong>Live Verification Code</strong> shown above</p>
                 <p>3. Both QR and verification code refresh every {{ refresh_interval }} seconds</p>
                 <p>4. This prevents screenshot sharing and ensures real-time attendance</p>
             </div>
@@ -635,13 +684,26 @@
 
 <script>
     // ====================================================================
-    // DYNAMIC QR REFRESH LOGIC
+    // DYNAMIC QR REFRESH LOGIC - FIXED TIMER
     // ====================================================================
     
     const sessionId = "{{ session_id }}";
     const refreshInterval = {{ refresh_interval }};
+    
+    // Parse end_time - FIXED: Properly handle the ISO date string
     const endTimeStr = "{{ end_time }}";
     let endTime = new Date(endTimeStr);
+    
+    // If endTime is invalid, calculate from duration
+    if (isNaN(endTime.getTime())) {
+        const durationMinutes = {{ duration }};
+        endTime = new Date();
+        endTime.setMinutes(endTime.getMinutes() + durationMinutes);
+        console.log('Using calculated end time:', endTime);
+    } else {
+        console.log('Using provided end time:', endTime);
+    }
+    
     let refreshTimer = null;
     let countdownInterval = null;
     
@@ -653,20 +715,28 @@
     const refreshIndicator = document.getElementById('refreshIndicator');
     
     // ====================================================================
-    // UPDATE COUNTDOWN
+    // UPDATE COUNTDOWN - FIXED
     // ====================================================================
     
     function updateCountdown() {
         const now = new Date();
         const remainingSeconds = Math.max(0, Math.floor((endTime - now) / 1000));
         
+        console.log('Timer update - remaining:', remainingSeconds, 'seconds');
+        
         if (remainingSeconds <= 0) {
             countdownElement.innerHTML = "00:00";
             countdownElement.classList.add('warning');
             statusBadge.className = 'status-badge expired';
             statusBadge.innerHTML = '<span class="dot"></span> Expired';
-            clearInterval(countdownInterval);
-            clearInterval(refreshTimer);
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            if (refreshTimer) {
+                clearInterval(refreshTimer);
+                refreshTimer = null;
+            }
             refreshIndicator.innerHTML = '⏰ Session has ended';
             return;
         }
@@ -714,8 +784,9 @@
                 // Update session end time if provided
                 if (data.expires_at) {
                     const newExpiry = new Date(data.expires_at);
-                    if (newExpiry > endTime) {
+                    if (!isNaN(newExpiry.getTime()) && newExpiry > endTime) {
                         endTime = newExpiry;
+                        console.log('Updated end time from refresh:', endTime);
                     }
                 }
             })
@@ -734,7 +805,6 @@
         navigator.clipboard.writeText(code).then(function() {
             alert('Verification code copied: ' + code);
         }).catch(function() {
-            // Fallback
             const textArea = document.createElement('textarea');
             textArea.value = code;
             document.body.appendChild(textArea);
@@ -752,8 +822,14 @@
     function checkSessionStatus() {
         const now = new Date();
         if (now >= endTime) {
-            clearInterval(refreshTimer);
-            clearInterval(countdownInterval);
+            if (refreshTimer) {
+                clearInterval(refreshTimer);
+                refreshTimer = null;
+            }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
             countdownElement.innerHTML = "00:00";
             countdownElement.classList.add('warning');
             statusBadge.className = 'status-badge expired';
@@ -768,25 +844,65 @@
     // INITIALIZATION
     // ====================================================================
     
-    // Start countdown
-    updateCountdown();
-    countdownInterval = setInterval(function() {
-        if (!checkSessionStatus()) {
+    function initTimer() {
+        // Clear any existing intervals
+        if (countdownInterval) {
             clearInterval(countdownInterval);
+            countdownInterval = null;
+        }
+        if (refreshTimer) {
             clearInterval(refreshTimer);
+            refreshTimer = null;
+        }
+        
+        // Check if session is already expired
+        const now = new Date();
+        if (now >= endTime) {
+            countdownElement.innerHTML = "00:00";
+            countdownElement.classList.add('warning');
+            statusBadge.className = 'status-badge expired';
+            statusBadge.innerHTML = '<span class="dot"></span> Expired';
+            refreshIndicator.innerHTML = '⏰ Session has ended';
             return;
         }
+        
+        // Start countdown
         updateCountdown();
-    }, 1000);
+        countdownInterval = setInterval(function() {
+            if (!checkSessionStatus()) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+                clearInterval(refreshTimer);
+                refreshTimer = null;
+                return;
+            }
+            updateCountdown();
+        }, 1000);
+        
+        // Start QR refresh
+        refreshTimer = setInterval(function() {
+            if (!checkSessionStatus()) {
+                clearInterval(refreshTimer);
+                refreshTimer = null;
+                return;
+            }
+            refreshQR();
+        }, refreshInterval * 1000);
+    }
     
-    // Start QR refresh
-    refreshTimer = setInterval(function() {
-        if (!checkSessionStatus()) {
-            clearInterval(refreshTimer);
-            return;
-        }
-        refreshQR();
-    }, refreshInterval * 1000);
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, initializing timer...');
+        console.log('End time:', endTime);
+        console.log('Current time:', new Date());
+        initTimer();
+    });
+    
+    // Also initialize immediately in case DOM already loaded
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        console.log('Document already ready, initializing...');
+        initTimer();
+    }
 </script>
 
 <script>
