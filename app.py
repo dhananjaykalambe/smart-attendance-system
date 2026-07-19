@@ -478,16 +478,16 @@ def create_session():
                     f"Created dynamic session for {subject} (ID: {session_id})")
         
         return render_template("dynamic_session.html",
-                              session_id=session_id,
-                              subject=subject,
-                              qr_base64=qr_base64,
-                              verification_code=qr_token_data['verification_code'],
-                              end_time=end_time.isoformat(),
-                              duration=duration,
-                              refresh_interval=refresh_interval,
-                              sidebar_links=sidebar_links,
-                              college_header=college_header,
-                              settings=settings)
+                      session_id=session_id,
+                      subject=subject,
+                      qr_base64=qr_base64,
+                      verification_code=qr_token_data['verification_code'],
+                      end_time=end_time.isoformat(),  # Keep as ISO format
+                      duration=duration,
+                      refresh_interval=refresh_interval,
+                      sidebar_links=sidebar_links,
+                      college_header=college_header,
+                      settings=settings)
     
     return render_template("create_session.html",
                           sidebar_links=sidebar_links,
