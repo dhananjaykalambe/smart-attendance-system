@@ -17,6 +17,8 @@ import time
 import json
 import base64
 from io import BytesIO
+import random
+import string
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -98,6 +100,16 @@ try:
     init_db(app)
 except Exception as e:
     app.logger.error(f"Database initialization error: {e}")
+
+# ====================================================================
+# HELPER FUNCTION - Generate Session ID
+# ====================================================================
+
+def generate_session_id():
+    """Generate a 4-5 digit alphanumeric session ID"""
+    length = random.choice([4, 5])  # Randomly choose 4 or 5 characters
+    characters = string.ascii_uppercase + string.digits
+    return ''.join(random.choices(characters, k=length))
 
 # ====================================================================
 # MIDDLEWARE
@@ -416,7 +428,12 @@ def create_session():
             flash('Please select a subject', 'error')
             return redirect(url_for('create_session'))
         
-        session_id = str(uuid.uuid4())[:8].upper()
+        # Generate 4-5 digit alphanumeric session ID
+        session_id = generate_session_id()
+        # Ensure uniqueness
+        while db.sessions.find_one({"session_id": session_id}):
+            session_id = generate_session_id()
+        
         start_time = datetime.now()
         end_time = start_time + timedelta(minutes=duration)
         
