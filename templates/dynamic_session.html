@@ -7,141 +7,187 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
 <style>
     .session-container {
-        max-width: 800px;
+        max-width: 900px;
         margin: 0 auto;
     }
     
     .qr-display-area {
         background: white;
         border-radius: var(--radius-md);
-        padding: 30px;
-        text-align: center;
+        padding: 35px 40px 30px;
         border: 1px solid var(--border-color);
         box-shadow: var(--shadow-sm);
     }
     
-    .qr-display-area .session-id {
-        font-size: 1.2rem;
+    /* Subject Title */
+    .subject-title {
+        font-size: 2rem;
+        color: var(--primary);
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 5px;
+    }
+    
+    /* Session ID */
+    .session-id {
+        text-align: center;
         color: var(--text-secondary);
-        margin-bottom: 5px;
+        font-size: 1rem;
+        margin-bottom: 25px;
     }
     
-    .qr-display-area .session-id code {
+    .session-id code {
         background: var(--primary-soft);
-        padding: 4px 14px;
+        padding: 4px 16px;
         border-radius: var(--radius-sm);
-        font-size: 1.1rem;
+        font-size: 1.3rem;
         color: var(--primary);
         font-weight: 700;
-        letter-spacing: 2px;
+        letter-spacing: 3px;
+        font-family: 'Courier New', monospace;
     }
     
-    .qr-display-area .subject-title {
-        font-size: 1.8rem;
-        color: var(--primary);
-        font-weight: 700;
-        margin-bottom: 5px;
+    /* QR + Verification Code Container */
+    .qr-verification-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 50px;
+        margin: 15px 0 10px;
+        flex-wrap: wrap;
+    }
+    
+    /* QR Code Container */
+    .qr-wrapper {
+        text-align: center;
     }
     
     .qr-container {
         background: white;
-        padding: 20px;
+        padding: 15px;
         border-radius: var(--radius-md);
-        display: inline-block;
         border: 2px solid var(--border-color);
-        margin: 10px 0;
+        display: inline-block;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+    }
+    
+    .qr-container:hover {
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary);
     }
     
     .qr-container img {
         border-radius: var(--radius-sm);
-        width: 220px;
-        height: 220px;
+        width: 200px;
+        height: 200px;
         display: block;
     }
     
-    .verification-code-area {
-        margin: 20px 0;
-        padding: 15px;
-        background: var(--primary-soft);
-        border-radius: var(--radius-md);
-        border: 1px solid var(--border-color);
+    .qr-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 8px;
+        display: block;
     }
     
-    .verification-code-area .label {
+    /* Live Verification Code */
+    .verification-wrapper {
+        text-align: center;
+        min-width: 160px;
+    }
+    
+    .verification-label {
         font-size: 13px;
         color: var(--text-secondary);
-        margin-bottom: 5px;
+        font-weight: 600;
         display: block;
+        margin-bottom: 8px;
+        letter-spacing: 1px;
     }
     
     .verification-code {
-        font-size: 2.2rem;
+        font-size: 2.8rem;
         font-weight: 700;
-        letter-spacing: 8px;
-        color: var(--primary);
-        background: white;
-        padding: 10px 25px;
+        letter-spacing: 10px;
+        color: white;
+        background: var(--primary);
+        padding: 15px 25px;
         border-radius: var(--radius-sm);
         display: inline-block;
-        font-family: monospace;
-        border: 2px dashed var(--primary);
+        font-family: 'Courier New', monospace;
+        min-width: 160px;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        animation: codePulse 2s ease-in-out infinite;
     }
     
-    .timer-section {
-        margin: 20px 0;
-        padding: 20px;
-        background: var(--light);
-        border-radius: var(--radius-md);
-        border: 1px solid var(--border-color);
+    .verification-code:hover {
+        transform: scale(1.02);
+        box-shadow: var(--shadow-md);
     }
     
-    .timer-section .timer-label {
-        font-size: 13px;
-        color: var(--text-secondary);
-        margin-bottom: 8px;
+    @keyframes codePulse {
+        0%, 100% { background: var(--primary); }
+        50% { background: var(--primary-light); }
+    }
+    
+    .verification-hint {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 8px;
         display: block;
     }
     
+    /* Timer Section - Below QR */
+    .timer-section {
+        margin: 20px auto 10px;
+        padding: 18px 25px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        border-radius: var(--radius-md);
+        text-align: center;
+        max-width: 400px;
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .timer-label {
+        font-size: 13px;
+        color: rgba(255,255,255,0.8);
+        display: block;
+        font-weight: 500;
+        letter-spacing: 1px;
+    }
+    
     .countdown-timer {
-        font-size: 3rem;
+        font-size: 3.2rem;
         font-weight: 700;
-        font-family: monospace;
-        background: var(--primary);
+        font-family: 'Courier New', monospace;
         color: white;
         display: inline-block;
-        padding: 15px 35px;
-        border-radius: var(--radius-sm);
-        min-width: 120px;
+        padding: 5px 10px;
+        letter-spacing: 4px;
         transition: all 0.3s ease;
     }
     
     .countdown-timer.warning {
-        background: var(--danger);
-        animation: pulse-warning 0.8s ease-in-out infinite;
+        color: #ffdddd;
+        animation: timerPulse 0.8s ease-in-out infinite;
     }
     
-    @keyframes pulse-warning {
+    @keyframes timerPulse {
         0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.02); }
+        50% { transform: scale(1.03); }
     }
     
     .status-badge {
         display: inline-block;
-        padding: 6px 16px;
+        padding: 4px 16px;
         border-radius: 20px;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 600;
-        margin-top: 8px;
-    }
-    
-    .status-badge.active {
-        background: var(--success-soft);
-        color: var(--success-dark);
-    }
-    
-    .status-badge.expired {
-        background: var(--danger-soft);
-        color: var(--danger-dark);
+        margin-top: 5px;
+        background: rgba(255,255,255,0.2);
+        color: white;
     }
     
     .status-badge .dot {
@@ -150,21 +196,34 @@
         height: 8px;
         border-radius: 50%;
         margin-right: 6px;
-    }
-    
-    .status-badge.active .dot {
-        background: var(--success);
+        background: #4ade80;
+        animation: dotPulse 1.5s ease-in-out infinite;
     }
     
     .status-badge.expired .dot {
-        background: var(--danger);
+        background: #f87171;
+        animation: none;
     }
     
+    @keyframes dotPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+    
+    /* Refresh Indicator */
+    .refresh-indicator {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 12px;
+        margin-top: 15px;
+    }
+    
+    /* Info Box */
     .info-box {
         background: var(--primary-soft);
         padding: 15px 20px;
         border-radius: var(--radius-sm);
-        margin: 20px 0;
+        margin: 20px 0 15px;
         text-align: left;
         border-left: 4px solid var(--primary);
     }
@@ -179,99 +238,131 @@
         color: var(--primary);
     }
     
-    .refresh-indicator {
-        color: var(--text-muted);
-        font-size: 12px;
-        margin-top: 10px;
-    }
-    
+    /* Action Buttons */
     .action-buttons {
         display: flex;
         gap: 12px;
         justify-content: center;
         flex-wrap: wrap;
-        margin-top: 20px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid var(--border-color);
     }
     
     .action-buttons .btn {
         padding: 10px 25px;
         min-width: 120px;
-    }
-    
-    .qr-url-box {
-        font-size: 11px;
-        word-break: break-all;
-        background: var(--gray-100);
-        padding: 12px 15px;
         border-radius: var(--radius-sm);
-        margin-top: 15px;
-        text-align: left;
-        border: 1px solid var(--border-color);
+        font-weight: 600;
+        font-size: 14px;
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
     }
     
-    .qr-url-box strong {
-        color: var(--primary);
-    }
-    
-    .qr-url-box .url-text {
+    .action-buttons .btn-secondary {
+        background: var(--gray-200);
         color: var(--text-secondary);
-        font-family: monospace;
-        font-size: 12px;
-        display: block;
-        margin-top: 4px;
+    }
+    .action-buttons .btn-secondary:hover {
+        background: var(--gray-300);
+        transform: translateY(-2px);
     }
     
+    .action-buttons .btn-success {
+        background: var(--success);
+        color: white;
+    }
+    .action-buttons .btn-success:hover {
+        background: var(--success-dark);
+        transform: translateY(-2px);
+    }
+    
+    .action-buttons .btn-info {
+        background: var(--info);
+        color: white;
+    }
+    .action-buttons .btn-info:hover {
+        background: var(--info-dark);
+        transform: translateY(-2px);
+    }
+    
+    /* Responsive */
     @media (max-width: 768px) {
+        .qr-display-area {
+            padding: 25px 20px 20px;
+        }
+        .subject-title {
+            font-size: 1.5rem;
+        }
+        .session-id code {
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+        }
+        .qr-verification-container {
+            flex-direction: column;
+            gap: 20px;
+        }
         .qr-container img {
             width: 170px;
             height: 170px;
         }
-        .countdown-timer {
-            font-size: 2rem;
-            padding: 12px 25px;
-            min-width: 90px;
-        }
         .verification-code {
-            font-size: 1.6rem;
-            letter-spacing: 5px;
-            padding: 8px 18px;
+            font-size: 2.2rem;
+            letter-spacing: 8px;
+            padding: 12px 20px;
+            min-width: 130px;
         }
-        .qr-display-area {
-            padding: 20px;
+        .timer-section {
+            max-width: 100%;
+            padding: 15px 20px;
         }
-        .qr-display-area .subject-title {
-            font-size: 1.4rem;
-        }
-        .action-buttons .btn {
-            padding: 8px 18px;
-            min-width: 100px;
-            font-size: 13px;
+        .countdown-timer {
+            font-size: 2.5rem;
         }
     }
     
     @media (max-width: 480px) {
+        .qr-display-area {
+            padding: 18px 12px 15px;
+        }
+        .subject-title {
+            font-size: 1.2rem;
+        }
+        .session-id {
+            font-size: 0.85rem;
+        }
+        .session-id code {
+            font-size: 0.95rem;
+            letter-spacing: 2px;
+            padding: 3px 12px;
+        }
         .qr-container img {
             width: 140px;
             height: 140px;
         }
-        .countdown-timer {
-            font-size: 1.5rem;
-            padding: 10px 18px;
-            min-width: 70px;
+        .qr-container {
+            padding: 10px;
         }
         .verification-code {
-            font-size: 1.3rem;
-            letter-spacing: 4px;
-            padding: 6px 14px;
+            font-size: 1.8rem;
+            letter-spacing: 6px;
+            padding: 10px 16px;
+            min-width: 110px;
         }
-        .qr-display-area {
-            padding: 15px;
+        .countdown-timer {
+            font-size: 2rem;
         }
-        .qr-display-area .subject-title {
-            font-size: 1.2rem;
-        }
-        .info-box {
+        .timer-section {
             padding: 12px 15px;
+        }
+        .action-buttons .btn {
+            padding: 8px 16px;
+            min-width: 90px;
+            font-size: 12px;
         }
         .info-box p {
             font-size: 12px;
@@ -328,41 +419,42 @@
 
     <div class="session-container">
         <div class="qr-display-area">
-            <!-- Subject and Session ID -->
+            <!-- Subject Name -->
             <div class="subject-title">{{ subject }}</div>
+            
+            <!-- Session ID -->
             <div class="session-id">
                 Session: <code>{{ session_id }}</code>
             </div>
             
-            <!-- Timer Section -->
+            <!-- QR Code + Verification Code Side by Side -->
+            <div class="qr-verification-container">
+                <!-- QR Code -->
+                <div class="qr-wrapper">
+                    <div class="qr-container">
+                        <img src="data:image/png;base64,{{ qr_base64 }}" id="qrImage" alt="QR Code">
+                    </div>
+                    <span class="qr-label">Scan to mark attendance</span>
+                </div>
+                
+                <!-- Live Verification Code -->
+                <div class="verification-wrapper">
+                    <span class="verification-label">🔑 Live Verification Code</span>
+                    <div class="verification-code" id="verificationCode">{{ verification_code }}</div>
+                    <span class="verification-hint">Students must enter this code</span>
+                </div>
+            </div>
+            
+            <!-- Timer Section - Below QR -->
             <div class="timer-section">
                 <span class="timer-label">⏱️ Session Timer</span>
-                <div>
-                    <div class="countdown-timer" id="countdownTimer">--:--</div>
-                </div>
-                <div>
-                    <span class="status-badge active" id="statusBadge">
-                        <span class="dot"></span> Active
-                    </span>
-                </div>
+                <div class="countdown-timer" id="countdownTimer">--:--</div>
+                <span class="status-badge active" id="statusBadge">
+                    <span class="dot"></span> Active
+                </span>
             </div>
             
-            <!-- Verification Code -->
-            <div class="verification-code-area">
-                <span class="label">🔑 Live Verification Code</span>
-                <div>
-                    <div class="verification-code" id="verificationCode">{{ verification_code }}</div>
-                </div>
-                <p style="color: var(--text-muted); font-size: 12px; margin-top: 8px;">
-                    Students must enter this code along with QR scan
-                </p>
-            </div>
-            
-            <!-- QR Code -->
-            <div class="qr-container">
-                <img src="data:image/png;base64,{{ qr_base64 }}" id="qrImage" alt="QR Code">
-            </div>
-            
+            <!-- Refresh Indicator -->
             <div class="refresh-indicator" id="refreshIndicator">
                 🔄 QR refreshes every {{ refresh_interval }} seconds
             </div>
@@ -370,7 +462,7 @@
             <!-- Info Box -->
             <div class="info-box">
                 <p><strong>📌 How it works:</strong></p>
-                <p>1. Students scan the QR code using their device</p>
+                <p>1. Students scan the QR code using their device camera</p>
                 <p>2. They must enter the <strong>Live Verification Code</strong> shown above</p>
                 <p>3. Both QR and verification code refresh every {{ refresh_interval }} seconds</p>
                 <p>4. This prevents screenshot sharing and ensures real-time attendance</p>
@@ -384,13 +476,7 @@
                 <a href="/create_session">
                     <button class="btn btn-success">+ New Session</button>
                 </a>
-                <button class="btn btn-info" onclick="copyQrData()">📋 Copy QR Data</button>
-            </div>
-            
-            <!-- QR URL -->
-            <div class="qr-url-box">
-                <strong>QR Data:</strong>
-                <span class="url-text" id="qrDataDisplay">{{ session_id }}|[TOKEN]</span>
+                <button class="btn btn-info" onclick="copyVerificationCode()">📋 Copy Code</button>
             </div>
         </div>
     </div>
@@ -414,7 +500,6 @@
     const verificationCodeSpan = document.getElementById('verificationCode');
     const qrImage = document.getElementById('qrImage');
     const refreshIndicator = document.getElementById('refreshIndicator');
-    const qrDataDisplay = document.getElementById('qrDataDisplay');
     
     // ====================================================================
     // UPDATE COUNTDOWN
@@ -471,9 +556,6 @@
                 // Update verification code
                 verificationCodeSpan.textContent = data.verification_code;
                 
-                // Update QR data display
-                qrDataDisplay.textContent = sessionId + '|' + data.verification_code;
-                
                 // Update indicator
                 const now = new Date();
                 refreshIndicator.innerHTML = `✅ QR refreshed at ${now.toLocaleTimeString()}`;
@@ -493,22 +575,22 @@
     }
     
     // ====================================================================
-    // COPY QR DATA
+    // COPY VERIFICATION CODE
     // ====================================================================
     
-    function copyQrData() {
-        const data = qrDataDisplay.textContent;
-        navigator.clipboard.writeText(data).then(function() {
-            alert('QR data copied to clipboard!');
+    function copyVerificationCode() {
+        const code = verificationCodeSpan.textContent;
+        navigator.clipboard.writeText(code).then(function() {
+            alert('Verification code copied: ' + code);
         }).catch(function() {
             // Fallback
             const textArea = document.createElement('textarea');
-            textArea.value = data;
+            textArea.value = code;
             document.body.appendChild(textArea);
             textArea.select();
             document.execCommand('copy');
             document.body.removeChild(textArea);
-            alert('QR data copied to clipboard!');
+            alert('Verification code copied: ' + code);
         });
     }
     
@@ -554,11 +636,6 @@
         }
         refreshQR();
     }, refreshInterval * 1000);
-    
-    // Initial QR data display
-    document.addEventListener('DOMContentLoaded', function() {
-        qrDataDisplay.textContent = sessionId + '|' + verificationCodeSpan.textContent;
-    });
 </script>
 
 <script>
