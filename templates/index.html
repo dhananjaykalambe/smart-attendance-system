@@ -12,10 +12,7 @@
     }
     .hero-section h1 {
         font-size: 1.8rem;
-        background: linear-gradient(135deg, var(--primary), var(--accent));
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
+        color: var(--primary);
         margin-bottom: 10px;
     }
     .hero-section p {
@@ -31,7 +28,7 @@
     .quick-stat {
         background: var(--card-bg);
         padding: 20px;
-        border-radius: var(--radius-lg);
+        border-radius: var(--radius-md);
         text-align: center;
         box-shadow: var(--shadow-sm);
         transition: var(--transition);
@@ -44,14 +41,18 @@
     .quick-stat h3 {
         font-size: 1.8rem;
         margin-bottom: 5px;
-        background: linear-gradient(135deg, var(--primary), var(--accent));
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
+        color: var(--primary);
     }
     .quick-stat p {
-        color: var(--text-secondary);
+        color: var(--text-muted);
         font-size: 0.75rem;
+        font-weight: 500;
+        margin: 0;
+    }
+    .quick-stat .stat-icon {
+        font-size: 2rem;
+        display: block;
+        margin-bottom: 8px;
     }
     .quick-access {
         display: flex;
@@ -62,16 +63,30 @@
     }
     .access-btn {
         padding: 12px 30px;
-        border-radius: 50px;
+        border-radius: var(--radius-sm);
         text-decoration: none;
         font-weight: bold;
         font-size: 14px;
         transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+        display: inline-block;
     }
-    .access-btn.student { background: linear-gradient(135deg, var(--success), var(--success-dark)); color: white; }
-    .access-btn.faculty { background: linear-gradient(135deg, var(--info), var(--info-dark)); color: white; }
-    .access-btn.admin { background: linear-gradient(135deg, var(--danger), var(--danger-dark)); color: white; }
+    .access-btn.student { background: var(--primary); color: white; }
+    .access-btn.faculty { background: var(--info); color: white; }
+    .access-btn.admin { background: var(--danger); color: white; }
     .access-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    
+    .empty-state {
+        text-align: center;
+        padding: 30px;
+        color: var(--text-muted);
+    }
+    .empty-state .icon {
+        font-size: 48px;
+        display: block;
+        margin-bottom: 10px;
+    }
     
     @media (max-width: 768px) {
         .quick-stats { grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -83,6 +98,7 @@
     
     @media (max-width: 480px) {
         .quick-stats { grid-template-columns: 1fr; }
+        .hero-section h1 { font-size: 1.2rem; }
     }
 </style>
 </head>
@@ -122,7 +138,7 @@
 
 <div class="main">
     <div class="header">
-        {{ settings.college_name }}, {{ settings.college_location }}
+        {{ settings.college_name if settings else 'Priyadarshini Bhagwati College of Engineering' }}, {{ settings.college_location if settings else 'Nagpur' }}
     </div>
 
     <div class="hero-section">
@@ -130,32 +146,38 @@
         <p>QR-based attendance with real-time analytics and secure verification</p>
     </div>
 
+    <!-- Statistics Cards -->
     <div class="quick-stats">
         <div class="quick-stat">
-            <h3>{{ stats.total_students }}</h3>
+            <span class="stat-icon">👨‍🎓</span>
+            <h3>{{ stats.total_students if stats and stats.total_students is defined else 0 }}</h3>
             <p>Total Students</p>
         </div>
         <div class="quick-stat">
-            <h3>{{ stats.total_faculty }}</h3>
+            <span class="stat-icon">👨‍🏫</span>
+            <h3>{{ stats.total_faculty if stats and stats.total_faculty is defined else 0 }}</h3>
             <p>Total Faculty</p>
         </div>
         <div class="quick-stat">
-            <h3>{{ stats.today_sessions }}</h3>
+            <span class="stat-icon">📚</span>
+            <h3>{{ stats.today_sessions if stats and stats.today_sessions is defined else 0 }}</h3>
             <p>Today's Lectures</p>
         </div>
         <div class="quick-stat">
-            <h3>{{ stats.active_sessions }}</h3>
+            <span class="stat-icon">🟢</span>
+            <h3>{{ stats.active_sessions if stats and stats.active_sessions is defined else 0 }}</h3>
             <p>Active Sessions</p>
         </div>
     </div>
 
+    <!-- Notice Board -->
     <div class="notice-board-container">
         <div class="notice-header">
             <span>📢</span>
             <h3 style="margin:0;">Notice Board</h3>
         </div>
         <div class="notice-list">
-            {% if stats.recent_notices %}
+            {% if stats and stats.recent_notices and stats.recent_notices|length > 0 %}
                 {% for notice in stats.recent_notices %}
                 <div class="notice-item">
                     <div class="notice-title">
@@ -171,14 +193,15 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <div class="empty-notice" style="text-align:center; padding:30px; color:var(--text-muted);">
-                    <span>📭</span>
+                <div class="empty-state">
+                    <span class="icon">📭</span>
                     <p>No notices available.</p>
                 </div>
             {% endif %}
         </div>
     </div>
 
+    <!-- Quick Access -->
     <div class="card" style="text-align: center;">
         <h2>Quick Access</h2>
         <div class="quick-access">
