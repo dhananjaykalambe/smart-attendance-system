@@ -14,6 +14,7 @@ import hmac
 import logging
 from logging.handlers import RotatingFileHandler
 import time
+import json
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -31,7 +32,7 @@ file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(messag
 file_handler.setLevel(logging.INFO)
 app.logger.addHandler(file_handler)
 app.logger.setLevel(logging.INFO)
-app.logger.info('Smart Attendance System Startup')
+app.logger.info('Smart Attendance System v3.1 Startup')
 
 # Import utilities
 from utils.database import db, init_db, get_db
@@ -39,7 +40,11 @@ from utils.auth import login_required, faculty_required, student_required, admin
 from utils.helpers import (
     get_settings, get_college_header, get_sidebar_links, get_dashboard_stats,
     generate_secure_qr_hash, verify_qr_hash, get_client_ip, is_session_active,
-    check_low_attendance, log_activity
+    check_low_attendance, log_activity,
+    # NEW: Dynamic QR functions
+    generate_qr_token, verify_qr_token, get_current_qr_token, 
+    get_qr_status, validate_attendance_request, log_attendance_attempt,
+    get_device_fingerprint
 )
 from utils.pdf_export import (
     export_attendance_report, export_student_report, export_all_students_report,
@@ -74,14 +79,12 @@ def after_request(response):
     if hasattr(g, 'start_time'):
         elapsed = time.time() - g.start_time
         app.logger.info(f"{request.method} {request.path} - {elapsed:.3f}s")
-    return response
-
-@app.context_processor
+    return response@app.context_processor
 def inject_theme():
     """Inject theme colors into all templates"""
     return {
         'theme': THEME,
-        'app_version': '3.0.0',
+        'app_version': '3.1.0',
         'current_year': datetime.now().year
     }
 
@@ -265,7 +268,7 @@ def student_dashboard():
 @login_required
 @student_required
 def scan():
-    """QR code scanning page"""
+    """QR code scanning page with dynamic QR support"""
     sidebar_links = get_sidebar_links()
     college_header = get_college_header()
     settings = get_settings()
@@ -320,12 +323,18 @@ def faculty_dashboard():
                           college_header=college_header,
                           settings=settings)
 
+# ====================================================================
+# DYNAMIC QR SESSION CREATION (UPDATED)
+# ====================================================================
+
 @app.route('/create_session', methods=['GET', 'POST'])
 @login_required
 @faculty_required
 def create_session():
-    """Create a new attendance session with QR code"""
+    """Create a new attendance session with dynamic QR code"""
     import qrcode
+    import base64
+    from io import BytesIO
     
     settings = get_settings()
     sidebar_links = get_sidebar_links()
@@ -334,57 +343,64 @@ def create_session():
     if request.method == 'POST':
         subject = request.form.get('subject')
         duration = int(request.form.get('duration', settings.get("session_duration_minutes", 5)))
+        refresh_interval = int(request.form.get('refresh_interval', settings.get("qr_refresh_interval", 15)))
         
         if not subject:
             flash('Please select a subject', 'error')
             return redirect(url_for('create_session'))
         
         session_id = str(uuid.uuid4())[:8].upper()
-        timestamp = int(datetime.now().timestamp())
-        qr_hash = generate_secure_qr_hash(session_id, timestamp)
-        
-        # Create QR code directory
-        qr_folder = os.path.join("static", "qr_codes")
-        os.makedirs(qr_folder, exist_ok=True)
-        
-        # Generate QR code URL
-        BASE_URL = os.getenv("BASE_URL", request.url_root.rstrip('/'))
-        url = f"{BASE_URL}/mark?session_id={session_id}&t={timestamp}&h={qr_hash}"
-        
-        qr_filename = f"qr_{session_id}.png"
-        qr_path = os.path.join(qr_folder, qr_filename)
-        img = qrcode.make(url)
-        img.save(qr_path)
-        
         start_time = datetime.now()
         end_time = start_time + timedelta(minutes=duration)
         
+        # Generate initial QR token
+        qr_token_data = generate_qr_token(session_id, subject, duration)
+        
+        # Create QR code as base64 image
+        qr_code = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_H,
+            box_size=10,
+            border=4,
+        )
+        # QR content includes token and verification code
+        qr_content = f"{session_id}|{qr_token_data['token']}"
+        qr_code.add_data(qr_content)
+        qr_code.make(fit=True)
+        
+        img = qr_code.make_image(fill_color="#1a3a6b", back_color="white")
+        
+        # Convert to base64 for inline display
+        buffered = BytesIO()
+        img.save(buffered, format="PNG")
+        qr_base64 = base64.b64encode(buffered.getvalue()).decode()
+        
+        # Store session data
         session_data = {
             "session_id": session_id,
             "subject": subject,
             "start_time": start_time,
             "end_time": end_time,
             "duration": duration,
-            "qr_hash": qr_hash,
-            "qr_filename": qr_filename,
+            "qr_refresh_interval": refresh_interval,
             "is_active": True,
             "created_at": datetime.now(),
             "created_by": session['user_id'],
-            "qr_url": url
+            "current_verification_code": qr_token_data['verification_code']
         }
         db.sessions.insert_one(session_data)
         
         log_activity('session_created', session['user_id'], get_client_ip(), 
-                    f"Created session for {subject} (ID: {session_id})")
+                    f"Created dynamic session for {subject} (ID: {session_id})")
         
-        end_time_iso = end_time.isoformat()
-        
-        return render_template("session.html",
+        return render_template("dynamic_session.html",
                               session_id=session_id,
                               subject=subject,
-                              qr=qr_filename,
-                              end_time=end_time_iso,
+                              qr_base64=qr_base64,
+                              verification_code=qr_token_data['verification_code'],
+                              end_time=end_time.isoformat(),
                               duration=duration,
+                              refresh_interval=refresh_interval,
                               sidebar_links=sidebar_links,
                               college_header=college_header,
                               settings=settings)
@@ -395,7 +411,186 @@ def create_session():
                           settings=settings)
 
 # ====================================================================
-# STUDENT MANAGEMENT (FACULTY)
+# NEW: DYNAMIC QR API ENDPOINTS
+# ====================================================================
+
+@app.route('/api/qr/refresh/<session_id>', methods=['GET'])
+@login_required
+@faculty_required
+def api_refresh_qr(session_id):
+    """
+    API endpoint to refresh QR code for a session
+    Returns new QR code image and verification code
+    """
+    import qrcode
+    import base64
+    from io import BytesIO
+    
+    # Check if session exists and is active
+    session_data = db.sessions.find_one({"session_id": session_id})
+    if not session_data:
+        return jsonify({'error': 'Session not found'}), 404
+    
+    if not session_data.get('is_active', False):
+        return jsonify({'error': 'Session is not active'}), 400
+    
+    current_time = datetime.now()
+    if session_data.get('end_time') and current_time > session_data['end_time']:
+        return jsonify({'error': 'Session has expired'}), 400
+    
+    # Generate new QR token
+    subject = session_data.get('subject', 'Unknown')
+    duration = session_data.get('duration', 5)
+    refresh_interval = session_data.get('qr_refresh_interval', 15)
+    
+    qr_token_data = generate_qr_token(session_id, subject, duration)
+    
+    # Update session with new verification code
+    db.sessions.update_one(
+        {"session_id": session_id},
+        {"$set": {"current_verification_code": qr_token_data['verification_code']}}
+    )
+    
+    # Generate QR code
+    qr_code = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10,
+        border=4,
+    )
+    qr_content = f"{session_id}|{qr_token_data['token']}"
+    qr_code.add_data(qr_content)
+    qr_code.make(fit=True)
+    
+    img = qr_code.make_image(fill_color="#1a3a6b", back_color="white")
+    
+    buffered = BytesIO()
+    img.save(buffered, format="PNG")
+    qr_base64 = base64.b64encode(buffered.getvalue()).decode()
+    
+    return jsonify({
+        'qr_base64': qr_base64,
+        'verification_code': qr_token_data['verification_code'],
+        'expires_at': qr_token_data['expires_at'].isoformat(),
+        'refresh_interval': refresh_interval
+    })
+
+@app.route('/api/qr/status/<session_id>', methods=['GET'])
+@login_required
+def api_qr_status(session_id):
+    """Get current QR status for a session"""
+    status_data = get_qr_status(session_id)
+    return jsonify(status_data)
+
+# ====================================================================
+# MARK ATTENDANCE (UPDATED WITH DYNAMIC QR)
+# ====================================================================
+
+@app.route('/mark', methods=['GET', 'POST'])
+def mark():
+    """Mark attendance via QR code scan with dynamic verification"""
+    if 'user_id' not in session:
+        flash('Please login to mark attendance', 'warning')
+        return redirect(url_for('login'))
+    
+    student_id = session['user_id']
+    ip_address = get_client_ip()
+    device_fingerprint = get_device_fingerprint()
+    
+    # Handle QR data from scan
+    if request.method == 'POST':
+        qr_data = request.form.get('qr_data', '')
+        verification_code = request.form.get('verification_code', '')
+        session_id = request.form.get('session_id', '')
+        
+        # If QR data contains session_id and token
+        if '|' in qr_data:
+            parts = qr_data.split('|')
+            if len(parts) == 2:
+                session_id = parts[0]
+                token = parts[1]
+            else:
+                flash('Invalid QR code format', 'error')
+                return redirect(url_for('scan'))
+        else:
+            # Legacy format support
+            token = qr_data
+            if not session_id:
+                session_id = request.args.get('session_id', '')
+    
+    # GET request (from legacy QR)
+    else:
+        session_id = request.args.get('session_id', '')
+        token = request.args.get('token', '')
+        qr_timestamp = request.args.get('t')
+        qr_hash = request.args.get('h')
+        
+        # Legacy QR verification (for backward compatibility)
+        if qr_timestamp and qr_hash:
+            try:
+                timestamp_int = int(qr_timestamp)
+                current_time = int(datetime.now().timestamp())
+                settings = get_settings()
+                qr_expiry = settings.get("qr_expiry_seconds", 60)
+                
+                if current_time - timestamp_int > qr_expiry:
+                    return render_template("message.html",
+                                          title="QR Code Expired",
+                                          message="The QR code has expired. Please scan a valid QR code.",
+                                          type="error")
+                
+                if not verify_qr_hash(session_id, qr_timestamp, qr_hash):
+                    return render_template("message.html",
+                                          title="Invalid QR Code",
+                                          message="Invalid QR code detected. Please scan a valid QR code.",
+                                          type="error")
+                
+                # For legacy QR, token is session_id and verification_code is not required
+                token = session_id
+                verification_code = ''
+                
+            except Exception as e:
+                app.logger.error(f"QR validation error: {e}")
+                return render_template("message.html",
+                                      title="Error",
+                                      message="Invalid QR code format.",
+                                      type="error")
+    
+    # Validate the attendance request
+    validation_result = validate_attendance_request(session_id, token, verification_code, student_id)
+    
+    if not validation_result['success']:
+        log_attendance_attempt(student_id, session_id, ip_address, device_fingerprint, 
+                              'failed', validation_result.get('error'))
+        flash(validation_result.get('error', 'Attendance marking failed'), 'error')
+        return redirect(url_for('scan'))
+    
+    # Mark attendance
+    session_data = validation_result['session_data']
+    student = validation_result['student']
+    
+    attendance_record = {
+        "student_id": student_id,
+        "student_name": student['name'],
+        "session_id": session_id,
+        "subject": session_data['subject'],
+        "time": datetime.now(),
+        "ip_address": ip_address,
+        "device_fingerprint": device_fingerprint,
+        "user_agent": request.headers.get('User-Agent', ''),
+        "verification_code_used": verification_code,
+        "marked_at": datetime.now()
+    }
+    db.attendance.insert_one(attendance_record)
+    
+    log_attendance_attempt(student_id, session_id, ip_address, device_fingerprint, 'success')
+    log_activity('attendance_marked', student_id, ip_address, f"Marked attendance for {session_data['subject']}")
+    
+    flash('Attendance marked successfully!', 'success')
+    return redirect(url_for('student_dashboard'))
+
+# ====================================================================
+# STUDENT MANAGEMENT (FACULTY) - UNCHANGED
 # ====================================================================
 
 @app.route('/add_student', methods=['GET', 'POST'])
@@ -415,7 +610,6 @@ def add_student():
         branch = request.form['branch'].strip().upper()
         email = request.form.get('email', '').strip()
         
-        # Validate input
         if not roll or not name or not branch:
             error = "❌ Please fill all required fields"
         elif db.students.find_one({"roll_no": roll}):
@@ -448,15 +642,11 @@ def add_student():
                           college_header=college_header,
                           settings=settings)
 
-# ====================================================================
-# FACULTY BULK UPLOAD - FIXED VERSION
-# ====================================================================
-
 @app.route('/faculty_bulk_upload', methods=['POST'])
 @login_required
 @faculty_required
 def faculty_bulk_upload():
-    """Bulk upload students from Excel or CSV file for faculty"""
+    """Bulk upload students from Excel or CSV file"""
     
     if 'file' not in request.files:
         flash('No file selected', 'error')
@@ -474,16 +664,13 @@ def faculty_bulk_upload():
     try:
         import pandas as pd
         
-        # Read file based on extension
         if file.filename.endswith('.csv'):
             df = pd.read_csv(file)
         else:
             df = pd.read_excel(file)
         
-        # Normalize column names - handle common variations
         df.columns = [str(col).strip().lower().replace(' ', '_') for col in df.columns]
         
-        # Expected columns mapping (handle variations)
         roll_no_col = None
         name_col = None
         branch_col = None
@@ -496,7 +683,6 @@ def faculty_bulk_upload():
             if 'branch' in col or 'dept' in col:
                 branch_col = col
         
-        # Check required columns
         if not roll_no_col:
             flash('Missing required column: roll number column', 'error')
             return redirect(url_for('add_student'))
@@ -517,11 +703,9 @@ def faculty_bulk_upload():
                 name = str(row[name_col]).strip()
                 branch = str(row[branch_col]).strip().upper()
                 
-                # Skip empty rows or invalid data
                 if not roll_no or not name or not branch or roll_no == 'NAN' or name == 'NAN':
                     continue
                 
-                # Clean branch name
                 if 'cse' in branch.lower() or 'computer' in branch.lower():
                     branch = 'CSE'
                 elif 'it' in branch.lower():
@@ -533,14 +717,12 @@ def faculty_bulk_upload():
                 elif 'ce' in branch.lower() or 'civil' in branch.lower():
                     branch = 'CE'
                 
-                # Check if student already exists
                 existing = db.students.find_one({"roll_no": roll_no})
                 if existing:
                     error_count += 1
                     errors.append(f"Row {idx+2}: Roll number {roll_no} already exists")
                     continue
                 
-                # Get optional values
                 email = ''
                 if 'email' in df.columns and pd.notna(row['email']):
                     email = str(row['email']).strip()
@@ -597,7 +779,6 @@ def faculty_bulk_upload():
     
     return redirect(url_for('add_student'))
 
-
 @app.route('/delete_student/<roll_no>')
 @login_required
 @faculty_required
@@ -610,98 +791,7 @@ def delete_student(roll_no):
     return redirect(url_for('add_student'))
 
 # ====================================================================
-# MARK ATTENDANCE
-# ====================================================================
-
-@app.route('/mark', methods=['GET', 'POST'])
-def mark():
-    """Mark attendance via QR code scan"""
-    session_id = request.args.get('session_id') or request.form.get('session_id')
-    qr_timestamp = request.args.get('t')
-    qr_hash = request.args.get('h')
-    
-    if 'user_id' not in session:
-        flash('Please login to mark attendance', 'warning')
-        return redirect(url_for('login'))
-    
-    student_id = session['user_id']
-    
-    # Verify QR code if parameters provided
-    if qr_timestamp and qr_hash:
-        try:
-            timestamp_int = int(qr_timestamp)
-            current_time = int(datetime.now().timestamp())
-            settings = get_settings()
-            qr_expiry = settings.get("qr_expiry_seconds", 60)
-            
-            if current_time - timestamp_int > qr_expiry:
-                return render_template("message.html",
-                                      title="QR Code Expired",
-                                      message="The QR code has expired. Please scan a valid QR code.",
-                                      type="error")
-            
-            if not verify_qr_hash(session_id, qr_timestamp, qr_hash):
-                return render_template("message.html",
-                                      title="Invalid QR Code",
-                                      message="Invalid QR code detected. Please scan a valid QR code.",
-                                      type="error")
-        except Exception as e:
-            app.logger.error(f"QR validation error: {e}")
-            return render_template("message.html",
-                                  title="Error",
-                                  message="Invalid QR code format.",
-                                  type="error")
-    
-    # Validate session
-    session_data = db.sessions.find_one({"session_id": session_id})
-    if not session_data:
-        return render_template("message.html",
-                              title="Invalid Session",
-                              message="This session does not exist.",
-                              type="error")
-    
-    # Check if session is active
-    now = datetime.now()
-    end_time = session_data.get('end_time')
-    
-    if end_time and now > end_time:
-        db.sessions.update_one({"session_id": session_id}, {"$set": {"is_active": False}})
-        return render_template("message.html",
-                              title="Session Expired",
-                              message="This attendance session has expired.",
-                              type="error")
-    
-    # Check if already marked
-    existing = db.attendance.find_one({"student_id": student_id, "session_id": session_id})
-    if existing:
-        return render_template("message.html",
-                              title="Already Marked",
-                              message="You have already marked attendance for this session.",
-                              type="warning")
-    
-    # Mark attendance
-    client_ip = get_client_ip()
-    attendance_record = {
-        "student_id": student_id,
-        "session_id": session_id,
-        "subject": session_data['subject'],
-        "time": datetime.now(),
-        "ip_address": client_ip,
-        "user_agent": request.headers.get('User-Agent', ''),
-        "marked_at": datetime.now()
-    }
-    db.attendance.insert_one(attendance_record)
-    
-    log_activity('attendance_marked', student_id, client_ip, f"Marked attendance for {session_data['subject']}")
-    
-    return render_template("message.html",
-                          title="Attendance Marked!",
-                          message="Your attendance has been recorded successfully.",
-                          type="success",
-                          redirect_url="/student_dashboard")
-
-# ====================================================================
-# ATTENDANCE & REPORTS
+# ATTENDANCE & REPORTS - UNCHANGED
 # ====================================================================
 
 @app.route('/attendance')
@@ -748,7 +838,6 @@ def students_report():
     students_list = list(db.students.find({}))
     all_sessions = list(db.sessions.find({}))
     
-    # Calculate total sessions per subject
     total_sessions_dict = {}
     for session_item in all_sessions:
         subject = session_item['subject']
@@ -793,7 +882,7 @@ def students_report():
                           settings=settings)
 
 # ====================================================================
-# PDF EXPORT ROUTES
+# PDF EXPORT ROUTES - UNCHANGED
 # ====================================================================
 
 @app.route('/export_report/<session_id>')
@@ -863,7 +952,7 @@ def export_students():
     return export_students_directory(db)
 
 # ====================================================================
-# ADMIN ROUTES
+# ADMIN ROUTES - UNCHANGED (except settings update)
 # ====================================================================
 
 @app.route('/admin_dashboard')
@@ -1107,6 +1196,7 @@ def admin_delete_session(session_id):
     """Delete session"""
     db.attendance.delete_many({"session_id": session_id})
     db.sessions.delete_one({"session_id": session_id})
+    db.qr_tokens.delete_many({"session_id": session_id})  # Clean up QR tokens
     log_activity('session_deleted', session['user_id'], get_client_ip(), f"Deleted session {session_id}")
     flash('Session deleted successfully', 'success')
     return redirect(url_for('admin_manage_sessions'))
@@ -1134,7 +1224,12 @@ def admin_system_settings():
             "enable_location_tracking": request.form.get('enable_location_tracking') == 'on',
             "enable_ip_tracking": request.form.get('enable_ip_tracking') == 'on',
             "max_login_attempts": int(request.form.get('max_login_attempts', 5)),
-            "session_timeout_minutes": int(request.form.get('session_timeout_minutes', 30))
+            "session_timeout_minutes": int(request.form.get('session_timeout_minutes', 30)),
+            # NEW: Dynamic QR settings
+            "qr_refresh_interval": int(request.form.get('qr_refresh_interval', 15)),
+            "verification_code_length": int(request.form.get('verification_code_length', 6)),
+            "enable_device_fingerprinting": request.form.get('enable_device_fingerprinting') == 'on',
+            "enable_verification_code": request.form.get('enable_verification_code') == 'on'
         }
         
         db.settings.update_one({}, {"$set": updated_settings}, upsert=True)
@@ -1214,7 +1309,7 @@ def admin_delete_notice(notice_id):
     return redirect(url_for('admin_dashboard'))
 
 # ====================================================================
-# ADMIN BULK UPLOAD - FIXED VERSION
+# ADMIN BULK UPLOAD - UNCHANGED
 # ====================================================================
 
 import pandas as pd
@@ -1239,16 +1334,13 @@ def admin_bulk_upload_students():
         return redirect(url_for('admin_manage_students'))
     
     try:
-        # Read file based on extension
         if file.filename.endswith('.csv'):
             df = pd.read_csv(file)
         else:
             df = pd.read_excel(file)
         
-        # Normalize column names - remove spaces, convert to lowercase
         df.columns = [str(col).strip().lower().replace(' ', '_') for col in df.columns]
         
-        # Expected columns mapping - handle variations
         roll_no_col = None
         name_col = None
         branch_col = None
@@ -1281,11 +1373,9 @@ def admin_bulk_upload_students():
                 name = str(row[name_col]).strip()
                 branch = str(row[branch_col]).strip().upper()
                 
-                # Skip empty rows
                 if not roll_no or not name or not branch or roll_no == 'NAN' or name == 'NAN':
                     continue
                 
-                # Clean branch names
                 if 'cse' in branch.lower() or 'computer' in branch.lower():
                     branch = 'CSE'
                 elif 'it' in branch.lower():
@@ -1297,14 +1387,12 @@ def admin_bulk_upload_students():
                 elif 'ce' in branch.lower() or 'civil' in branch.lower():
                     branch = 'CE'
                 
-                # Check if student already exists
                 existing = db.students.find_one({"roll_no": roll_no})
                 if existing:
                     error_count += 1
                     errors.append(f"Row {idx+2}: Roll number {roll_no} already exists")
                     continue
                 
-                # Get optional values
                 email = ''
                 if 'email' in df.columns and pd.notna(row['email']):
                     email = str(row['email']).strip()
@@ -1362,7 +1450,7 @@ def admin_bulk_upload_students():
     return redirect(url_for('admin_manage_students'))
 
 # ====================================================================
-# STATIC PAGES
+# STATIC PAGES - UNCHANGED
 # ====================================================================
 
 @app.route('/subject_details')
@@ -1396,14 +1484,19 @@ if __name__ == "__main__":
     debug_mode = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
     
     print("\n" + "=" * 60)
-    print("🚀 SMART ATTENDANCE SYSTEM v3.0")
+    print("🚀 SMART ATTENDANCE SYSTEM v3.1")
     print("=" * 60)
-    print(f"📊 Database: {os.getenv('DB_NAME', 'smart_attendance')}")
-    print(f"🌐 Server running on port: {port}")
+    print("📊 Database: " + os.getenv('DB_NAME', 'smart_attendance'))
+    print("🌐 Server running on port: " + str(port))
     print("\n👥 Login Credentials:")
     print("   Admin:   ADMIN001 / admin123")
     print("   Faculty: FAC001 / faculty123")
     print("   Student: CS001 (no password)")
+    print("\n✨ NEW FEATURES:")
+    print("   • Dynamic QR Code (refreshes every 10-15s)")
+    print("   • Live Verification Code")
+    print("   • Device Fingerprinting")
+    print("   • Enhanced Security")
     print("\n" + "=" * 60 + "\n")
     
     app.run(debug=debug_mode, host='0.0.0.0', port=port)
