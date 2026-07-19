@@ -153,8 +153,28 @@ def home():
         else:
             return redirect(url_for('student_dashboard'))
     
-    stats = get_dashboard_stats()
-    settings = get_settings()
+    # Get stats with error handling to prevent crashes
+    try:
+        stats = get_dashboard_stats()
+    except Exception as e:
+        app.logger.error(f"Error getting dashboard stats: {e}")
+        stats = {
+            "total_students": 0,
+            "total_faculty": 0,
+            "total_sessions": 0,
+            "total_attendance": 0,
+            "today_sessions": 0,
+            "active_sessions": 0,
+            "recent_notices": []
+        }
+    
+    # Get settings with error handling
+    try:
+        settings = get_settings()
+    except Exception as e:
+        app.logger.error(f"Error getting settings: {e}")
+        settings = {}
+    
     sidebar_links = get_sidebar_links()
     college_header = get_college_header()
     
