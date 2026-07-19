@@ -13,20 +13,20 @@
     
     .role-tabs {
         display: flex;
-        background: var(--gray-light);
+        background: var(--gray-200);
         border-radius: 50px;
-        padding: 5px;
-        margin: 20px 0;
-        gap: 5px;
+        padding: 4px;
+        margin: 16px 0;
+        gap: 4px;
     }
     
     .role-tab {
         flex: 1;
         text-align: center;
-        padding: 12px 8px;
+        padding: 10px 8px;
         border-radius: 40px;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: var(--transition);
         font-weight: 600;
         font-size: 14px;
         background: transparent;
@@ -35,18 +35,23 @@
     }
     
     .role-tab.active {
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        background: var(--primary);
         color: white;
         box-shadow: var(--shadow-sm);
     }
     
-    .role-tab.student.active { background: linear-gradient(135deg, var(--success), var(--success-dark)); }
-    .role-tab.faculty.active { background: linear-gradient(135deg, var(--info), var(--info-dark)); }
-    .role-tab.admin.active { background: linear-gradient(135deg, var(--danger), var(--danger-dark)); }
+    .role-tab.student.active {
+        background: var(--primary);
+    }
+    .role-tab.faculty.active {
+        background: var(--info);
+    }
+    .role-tab.admin.active {
+        background: var(--danger);
+    }
     
     .role-tab:hover:not(.active) {
-        background: var(--border-color);
-        transform: translateY(-2px);
+        background: var(--gray-300);
     }
     
     .input-group {
@@ -61,17 +66,17 @@
         font-size: 14px;
         transition: all 0.3s;
         background: var(--card-bg);
-        color: var(--text-primary);
+        color: var(--text-secondary);
     }
     
     .input-group input:focus {
         outline: none;
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        box-shadow: 0 0 0 3px rgba(26, 58, 107, 0.12);
     }
     
     .login-btn {
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        background: var(--primary);
         color: white;
         border: none;
         border-radius: var(--radius-md);
@@ -85,8 +90,9 @@
     }
     
     .login-btn:hover {
+        background: var(--primary-dark);
         transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
+        box-shadow: var(--shadow-sm);
     }
     
     .demo-credentials {
@@ -156,7 +162,7 @@
         
         <form method="POST">
             <div class="role-tabs">
-                <button type="button" class="role-tab student active" data-role="student" onclick="selectRole('student')">
+                <button type="button" class="role-tab student" data-role="student" onclick="selectRole('student')">
                     Student
                 </button>
                 <button type="button" class="role-tab faculty" data-role="faculty" onclick="selectRole('faculty')">
@@ -217,8 +223,23 @@
             passwordField.required = true;
         }
     }
+
+    // ====================================================================
+    // AUTO-SELECT ROLE FROM URL PARAMETER
+    // ====================================================================
     
-    selectRole('student');
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const role = urlParams.get('role');
+        
+        if (role && ['student', 'faculty', 'admin'].includes(role)) {
+            // Auto-select the matching role tab
+            selectRole(role);
+        } else {
+            // Default to student
+            selectRole('student');
+        }
+    });
 </script>
 
 <script>
