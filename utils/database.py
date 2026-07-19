@@ -35,13 +35,8 @@ class Database:
                 'attendance': self.db['attendance'],
                 'notices': self.db['notices'],
                 'settings': self.db['settings'],
-                'logs': self.db['logs'],
-                'qr_tokens': self.db['qr_tokens'],  # NEW
-                'attendance_attempts': self.db['attendance_attempts']  # NEW
+                'logs': self.db['logs']
             }
-            
-            # Create indexes
-            self._create_indexes()
             
             logger.info(f"Connected to MongoDB database: {db_name}")
             return True
@@ -49,32 +44,6 @@ class Database:
         except (ConnectionFailure, ServerSelectionTimeoutError) as e:
             logger.error(f"MongoDB connection failed: {e}")
             return False
-    
-    def _create_indexes(self):
-        """Create database indexes for performance"""
-        try:
-            # QR tokens indexes
-            self.db['qr_tokens'].create_index('session_id')
-            self.db['qr_tokens'].create_index('token_id', unique=True)
-            self.db['qr_tokens'].create_index('expires_at')
-            self.db['qr_tokens'].create_index([('created_at', -1)])
-            
-            # Attendance attempts indexes
-            self.db['attendance_attempts'].create_index('session_id')
-            self.db['attendance_attempts'].create_index('student_id')
-            self.db['attendance_attempts'].create_index('timestamp')
-            
-            # Existing indexes
-            self.db['attendance'].create_index('student_id')
-            self.db['attendance'].create_index('session_id')
-            self.db['sessions'].create_index('session_id', unique=True)
-            self.db['students'].create_index('roll_no', unique=True)
-            self.db['faculty'].create_index('faculty_id', unique=True)
-            self.db['admins'].create_index('admin_id', unique=True)
-            
-            logger.info("Database indexes created")
-        except Exception as e:
-            logger.warning(f"Index creation warning: {e}")
     
     def __getattr__(self, name):
         """Access collections directly"""
