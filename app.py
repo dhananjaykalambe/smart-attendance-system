@@ -34,7 +34,7 @@ app.logger.setLevel(logging.INFO)
 app.logger.info('Smart Attendance System Startup')
 
 # Import utilities
-from utils.database import db, init_db, get_db
+from utils.database import db, init_db, get_db, generate_verification_code
 from utils.auth import login_required, faculty_required, student_required, admin_required
 from utils.helpers import (
     get_settings, get_college_header, get_sidebar_links, get_dashboard_stats,
@@ -359,6 +359,12 @@ def create_session():
         start_time = datetime.now()
         end_time = start_time + timedelta(minutes=duration)
         
+        # ============================================================
+        # GENERATE VERIFICATION CODE - NEW FEATURE
+        # ============================================================
+        verification_code = generate_verification_code(settings.get("verification_code_length", 6))
+        verification_expiry = settings.get("qr_expiry_seconds", 60)
+        
         session_data = {
             "session_id": session_id,
             "subject": subject,
@@ -370,9 +376,23 @@ def create_session():
             "is_active": True,
             "created_at": datetime.now(),
             "created_by": session['user_id'],
-            "qr_url": url
+            "qr_url": url,
+            # NEW VERIFICATION CODE FIELDS
+            "verification_code": verification_code,
+            "verification_expires_at": datetime.now() + timedelta(seconds=verification_expiry)
         }
         db.sessions.insert_one(session_data)
+        
+        # Also store verification code in the verification_codes collection for tracking
+        db.verification_codes.insert_one({
+            'session_id': session_id,
+            'code': verification_code,
+            'created_at': datetime.now(),
+            'expires_at': datetime.now() + timedelta(seconds=verification_expiry),
+            'expiry_timestamp': (datetime.now() + timedelta(seconds=verification_expiry)).timestamp(),
+            'is_used': False,
+            'used_by': None
+        })
         
         log_activity('session_created', session['user_id'], get_client_ip(), 
                     f"Created session for {subject} (ID: {session_id})")
@@ -385,6 +405,7 @@ def create_session():
                               qr=qr_filename,
                               end_time=end_time_iso,
                               duration=duration,
+                              verification_code=verification_code,
                               sidebar_links=sidebar_links,
                               college_header=college_header,
                               settings=settings)
@@ -610,34 +631,36 @@ def delete_student(roll_no):
     return redirect(url_for('add_student'))
 
 # ====================================================================
-# MARK ATTENDANCE
+# MARK ATTENDANCE - UPDATED WITH VERIFICATION CODE
 # ====================================================================
 
 @app.route('/mark', methods=['GET', 'POST'])
 def mark():
-    """Mark attendance via QR code scan"""
+    """Mark attendance via QR code scan with verification code"""
     session_id = request.args.get('session_id') or request.form.get('session_id')
     qr_timestamp = request.args.get('t')
     qr_hash = request.args.get('h')
+    qr_data = request.form.get('qr_data')
+    verification_code = request.form.get('verification_code', '').strip()
     
     if 'user_id' not in session:
         flash('Please login to mark attendance', 'warning')
         return redirect(url_for('login'))
     
     student_id = session['user_id']
+    settings = get_settings()
     
-    # Verify QR code if parameters provided
+    # Verify QR code if parameters provided (GET request from QR scan)
     if qr_timestamp and qr_hash:
         try:
             timestamp_int = int(qr_timestamp)
             current_time = int(datetime.now().timestamp())
-            settings = get_settings()
             qr_expiry = settings.get("qr_expiry_seconds", 60)
             
             if current_time - timestamp_int > qr_expiry:
                 return render_template("message.html",
                                       title="QR Code Expired",
-                                      message="The QR code has expired. Please scan a valid QR code.",
+                                      message="The QR code has expired. Please scan a fresh QR code.",
                                       type="error")
             
             if not verify_qr_hash(session_id, qr_timestamp, qr_hash):
@@ -652,7 +675,26 @@ def mark():
                                   message="Invalid QR code format.",
                                   type="error")
     
-    # Validate session
+    # Dynamic QR code handling (POST from scanner)
+    if request.method == 'POST' and qr_data:
+        # Parse dynamic QR format: sessionId|data
+        if '|' in qr_data:
+            parts = qr_data.split('|')
+            if len(parts) >= 2:
+                session_id = parts[0]
+            else:
+                session_id = qr_data
+        else:
+            session_id = qr_data
+    
+    # Validate session_id
+    if not session_id:
+        return render_template("message.html",
+                              title="Invalid Session",
+                              message="Session ID is required.",
+                              type="error")
+    
+    # Validate session exists
     session_data = db.sessions.find_one({"session_id": session_id})
     if not session_data:
         return render_template("message.html",
@@ -671,6 +713,25 @@ def mark():
                               message="This attendance session has expired.",
                               type="error")
     
+    # Check if session is marked as inactive
+    if session_data.get('is_active') is False:
+        return render_template("message.html",
+                              title="Session Closed",
+                              message="This attendance session is closed.",
+                              type="error")
+    
+    # ================================================================
+    # VERIFICATION CODE VALIDATION - UPDATED
+    # ================================================================
+    enable_verification = settings.get("enable_verification_code", True)
+    if enable_verification and verification_code:
+        # Use the database method to verify the code
+        if not db.verify_code(session_id, verification_code):
+            return render_template("message.html",
+                                  title="Invalid Verification Code",
+                                  message="The verification code you entered is incorrect or expired. Please try again.",
+                                  type="error")
+    
     # Check if already marked
     existing = db.attendance.find_one({"student_id": student_id, "session_id": session_id})
     if existing:
@@ -688,15 +749,16 @@ def mark():
         "time": datetime.now(),
         "ip_address": client_ip,
         "user_agent": request.headers.get('User-Agent', ''),
-        "marked_at": datetime.now()
+        "marked_at": datetime.now(),
+        "verification_used": verification_code if verification_code else None
     }
     db.attendance.insert_one(attendance_record)
     
     log_activity('attendance_marked', student_id, client_ip, f"Marked attendance for {session_data['subject']}")
     
     return render_template("message.html",
-                          title="Attendance Marked!",
-                          message="Your attendance has been recorded successfully.",
+                          title="✅ Attendance Marked!",
+                          message=f"Your attendance for {session_data['subject']} has been recorded successfully.",
                           type="success",
                           redirect_url="/student_dashboard")
 
@@ -1134,7 +1196,12 @@ def admin_system_settings():
             "enable_location_tracking": request.form.get('enable_location_tracking') == 'on',
             "enable_ip_tracking": request.form.get('enable_ip_tracking') == 'on',
             "max_login_attempts": int(request.form.get('max_login_attempts', 5)),
-            "session_timeout_minutes": int(request.form.get('session_timeout_minutes', 30))
+            "session_timeout_minutes": int(request.form.get('session_timeout_minutes', 30)),
+            # NEW SETTINGS
+            "qr_refresh_interval": int(request.form.get('qr_refresh_interval', 15)),
+            "enable_verification_code": request.form.get('enable_verification_code') == 'on',
+            "verification_code_length": int(request.form.get('verification_code_length', 6)),
+            "enable_device_fingerprinting": request.form.get('enable_device_fingerprinting') == 'on'
         }
         
         db.settings.update_one({}, {"$set": updated_settings}, upsert=True)
@@ -1404,6 +1471,9 @@ if __name__ == "__main__":
     print("   Admin:   ADMIN001 / admin123")
     print("   Faculty: FAC001 / faculty123")
     print("   Student: CS001 (no password)")
+    print("\n🔐 Verification Code System: Enabled")
+    print("   - 6-digit codes generated per session")
+    print("   - Codes expire after QR expiry time")
     print("\n" + "=" * 60 + "\n")
     
     app.run(debug=debug_mode, host='0.0.0.0', port=port)

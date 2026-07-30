@@ -44,9 +44,13 @@ DEFAULT_SETTINGS = {
     "enable_ip_tracking": True,
     "maintenance_mode": False,
     "max_login_attempts": 5,
-    "session_timeout_minutes": 30
+    "session_timeout_minutes": 30,
+    # NEW SETTINGS
+    "qr_refresh_interval": 15,           # QR code refresh interval in seconds
+    "enable_verification_code": True,    # Enable verification code feature
+    "verification_code_length": 6,       # Length of verification code
+    "enable_device_fingerprinting": True # Enable device fingerprinting
 }
-
 # ====================================================================
 # APP CONFIGURATION
 # ====================================================================
