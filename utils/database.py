@@ -8,24 +8,8 @@ from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 from datetime import datetime
 import os
 import logging
-import random
-import string
 
 logger = logging.getLogger(__name__)
-
-
-def generate_verification_code(length=6):
-    """
-    Generate a numeric verification code for QR attendance
-    
-    Args:
-        length (int): Length of the verification code (default: 6)
-    
-    Returns:
-        str: Numeric verification code
-    """
-    return ''.join(random.choices(string.digits, k=length))
-
 
 class Database:
     """MongoDB database wrapper"""
@@ -51,8 +35,7 @@ class Database:
                 'attendance': self.db['attendance'],
                 'notices': self.db['notices'],
                 'settings': self.db['settings'],
-                'logs': self.db['logs'],
-                'verification_codes': self.db['verification_codes']  # New collection for tracking codes
+                'logs': self.db['logs']
             }
             
             logger.info(f"Connected to MongoDB database: {db_name}")
@@ -67,133 +50,6 @@ class Database:
         if name in self.collections:
             return self.collections[name]
         raise AttributeError(f"'Database' object has no attribute '{name}'")
-    
-    def create_verification_code(self, session_id, length=6, expiry_seconds=60):
-        """
-        Create and store a verification code for a session
-        
-        Args:
-            session_id (str): The session ID
-            length (int): Length of the code
-            expiry_seconds (int): How long the code is valid
-        
-        Returns:
-            str: The generated verification code
-        """
-        code = generate_verification_code(length)
-        expires_at = datetime.now().timestamp() + expiry_seconds
-        
-        # Store the verification code
-        self.verification_codes.insert_one({
-            'session_id': session_id,
-            'code': code,
-            'created_at': datetime.now(),
-            'expires_at': datetime.fromtimestamp(expires_at),
-            'expiry_timestamp': expires_at,
-            'is_used': False,
-            'used_by': None
-        })
-        
-        # Also update the session with the current code for quick lookup
-        self.sessions.update_one(
-            {'session_id': session_id},
-            {'$set': {
-                'verification_code': code,
-                'verification_expires_at': datetime.fromtimestamp(expires_at)
-            }}
-        )
-        
-        return code
-    
-    def verify_code(self, session_id, code):
-        """
-        Verify a verification code for a session
-        
-        Args:
-            session_id (str): The session ID
-            code (str): The code to verify
-        
-        Returns:
-            bool: True if valid, False otherwise
-        """
-        now = datetime.now()
-        
-        # Find the verification code
-        vc = self.verification_codes.find_one({
-            'session_id': session_id,
-            'code': code,
-            'is_used': False,
-            'expires_at': {'$gt': now}
-        })
-        
-        if vc:
-            # Mark as used
-            self.verification_codes.update_one(
-                {'_id': vc['_id']},
-                {'$set': {'is_used': True}}
-            )
-            return True
-        
-        # Also check if there's a code directly in the session (for backward compatibility)
-        session = self.sessions.find_one({'session_id': session_id})
-        if session and session.get('verification_code') == code:
-            expiry = session.get('verification_expires_at')
-            if expiry and expiry > now:
-                return True
-        
-        return False
-    
-    def refresh_verification_code(self, session_id, length=6, expiry_seconds=60):
-        """
-        Refresh the verification code for a session
-        
-        Args:
-            session_id (str): The session ID
-            length (int): Length of the code
-            expiry_seconds (int): How long the code is valid
-        
-        Returns:
-            str: The new verification code
-        """
-        # Mark old codes as used/expired
-        self.verification_codes.update_many(
-            {'session_id': session_id, 'is_used': False},
-            {'$set': {'is_used': True}}
-        )
-        
-        # Generate and store new code
-        return self.create_verification_code(session_id, length, expiry_seconds)
-    
-    def get_active_verification_code(self, session_id):
-        """
-        Get the current active verification code for a session
-        
-        Args:
-            session_id (str): The session ID
-        
-        Returns:
-            str: The active verification code or None
-        """
-        now = datetime.now()
-        
-        vc = self.verification_codes.find_one({
-            'session_id': session_id,
-            'is_used': False,
-            'expires_at': {'$gt': now}
-        })
-        
-        if vc:
-            return vc['code']
-        
-        # Check session for quick lookup
-        session = self.sessions.find_one({'session_id': session_id})
-        if session and session.get('verification_code'):
-            expiry = session.get('verification_expires_at')
-            if expiry and expiry > now:
-                return session['verification_code']
-        
-        return None
-
 
 # Global database instance
 db = Database()
@@ -300,10 +156,6 @@ def create_indexes(db):
         db.attendance.create_index([("student_id", 1), ("session_id", 1)])
         db.attendance.create_index("subject")
         db.attendance.create_index("time")
-        
-        # Verification codes indexes
-        db.verification_codes.create_index([("session_id", 1), ("expires_at", 1)])
-        db.verification_codes.create_index([("expires_at", 1), ("is_used", 1)])
         
         # Logs indexes
         db.logs.create_index("timestamp")
