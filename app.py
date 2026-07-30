@@ -642,10 +642,14 @@ def delete_student(roll_no):
 @app.route('/mark', methods=['GET', 'POST'])
 def mark():
     """Mark attendance via QR code scan only"""
-    session_id = request.args.get('session_id') or request.form.get('session_id')
+    # Get parameters from URL (GET request from QR scan)
+    session_id = request.args.get('session_id')
     qr_timestamp = request.args.get('t')
     qr_hash = request.args.get('h')
+    
+    # Get parameters from POST (form submission from scanner)
     qr_data = request.form.get('qr_data')
+    post_session_id = request.form.get('session_id')
     
     # If user is not logged in, store session_id and redirect to login
     if 'user_id' not in session:
@@ -657,24 +661,41 @@ def mark():
     student_id = session['user_id']
     settings = get_settings()
     
-    # Verify QR code if parameters provided (GET request from QR scan)
-    if qr_timestamp and qr_hash:
+    # ================================================================
+    # QR VERIFICATION - Handle both GET and POST
+    # ================================================================
+    
+    # Case 1: Direct QR scan (GET request with parameters)
+    if qr_timestamp and qr_hash and session_id:
         try:
             timestamp_int = int(qr_timestamp)
             current_time = int(datetime.now().timestamp())
             qr_expiry = settings.get("qr_expiry_seconds", 60)
             
+            # Check if QR code has expired
             if current_time - timestamp_int > qr_expiry:
                 return render_template("message.html",
                                       title="QR Code Expired",
                                       message="The QR code has expired. Please scan a fresh QR code.",
                                       type="error")
             
+            # Verify the hash
             if not verify_qr_hash(session_id, qr_timestamp, qr_hash):
+                app.logger.warning(f"Invalid QR hash for session {session_id}")
                 return render_template("message.html",
                                       title="Invalid QR Code",
                                       message="Invalid QR code detected. Please scan a valid QR code.",
                                       type="error")
+                
+            # Hash is valid, proceed with this session_id
+            app.logger.info(f"QR verified for session {session_id}")
+            
+        except ValueError as e:
+            app.logger.error(f"QR validation error: {e}")
+            return render_template("message.html",
+                                  title="Error",
+                                  message="Invalid QR code format.",
+                                  type="error")
         except Exception as e:
             app.logger.error(f"QR validation error: {e}")
             return render_template("message.html",
@@ -682,8 +703,8 @@ def mark():
                                   message="Invalid QR code format.",
                                   type="error")
     
-    # Dynamic QR code handling (POST from scanner)
-    if request.method == 'POST' and qr_data:
+    # Case 2: POST from scanner (dynamic QR)
+    elif request.method == 'POST' and qr_data:
         # Parse dynamic QR format: sessionId|data
         if '|' in qr_data:
             parts = qr_data.split('|')
@@ -692,7 +713,24 @@ def mark():
             else:
                 session_id = qr_data
         else:
-            session_id = qr_data
+            # Try to parse as URL
+            try:
+                from urllib.parse import urlparse, parse_qs
+                parsed = urlparse(qr_data)
+                if parsed.query:
+                    params = parse_qs(parsed.query)
+                    session_id = params.get('session_id', [None])[0] or qr_data
+                else:
+                    session_id = qr_data
+            except:
+                session_id = qr_data
+        
+        app.logger.info(f"POST QR scan for session {session_id}")
+    
+    # Case 3: POST with session_id from form
+    elif request.method == 'POST' and post_session_id:
+        session_id = post_session_id
+        app.logger.info(f"POST form submission for session {session_id}")
     
     # Validate session_id
     if not session_id:
@@ -704,6 +742,7 @@ def mark():
     # Validate session exists
     session_data = db.sessions.find_one({"session_id": session_id})
     if not session_data:
+        app.logger.warning(f"Session not found: {session_id}")
         return render_template("message.html",
                               title="Invalid Session",
                               message="This session does not exist.",
