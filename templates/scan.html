@@ -2,55 +2,60 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Scan QR Code - Dynamic Attendance</title>
+<title>Scan QR Code</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
 <script src="https://unpkg.com/html5-qrcode"></script>
 <style>
-    .verification-input {
-        margin: 15px 0;
-        padding: 15px;
-        background: var(--primary-soft);
+    #reader {
+        width: 100%;
+        max-width: 400px;
+        margin: 20px auto;
+    }
+    #reader video {
         border-radius: var(--radius-md);
-        border: 1px solid var(--border-color);
     }
-    .verification-input label {
+    .scan-status {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: var(--radius-md);
+        display: none;
+    }
+    .scan-status.show {
         display: block;
-        font-weight: 600;
+    }
+    .scan-status.success {
+        background: var(--primary-soft);
         color: var(--primary);
-        margin-bottom: 5px;
+        border-left: 4px solid var(--primary);
     }
-    .verification-input input {
-        text-align: center;
-        font-size: 1.5rem;
-        letter-spacing: 8px;
-        font-family: monospace;
-        padding: 12px;
-        width: 200px;
-        margin: 0 auto;
-        display: block;
-        border: 2px solid var(--primary);
-        border-radius: var(--radius-sm);
-        background: white;
+    .scan-status.error {
+        background: #ffebee;
+        color: #c62828;
+        border-left: 4px solid #c62828;
     }
-    .verification-input input:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
-        outline: none;
+    .scan-status.warning {
+        background: #fff8e1;
+        color: #f57f17;
+        border-left: 4px solid #f57f17;
     }
-    .verification-input input.error {
-        border-color: var(--danger);
-        box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15);
-    }
-    .verification-input input.success {
-        border-color: var(--success);
-        box-shadow: 0 0 0 3px rgba(0, 210, 160, 0.15);
-    }
-    .instruction-text {
-        color: var(--text-secondary);
+    .location-status {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: var(--radius-md);
         font-size: 13px;
-        text-align: center;
-        margin: 10px 0;
+    }
+    .location-status.success {
+        background: var(--primary-soft);
+        color: var(--primary);
+    }
+    .location-status.error {
+        background: #ffebee;
+        color: #c62828;
+    }
+    .location-status.warning {
+        background: #fff8e1;
+        color: #f57f17;
     }
     .manual-form {
         margin-top: 20px;
@@ -74,58 +79,7 @@
         padding: 10px 30px;
         margin-top: 0;
     }
-    #reader {
-        width: 100%;
-        max-width: 400px;
-        margin: 20px auto;
-    }
-    #reader video {
-        border-radius: var(--radius-md);
-    }
-    .scan-status {
-        margin-top: 10px;
-        padding: 10px;
-        border-radius: var(--radius-md);
-        display: none;
-    }
-    .scan-status.show {
-        display: block;
-    }
-    .scan-status.success {
-        background: var(--success-soft);
-        color: var(--success-dark);
-        border-left: 4px solid var(--success);
-    }
-    .scan-status.error {
-        background: var(--danger-soft);
-        color: var(--danger-dark);
-        border-left: 4px solid var(--danger);
-    }
-    .scan-status.warning {
-        background: var(--warning-soft);
-        color: var(--warning-dark);
-        border-left: 4px solid var(--warning);
-    }
-    .location-status {
-        margin-top: 15px;
-        padding: 10px;
-        border-radius: var(--radius-md);
-        font-size: 13px;
-    }
-    .location-status.success {
-        background: var(--success-soft);
-        color: var(--success-dark);
-    }
-    .location-status.error {
-        background: var(--danger-soft);
-        color: var(--danger-dark);
-    }
-    .location-status.warning {
-        background: var(--warning-soft);
-        color: var(--warning-dark);
-    }
     @media (max-width: 480px) {
-        .verification-input input { width: 150px; font-size: 1.2rem; letter-spacing: 4px; }
         .manual-form .form-row { flex-direction: column; align-items: center; }
         .manual-form input { max-width: 100%; width: 100%; }
         #reader { max-width: 100%; }
@@ -180,19 +134,11 @@
     <div class="card" style="text-align: center;">
         <h3>Welcome, {{ name }}</h3>
         <p style="color: var(--text-secondary); margin-bottom: 20px;">
-            Scan the dynamic QR code displayed by your faculty and enter the verification code
+            Scan the QR code displayed by your faculty to mark attendance
         </p>
         
         <!-- QR Reader -->
         <div id="reader"></div>
-        
-        <!-- Verification Code Input -->
-        <div class="verification-input">
-            <label for="verificationCode">🔐 Live Verification Code</label>
-            <input type="text" id="verificationCode" placeholder="Enter 6-digit code" 
-                   maxlength="6" pattern="[0-9]*" inputmode="numeric" autocomplete="off">
-            <p class="instruction-text">Enter the verification code shown alongside the QR code</p>
-        </div>
         
         <!-- Scan Status -->
         <div id="scanStatus" class="scan-status"></div>
@@ -203,7 +149,6 @@
             <form method="POST" action="/mark" id="attendanceForm">
                 <input type="hidden" name="session_id" id="sessionIdInput">
                 <input type="hidden" name="qr_data" id="qrDataInput">
-                <input type="hidden" name="verification_code" id="verificationCodeInput">
                 <div class="form-row">
                     <input type="text" id="manualSessionId" placeholder="Session ID (e.g., ABC123)" style="text-align: center;">
                 </div>
@@ -215,14 +160,14 @@
         <div id="locationStatus" class="location-status">📍 Detecting location...</div>
         
         <p style="margin-top: 15px; font-size: 12px; color: var(--text-muted);">
-            🔒 Your location, IP, and device fingerprint are recorded for security
+            🔒 Your location and IP are recorded for security
         </p>
     </div>
 </div>
 
 <script>
 // ====================================================================
-// GEOLOCATION - FIXED
+// GEOLOCATION
 // ====================================================================
 
 (function initLocation() {
@@ -262,7 +207,7 @@
 })();
 
 // ====================================================================
-// QR SCANNER - FIXED
+// QR SCANNER
 // ====================================================================
 
 let scanner = null;
@@ -310,25 +255,9 @@ function onScanSuccess(decodedText) {
             }
         }
         
-        // Get verification code
-        const verificationCode = document.getElementById('verificationCode').value.trim();
-        
-        if (!verificationCode) {
-            showScanStatus('⚠️ Please enter the verification code before scanning.', 'warning');
-            isProcessing = false;
-            return;
-        }
-        
-        if (verificationCode.length < 4) {
-            showScanStatus('⚠️ Verification code must be at least 4 digits.', 'warning');
-            isProcessing = false;
-            return;
-        }
-        
         // Update form
         document.getElementById('sessionIdInput').value = sessionId;
         document.getElementById('qrDataInput').value = qrData;
-        document.getElementById('verificationCodeInput').value = verificationCode;
         
         showScanStatus('✅ Verifying attendance... Please wait.', 'success');
         
@@ -385,65 +314,19 @@ function createScanner() {
 }
 
 // ====================================================================
-// VERIFICATION CODE VALIDATION
-// ====================================================================
-
-const vcInput = document.getElementById('verificationCode');
-
-vcInput.addEventListener('input', function(e) {
-    // Only allow digits
-    this.value = this.value.replace(/[^0-9]/g, '');
-    // Limit to 6 digits
-    if (this.value.length > 6) {
-        this.value = this.value.slice(0, 6);
-    }
-    // Update styling
-    if (this.value.length >= 4) {
-        this.className = 'success';
-    } else if (this.value.length > 0) {
-        this.className = '';
-    } else {
-        this.className = '';
-    }
-});
-
-// Enter key on verification code triggers scan (if scanner active)
-vcInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        // Try to trigger scan - but scanner handles it automatically
-        if (scanner) {
-            showScanStatus('📷 Please scan the QR code now.', 'warning');
-        }
-    }
-});
-
-// ====================================================================
-// MANUAL SUBMIT - FIXED
+// MANUAL SUBMIT
 // ====================================================================
 
 function manualSubmit() {
     const sessionId = document.getElementById('manualSessionId').value.trim();
-    const verificationCode = document.getElementById('verificationCode').value.trim();
     
     if (!sessionId) {
         showScanStatus('⚠️ Please enter a Session ID.', 'warning');
         return;
     }
     
-    if (!verificationCode) {
-        showScanStatus('⚠️ Please enter the verification code.', 'warning');
-        return;
-    }
-    
-    if (verificationCode.length < 4) {
-        showScanStatus('⚠️ Verification code must be at least 4 digits.', 'warning');
-        return;
-    }
-    
     document.getElementById('sessionIdInput').value = sessionId;
     document.getElementById('qrDataInput').value = sessionId;
-    document.getElementById('verificationCodeInput').value = verificationCode;
     
     showScanStatus('✅ Submitting attendance...', 'success');
     

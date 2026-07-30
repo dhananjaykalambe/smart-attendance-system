@@ -19,14 +19,14 @@
         max-width: 100%;
     }
     .info-box {
-        background: var(--info-soft);
+        background: var(--primary-soft);
         padding: 15px;
         border-radius: var(--radius-md);
         margin: 20px 0;
         text-align: left;
-        border-left: 4px solid var(--info);
+        border-left: 4px solid var(--primary);
     }
-    .info-box p { margin: 5px 0; color: var(--info-dark); }
+    .info-box p { margin: 5px 0; color: var(--text-primary); }
     .copy-btn {
         background: var(--gray);
         padding: 8px 20px;
@@ -47,11 +47,11 @@
         min-width: 120px;
     }
     .countdown-timer.warning {
-        background: linear-gradient(135deg, var(--danger), var(--danger-dark));
+        background: linear-gradient(135deg, var(--danger), var(--primary-dark));
         animation: pulse 0.8s infinite;
     }
     .countdown-timer.expired {
-        background: linear-gradient(135deg, var(--danger), var(--danger-dark));
+        background: linear-gradient(135deg, var(--danger), var(--primary-dark));
         animation: none;
     }
     @keyframes pulse {
@@ -68,15 +68,6 @@
         padding: 10px;
         border-radius: var(--radius-md);
         margin-top: 15px;
-    }
-    .refresh-note {
-        background: var(--primary-soft);
-        padding: 8px 15px;
-        border-radius: var(--radius-md);
-        margin: 10px 0;
-        font-size: 13px;
-        color: var(--primary);
-        display: inline-block;
     }
     @media (max-width: 768px) {
         .countdown-timer { font-size: 2rem; padding: 15px 25px; min-width: 80px; }
@@ -127,7 +118,7 @@
 </div>
 
 <div class="main">
-    <div class="header" style="background: linear-gradient(135deg, var(--success), var(--success-dark));">
+    <div class="header" style="background: linear-gradient(135deg, var(--primary), var(--primary-light));">
         Session Created Successfully
     </div>
 
@@ -144,24 +135,19 @@
             <img src="{{ url_for('static', filename='qr_codes/' + qr) }}" width="250" id="qrImage" alt="QR Code">
         </div>
         
-        <div class="refresh-note">
-            🔄 QR Code refreshes every {{ settings.get('qr_refresh_interval', 15) }} seconds with new verification code
-        </div>
-        
         <div class="info-box">
             <p><strong>How to use:</strong></p>
             <p>1. Students should open the Scan QR page</p>
             <p>2. Scan this QR code using their device camera</p>
-            <p>3. Enter the verification code shown on their screen</p>
-            <p>4. Attendance will be automatically marked</p>
-            <p>5. Session expires when countdown reaches 00:00</p>
+            <p>3. Attendance will be automatically marked</p>
+            <p>4. Session expires when countdown reaches 00:00</p>
         </div>
         
         <p style="margin-top: 20px;" id="activeMessage">✅ Session is active for the duration shown above</p>
         
         <div class="qr-url">
             <strong>QR URL (for manual entry):</strong><br>
-            <span id="qrUrl">{{ qr_url if qr_url else url_for('mark', session_id=session_id, _external=True) }}</span>
+            <span id="qrUrl">{{ url_for('mark', session_id=session_id, _external=True) }}</span>
             <button onclick="copyUrl()" class="btn-small" style="width: auto; margin-top: 5px;">📋 Copy URL</button>
         </div>
     </div>

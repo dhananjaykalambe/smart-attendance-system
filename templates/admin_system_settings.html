@@ -146,44 +146,7 @@
                 <div class="form-group">
                     <label>QR Code Expiry (seconds):</label>
                     <input type="number" name="qr_expiry" value="{{ settings.qr_expiry_seconds }}" min="10" max="300" required>
-                    <small class="text-muted">Legacy QR expiry (for backward compatibility)</small>
-                </div>
-            </div>
-            
-            <!-- Dynamic QR Settings (NEW) -->
-            <div class="settings-section">
-                <h3>🔄 Dynamic QR & Verification</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>QR Refresh Interval (seconds):</label>
-                        <input type="number" name="qr_refresh_interval" value="{{ settings.get('qr_refresh_interval', 15) }}" min="5" max="60" required>
-                        <small class="text-muted">How often QR code refreshes</small>
-                    </div>
-                    <div class="form-group">
-                        <label>Verification Code Length:</label>
-                        <input type="number" name="verification_code_length" value="{{ settings.get('verification_code_length', 6) }}" min="4" max="8" required>
-                        <small class="text-muted">Number of digits in verification code</small>
-                    </div>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" name="enable_verification_code" id="enableVerification" 
-                           {% if settings.get('enable_verification_code', True) %}checked{% endif %}>
-                    <label for="enableVerification">Enable Live Verification Code</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" name="enable_device_fingerprinting" id="enableFingerprint" 
-                           {% if settings.get('enable_device_fingerprinting', True) %}checked{% endif %}>
-                    <label for="enableFingerprint">Enable Device Fingerprinting</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" name="enable_location_tracking" id="enableLocation" 
-                           {% if settings.get('enable_location_tracking', True) %}checked{% endif %}>
-                    <label for="enableLocation">Enable Location Tracking</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" name="enable_ip_tracking" id="enableIP" 
-                           {% if settings.get('enable_ip_tracking', True) %}checked{% endif %}>
-                    <label for="enableIP">Enable IP Tracking</label>
+                    <small class="text-muted">How long QR code remains valid</small>
                 </div>
             </div>
             
@@ -201,6 +164,16 @@
                     </div>
                 </div>
                 <div class="checkbox-group">
+                    <input type="checkbox" name="enable_location_tracking" id="enableLocation" 
+                           {% if settings.get('enable_location_tracking', True) %}checked{% endif %}>
+                    <label for="enableLocation">Enable Location Tracking</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" name="enable_ip_tracking" id="enableIP" 
+                           {% if settings.get('enable_ip_tracking', True) %}checked{% endif %}>
+                    <label for="enableIP">Enable IP Tracking</label>
+                </div>
+                <div class="checkbox-group">
                     <input type="checkbox" name="maintenance_mode" id="maintenanceMode" 
                            {% if settings.maintenance_mode %}checked{% endif %}>
                     <label for="maintenanceMode">Enable Maintenance Mode</label>
@@ -209,12 +182,6 @@
             
             <button type="submit" class="success" style="width: 100%; padding: 14px; font-size: 16px;">💾 Save All Settings</button>
         </form>
-        
-        <div class="alert alert-info" style="margin-top: 20px;">
-            <strong>ℹ️ Dynamic QR System:</strong><br>
-            When enabled, QR codes refresh automatically every {{ settings.get('qr_refresh_interval', 15) }} seconds 
-            with a new verification code. This prevents screenshot sharing and ensures real-time attendance marking.
-        </div>
     </div>
 </div>
 
