@@ -377,6 +377,7 @@ def create_session():
         log_activity('session_created', session['user_id'], get_client_ip(), 
                     f"Created session for {subject} (ID: {session_id})")
         
+        # Convert end_time to ISO format string for JavaScript
         end_time_iso = end_time.isoformat()
         
         return render_template("session.html",
