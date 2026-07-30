@@ -148,15 +148,16 @@
             <table style="width:100%">
                 <thead><tr><th>Date</th><th>Subject</th><th>Session ID</th><th>Status</th></tr></thead>
                 <tbody>
+                    <!-- Updated to use time_display for IST conversion -->
                     {% for record in recent_attendance %}
                     <tr>
-                        <td>{{ record.time.strftime('%d %b %Y, %H:%M') }}</td>
+                        <td>{{ record.time_display if record.time_display else record.time.strftime('%d %b %Y, %H:%M') }}</td>
                         <td>{{ record.subject }}</td>
                         <td><code>{{ record.session_id }}</code></td>
                         <td><span class="badge badge-success">Present</span></td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="4" style="text-align: center;">No attendance records found.</td>
+                    <tr><td colspan="4" style="text-align: center;">No attendance records found.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

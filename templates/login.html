@@ -161,6 +161,9 @@
         {% endif %}
         
         <form method="POST">
+            <!-- Hidden redirect field for QR scan login -->
+            <input type="hidden" name="redirect" value="{{ redirect_to }}">
+            
             <div class="role-tabs">
                 <button type="button" class="role-tab student" data-role="student" onclick="selectRole('student')">
                     Student
