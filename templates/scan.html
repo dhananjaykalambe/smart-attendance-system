@@ -57,31 +57,20 @@
         background: #fff8e1;
         color: #f57f17;
     }
-    .manual-form {
-        margin-top: 20px;
-        padding-top: 20px;
-        border-top: 1px solid var(--border-color);
+    .scan-instructions {
+        background: var(--primary-soft);
+        padding: 15px;
+        border-radius: var(--radius-md);
+        margin: 15px 0;
+        text-align: left;
+        border-left: 4px solid var(--primary);
     }
-    .manual-form .form-row {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    .manual-form input {
-        flex: 1;
-        min-width: 150px;
-        max-width: 300px;
-        text-align: center;
-    }
-    .manual-form button {
-        width: auto;
-        padding: 10px 30px;
-        margin-top: 0;
+    .scan-instructions p {
+        margin: 5px 0;
+        color: var(--text-primary);
+        font-size: 13px;
     }
     @media (max-width: 480px) {
-        .manual-form .form-row { flex-direction: column; align-items: center; }
-        .manual-form input { max-width: 100%; width: 100%; }
         #reader { max-width: 100%; }
     }
 </style>
@@ -137,24 +126,20 @@
             Scan the QR code displayed by your faculty to mark attendance
         </p>
         
+        <!-- Scan Instructions -->
+        <div class="scan-instructions">
+            <p><strong>📌 Instructions:</strong></p>
+            <p>1. Point your camera at the QR code shown by your faculty</p>
+            <p>2. Wait for the scanner to detect and read the QR code</p>
+            <p>3. Your attendance will be marked automatically</p>
+            <p>4. You will be redirected to your dashboard</p>
+        </div>
+        
         <!-- QR Reader -->
         <div id="reader"></div>
         
         <!-- Scan Status -->
         <div id="scanStatus" class="scan-status"></div>
-        
-        <!-- Manual Entry Form -->
-        <div class="manual-form">
-            <h4 style="color: var(--text-secondary); font-size: 14px;">Or enter details manually</h4>
-            <form method="POST" action="/mark" id="attendanceForm">
-                <input type="hidden" name="session_id" id="sessionIdInput">
-                <input type="hidden" name="qr_data" id="qrDataInput">
-                <div class="form-row">
-                    <input type="text" id="manualSessionId" placeholder="Session ID (e.g., ABC123)" style="text-align: center;">
-                </div>
-                <button type="button" onclick="manualSubmit()" style="margin-top: 10px;">📝 Mark Attendance Manually</button>
-            </form>
-        </div>
         
         <!-- Location Status -->
         <div id="locationStatus" class="location-status">📍 Detecting location...</div>
@@ -235,7 +220,7 @@ function onScanSuccess(decodedText) {
         let sessionId = '';
         let qrData = decodedText;
         
-        // Parse dynamic QR format: sessionId|data
+        // Parse QR format
         if (decodedText.includes('|')) {
             const parts = decodedText.split('|');
             if (parts.length >= 2) {
@@ -245,7 +230,7 @@ function onScanSuccess(decodedText) {
                 sessionId = decodedText;
             }
         } else {
-            // Legacy QR format - try to parse URL
+            // Try to parse URL
             try {
                 const url = new URL(decodedText);
                 sessionId = url.searchParams.get('session_id') || decodedText;
@@ -255,9 +240,24 @@ function onScanSuccess(decodedText) {
             }
         }
         
-        // Update form
-        document.getElementById('sessionIdInput').value = sessionId;
-        document.getElementById('qrDataInput').value = qrData;
+        // Create form and submit
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/mark';
+        
+        const sessionInput = document.createElement('input');
+        sessionInput.type = 'hidden';
+        sessionInput.name = 'session_id';
+        sessionInput.value = sessionId;
+        form.appendChild(sessionInput);
+        
+        const qrInput = document.createElement('input');
+        qrInput.type = 'hidden';
+        qrInput.name = 'qr_data';
+        qrInput.value = qrData;
+        form.appendChild(qrInput);
+        
+        document.body.appendChild(form);
         
         showScanStatus('✅ Verifying attendance... Please wait.', 'success');
         
@@ -270,7 +270,7 @@ function onScanSuccess(decodedText) {
         
         // Submit form
         setTimeout(function() {
-            document.getElementById('attendanceForm').submit();
+            form.submit();
         }, 500);
         
     } catch(e) {
@@ -308,31 +308,9 @@ function createScanner() {
     } catch(e) {
         console.error('Scanner init error:', e);
         document.getElementById('reader').innerHTML = 
-            '<div class="alert alert-warning" style="padding:20px;">⚠️ Camera access denied or not available. Please use manual entry below.</div>';
-        showScanStatus('⚠️ Camera not available. Use manual entry.', 'warning');
+            '<div class="alert alert-warning" style="padding:20px;">⚠️ Camera access denied. Please allow camera access and refresh the page.</div>';
+        showScanStatus('⚠️ Camera not available. Please enable camera access.', 'warning');
     }
-}
-
-// ====================================================================
-// MANUAL SUBMIT
-// ====================================================================
-
-function manualSubmit() {
-    const sessionId = document.getElementById('manualSessionId').value.trim();
-    
-    if (!sessionId) {
-        showScanStatus('⚠️ Please enter a Session ID.', 'warning');
-        return;
-    }
-    
-    document.getElementById('sessionIdInput').value = sessionId;
-    document.getElementById('qrDataInput').value = sessionId;
-    
-    showScanStatus('✅ Submitting attendance...', 'success');
-    
-    setTimeout(function() {
-        document.getElementById('attendanceForm').submit();
-    }, 500);
 }
 
 // ====================================================================
@@ -340,11 +318,6 @@ function manualSubmit() {
 // ====================================================================
 
 document.addEventListener('keydown', function(e) {
-    // Ctrl+M for manual submit
-    if (e.ctrlKey && e.key === 'm') {
-        e.preventDefault();
-        manualSubmit();
-    }
     // Escape to clear status
     if (e.key === 'Escape') {
         hideScanStatus();
