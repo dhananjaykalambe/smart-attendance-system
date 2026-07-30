@@ -25,6 +25,7 @@
         margin: 0;
         font-weight: 600;
         box-shadow: var(--shadow-sm);
+        font-size: 14px;
     }
     .subject-card:hover {
         transform: translateY(-5px);
@@ -34,8 +35,9 @@
         background: linear-gradient(135deg, var(--primary), var(--primary-light));
         box-shadow: var(--shadow-md);
         transform: scale(1.02);
+        border: 2px solid var(--primary);
     }
-    .subject-card small { font-size: 11px; opacity: 0.9; }
+    .subject-card small { font-size: 11px; opacity: 0.9; display: block; margin-top: 4px; }
     .duration-select { margin: 25px 0; }
     .duration-select label { font-weight: 600; color: var(--primary); display: block; margin-bottom: 8px; }
     .duration-select select {
@@ -43,22 +45,49 @@
         border: 2px solid var(--border-color); font-size: 14px;
         background: var(--card-bg); color: var(--text-primary); cursor: pointer;
     }
+    .duration-select select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.12);
+    }
     .create-btn {
         background: linear-gradient(135deg, var(--success), var(--success-dark));
         font-size: 18px; padding: 15px; margin-top: 20px; font-weight: bold;
         border-radius: 50px;
+        width: 100%;
+        transition: all 0.3s ease;
     }
-    .create-btn:hover { background: linear-gradient(135deg, var(--success-dark), var(--success)); }
+    .create-btn:hover { 
+        background: linear-gradient(135deg, var(--success-dark), var(--success));
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+    .create-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
     .error-msg {
         background: var(--danger-soft); color: var(--danger-dark);
         padding: 12px; border-radius: var(--radius-md); margin-bottom: 15px;
         display: none; border-left: 4px solid var(--danger);
     }
+    .error-msg.show { display: block; }
     .info-tip {
         background: var(--info-soft); padding: 12px; border-radius: var(--radius-md);
         text-align: center; margin-top: 20px;
     }
     .info-tip p { margin: 0; font-size: 13px; color: var(--info-dark); }
+    .selected-subject-display {
+        margin: 15px 0;
+        padding: 12px;
+        background: var(--primary-soft);
+        border-radius: var(--radius-md);
+        display: none;
+        border-left: 4px solid var(--primary);
+    }
+    .selected-subject-display.show { display: block; }
+    .selected-subject-display strong { color: var(--primary); }
 </style>
 </head>
 <body>
@@ -81,19 +110,19 @@
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">MAIN MENU</div>
-        <a href="/faculty_dashboard" {% if request.path == '/faculty_dashboard' %}class="active"{% endif %}>Dashboard</a>
-        <a href="/create_session" {% if request.path == '/create_session' %}class="active"{% endif %}>Create Session</a>
-        <a href="/add_student" {% if request.path == '/add_student' %}class="active"{% endif %}>Manage Students</a>
-        <a href="/students_report" {% if request.path == '/students_report' %}class="active"{% endif %}>Reports</a>
+        <a href="/faculty_dashboard">Dashboard</a>
+        <a href="/create_session" class="active">Create Session</a>
+        <a href="/add_student">Manage Students</a>
+        <a href="/students_report">Reports</a>
     </div>
     
     <div class="sidebar-divider"></div>
     
     <div class="sidebar-section">
         <div class="sidebar-section-title">GENERAL</div>
-        <a href="/attendance" {% if request.path == '/attendance' %}class="active"{% endif %}>All Attendance</a>
-        <a href="/subject_details" {% if request.path == '/subject_details' %}class="active"{% endif %}>Subjects</a>
-        <a href="/about" {% if request.path == '/about' %}class="active"{% endif %}>About</a>
+        <a href="/attendance">All Attendance</a>
+        <a href="/subject_details">Subjects</a>
+        <a href="/about">About</a>
     </div>
     
     <div class="sidebar-divider"></div>
@@ -112,109 +141,170 @@
         <h2>Session Details</h2>
         
         <div id="errorMsg" class="error-msg">
-            Please select a subject before creating session
+            ⚠️ Please select a subject before creating session
         </div>
         
-        <form method="POST" action="/create_session" id="sessionForm">
-            <label>Select Subject:</label>
+        <form method="POST" action="/create_session" id="sessionForm" onsubmit="return validateForm()">
+            <label style="font-weight: 600; color: var(--text-secondary);">Select Subject:</label>
             <div class="subject-grid">
                 <button type="button" value="ML" class="subject-card" onclick="selectSubject(this, 'ML')">
-                    Machine Learning<br><small>(ML)</small>
+                    Machine Learning<br><small>ML</small>
                 </button>
                 <button type="button" value="DS" class="subject-card" onclick="selectSubject(this, 'DS')">
-                    Data Structures<br><small>(DS)</small>
+                    Data Structures<br><small>DS</small>
                 </button>
                 <button type="button" value="CD" class="subject-card" onclick="selectSubject(this, 'CD')">
-                    Compiler Design<br><small>(CD)</small>
+                    Compiler Design<br><small>CD</small>
                 </button>
                 <button type="button" value="IPR" class="subject-card" onclick="selectSubject(this, 'IPR')">
-                    IPR<br><small>(IPR)</small>
+                    IPR<br><small>IPR</small>
                 </button>
                 <button type="button" value="EOII" class="subject-card" onclick="selectSubject(this, 'EOII')">
-                    Economics in IT<br><small>(EOII)</small>
+                    Economics in IT<br><small>EOII</small>
                 </button>
                 <button type="button" value="OE-1" class="subject-card" onclick="selectSubject(this, 'OE-1')">
-                    Environmental Engg<br><small>(OE-1)</small>
+                    Environmental Engg<br><small>OE-1</small>
                 </button>
             </div>
             
+            <div id="selectedDisplay" class="selected-subject-display">
+                Selected: <strong id="selectedSubjectName">None</strong>
+            </div>
+            
             <div class="duration-select">
-                <label>Session Duration:</label>
-                <select name="duration" required>
+                <label for="durationSelect">⏱️ Session Duration:</label>
+                <select name="duration" id="durationSelect" required>
                     <option value="1">1 minute (Quick Session)</option>
                     <option value="2">2 minutes</option>
                     <option value="5" selected>5 minutes (Standard)</option>
                     <option value="10">10 minutes</option>
                     <option value="15">15 minutes (Lecture)</option>
                     <option value="30">30 minutes (Long Session)</option>
+                    <option value="60">60 minutes (Extended)</option>
                 </select>
             </div>
             
-            <input type="hidden" name="selected_subject" id="selected_subject" value="">
+            <!-- Hidden field for subject -->
+            <input type="hidden" name="subject" id="selectedSubject" value="">
             
-            <button type="button" class="create-btn" onclick="submitSession()">Generate QR Code</button>
+            <button type="submit" class="create-btn" id="createBtn">🚀 Generate QR Code</button>
         </form>
         
         <div class="info-tip">
-            <p>Tip: Select a subject first, then click "Generate QR Code"</p>
+            <p>💡 Select a subject first, then click "Generate QR Code" to create a session</p>
         </div>
     </div>
 </div>
 
 <script>
-    let currentSubject = null;
-    
-    function selectSubject(button, subject) {
-        document.querySelectorAll('.subject-card').forEach(btn => {
-            btn.classList.remove('selected');
-        });
-        button.classList.add('selected');
-        currentSubject = subject;
-        document.getElementById('selected_subject').value = subject;
-        document.getElementById('errorMsg').style.display = 'none';
-    }
-    
-    function submitSession() {
-        if (!currentSubject) {
-            document.getElementById('errorMsg').style.display = 'block';
-            return;
-        }
-        const form = document.getElementById('sessionForm');
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'subject';
-        hiddenInput.value = currentSubject;
-        form.appendChild(hiddenInput);
-        form.submit();
-    }
-</script>
+// ====================================================================
+// SUBJECT SELECTION - FIXED
+// ====================================================================
 
-<script>
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const menuBtn = document.querySelector('.menu-toggle');
-        if (sidebar) {
-            sidebar.classList.toggle('open');
-            if (overlay) overlay.classList.toggle('active');
-            if (menuBtn) menuBtn.classList.toggle('open');
-        }
-    }
-    function closeSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const menuBtn = document.querySelector('.menu-toggle');
-        if (sidebar) {
-            sidebar.classList.remove('open');
-            if (overlay) overlay.classList.remove('active');
-            if (menuBtn) menuBtn.classList.remove('open');
-        }
-    }
-    document.querySelectorAll('.sidebar a').forEach(link => {
-        link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
+let currentSubject = null;
+let selectedElement = null;
+
+function selectSubject(button, subject) {
+    // Deselect all
+    document.querySelectorAll('.subject-card').forEach(btn => {
+        btn.classList.remove('selected');
     });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && window.innerWidth <= 768) closeSidebar(); });
-    window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+    
+    // Select current
+    button.classList.add('selected');
+    currentSubject = subject;
+    selectedElement = button;
+    
+    // Update hidden field
+    document.getElementById('selectedSubject').value = subject;
+    
+    // Update display
+    const displayEl = document.getElementById('selectedDisplay');
+    const nameEl = document.getElementById('selectedSubjectName');
+    const subjectNames = {
+        'ML': 'Machine Learning',
+        'DS': 'Data Structures',
+        'CD': 'Compiler Design',
+        'IPR': 'Intellectual Property Rights',
+        'EOII': 'Economics in IT Industry',
+        'OE-1': 'Environmental Engineering'
+    };
+    nameEl.textContent = subjectNames[subject] || subject;
+    displayEl.classList.add('show');
+    
+    // Hide error
+    document.getElementById('errorMsg').classList.remove('show');
+}
+
+// ====================================================================
+// FORM VALIDATION - FIXED
+// ====================================================================
+
+function validateForm() {
+    const subject = document.getElementById('selectedSubject').value;
+    const btn = document.getElementById('createBtn');
+    
+    if (!subject) {
+        document.getElementById('errorMsg').classList.add('show');
+        // Highlight missing subject
+        document.querySelector('.subject-grid').style.border = '2px solid var(--danger)';
+        setTimeout(() => {
+            document.querySelector('.subject-grid').style.border = 'none';
+        }, 3000);
+        return false;
+    }
+    
+    // Disable button to prevent double submission
+    btn.disabled = true;
+    btn.textContent = '⏳ Creating session...';
+    
+    return true;
+}
+
+// ====================================================================
+// KEYBOARD SHORTCUTS
+// ====================================================================
+
+document.addEventListener('keydown', function(e) {
+    // Enter key on subject selection
+    if (e.key === 'Enter' && currentSubject) {
+        e.preventDefault();
+        document.getElementById('sessionForm').submit();
+    }
+});
+
+// ====================================================================
+// SIDEBAR FUNCTIONS
+// ====================================================================
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const menuBtn = document.querySelector('.menu-toggle');
+    if (sidebar) {
+        sidebar.classList.toggle('open');
+        if (overlay) overlay.classList.toggle('active');
+        if (menuBtn) menuBtn.classList.toggle('open');
+    }
+}
+
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const menuBtn = document.querySelector('.menu-toggle');
+    if (sidebar) {
+        sidebar.classList.remove('open');
+        if (overlay) overlay.classList.remove('active');
+        if (menuBtn) menuBtn.classList.remove('open');
+    }
+}
+
+document.querySelectorAll('.sidebar a').forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
+});
+
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && window.innerWidth <= 768) closeSidebar(); });
+window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 </body>
 </html>

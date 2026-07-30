@@ -16,6 +16,7 @@
     }
     .qr-container img {
         border-radius: var(--radius-md);
+        max-width: 100%;
     }
     .info-box {
         background: var(--info-soft);
@@ -43,18 +44,23 @@
         padding: 20px 40px;
         border-radius: var(--radius-xl);
         box-shadow: var(--shadow-md);
+        min-width: 120px;
     }
     .countdown-timer.warning {
         background: linear-gradient(135deg, var(--danger), var(--danger-dark));
-        animation: pulse 0.5s infinite;
+        animation: pulse 0.8s infinite;
+    }
+    .countdown-timer.expired {
+        background: linear-gradient(135deg, var(--danger), var(--danger-dark));
+        animation: none;
     }
     @keyframes pulse {
         0%, 100% { transform: scale(1); }
         50% { transform: scale(1.05); }
     }
-    .status-text { margin-top: 10px; font-size: 14px; }
-    .status-text.active { color: var(--success); font-weight: bold; }
-    .status-text.expired { color: var(--danger); font-weight: bold; }
+    .status-text { margin-top: 10px; font-size: 16px; font-weight: bold; }
+    .status-text.active { color: var(--success); }
+    .status-text.expired { color: var(--danger); }
     .qr-url {
         font-size: 11px;
         word-break: break-all;
@@ -63,8 +69,17 @@
         border-radius: var(--radius-md);
         margin-top: 15px;
     }
+    .refresh-note {
+        background: var(--primary-soft);
+        padding: 8px 15px;
+        border-radius: var(--radius-md);
+        margin: 10px 0;
+        font-size: 13px;
+        color: var(--primary);
+        display: inline-block;
+    }
     @media (max-width: 768px) {
-        .countdown-timer { font-size: 2rem; padding: 15px 25px; }
+        .countdown-timer { font-size: 2rem; padding: 15px 25px; min-width: 80px; }
         .qr-container img { width: 200px; }
     }
 </style>
@@ -122,110 +137,168 @@
         
         <div class="countdown-container">
             <div class="countdown-timer" id="countdownTimer">--:--</div>
-            <div class="status-text" id="statusText">Session Active</div>
+            <div class="status-text" id="statusText">⏳ Loading...</div>
         </div>
         
         <div class="qr-container">
             <img src="{{ url_for('static', filename='qr_codes/' + qr) }}" width="250" id="qrImage" alt="QR Code">
         </div>
         
+        <div class="refresh-note">
+            🔄 QR Code refreshes every {{ settings.get('qr_refresh_interval', 15) }} seconds with new verification code
+        </div>
+        
         <div class="info-box">
             <p><strong>How to use:</strong></p>
             <p>1. Students should open the Scan QR page</p>
             <p>2. Scan this QR code using their device camera</p>
-            <p>3. Attendance will be automatically marked</p>
-            <p>4. Session expires after the countdown ends</p>
+            <p>3. Enter the verification code shown on their screen</p>
+            <p>4. Attendance will be automatically marked</p>
+            <p>5. Session expires when countdown reaches 00:00</p>
         </div>
         
-        <p style="margin-top: 20px;" id="activeMessage">QR is active for the duration shown above</p>
+        <p style="margin-top: 20px;" id="activeMessage">✅ Session is active for the duration shown above</p>
         
         <div class="qr-url">
             <strong>QR URL (for manual entry):</strong><br>
-            <span id="qrUrl"></span>
-            <button onclick="copyUrl()" class="btn-small" style="width: auto; margin-top: 5px;">Copy URL</button>
+            <span id="qrUrl">{{ qr_url if qr_url else url_for('mark', session_id=session_id, _external=True) }}</span>
+            <button onclick="copyUrl()" class="btn-small" style="width: auto; margin-top: 5px;">📋 Copy URL</button>
         </div>
     </div>
 </div>
 
 <script>
+    // ====================================================================
+    // TIMER - FIXED VERSION
+    // ====================================================================
+    
+    // Parse end time from server (ISO format)
     const endTimeStr = "{{ end_time }}";
     const durationMinutes = {{ duration }};
     
+    // Create end time - handle both ISO string and fallback
     let endTime = new Date(endTimeStr);
     
+    // If invalid, calculate from now + duration
     if (isNaN(endTime.getTime())) {
         endTime = new Date();
         endTime.setMinutes(endTime.getMinutes() + durationMinutes);
     }
     
+    console.log('Session ends at:', endTime.toLocaleString());
+    
     const countdownElement = document.getElementById('countdownTimer');
     const statusTextSpan = document.getElementById('statusText');
     const activeMessageSpan = document.getElementById('activeMessage');
     
+    // Check if session is already expired
+    function isSessionExpired() {
+        const now = new Date();
+        return now >= endTime;
+    }
+    
     function updateCountdown() {
         const now = new Date();
-        const remainingSeconds = Math.max(0, Math.floor((endTime - now) / 1000));
+        const remainingMs = endTime - now;
+        const remainingSeconds = Math.max(0, Math.floor(remainingMs / 1000));
         
         if (remainingSeconds <= 0) {
+            // Session expired
             countdownElement.innerHTML = "00:00";
-            countdownElement.classList.add('warning');
-            statusTextSpan.innerHTML = "SESSION EXPIRED";
+            countdownElement.className = 'countdown-timer expired';
+            statusTextSpan.innerHTML = "⛔ SESSION EXPIRED";
             statusTextSpan.className = "status-text expired";
-            activeMessageSpan.innerHTML = "Session has expired. Please create a new session.";
+            activeMessageSpan.innerHTML = "⛔ Session has expired. Please create a new session.";
             activeMessageSpan.style.color = "var(--danger)";
             activeMessageSpan.style.fontWeight = "bold";
+            
+            // Disable QR - show expired overlay
+            const qrImg = document.getElementById('qrImage');
+            if (qrImg) {
+                qrImg.style.opacity = '0.4';
+                qrImg.style.filter = 'grayscale(1)';
+            }
             return;
         }
         
+        // Calculate minutes and seconds
         const minutes = Math.floor(remainingSeconds / 60);
         const seconds = remainingSeconds % 60;
         const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         countdownElement.innerHTML = formattedTime;
         
+        // Update status based on time remaining
         if (remainingSeconds <= 30) {
-            countdownElement.classList.add('warning');
-            statusTextSpan.innerHTML = "Session expiring soon!";
+            countdownElement.className = 'countdown-timer warning';
+            statusTextSpan.innerHTML = "⚠️ Session expiring soon!";
+            statusTextSpan.className = "status-text active";
+            statusTextSpan.style.color = "var(--warning)";
+        } else if (remainingSeconds <= 60) {
+            countdownElement.className = 'countdown-timer warning';
+            statusTextSpan.innerHTML = "⏳ Less than a minute remaining!";
+            statusTextSpan.className = "status-text active";
             statusTextSpan.style.color = "var(--warning)";
         } else {
-            countdownElement.classList.remove('warning');
-            statusTextSpan.innerHTML = "Session Active";
+            countdownElement.className = 'countdown-timer';
+            statusTextSpan.innerHTML = "✅ Session Active";
+            statusTextSpan.className = "status-text active";
             statusTextSpan.style.color = "var(--success)";
         }
         
+        // Schedule next update
         setTimeout(updateCountdown, 1000);
     }
     
-    updateCountdown();
-    
-    setInterval(function() {
-        if (new Date() >= endTime) {
-            location.reload();
-        }
-    }, 1000);
-    
-    function copyUrl() {
-        const url = window.location.origin + "/mark?session_id={{ session_id }}";
-        navigator.clipboard.writeText(url).then(function() {
-            alert("URL copied to clipboard!");
-        });
+    // Start the countdown
+    if (isSessionExpired()) {
+        // Session already expired
+        countdownElement.innerHTML = "00:00";
+        countdownElement.className = 'countdown-timer expired';
+        statusTextSpan.innerHTML = "⛔ SESSION EXPIRED";
+        statusTextSpan.className = "status-text expired";
+        activeMessageSpan.innerHTML = "⛔ Session has expired. Please create a new session.";
+        activeMessageSpan.style.color = "var(--danger)";
+        activeMessageSpan.style.fontWeight = "bold";
+    } else {
+        // Start countdown
+        updateCountdown();
+        
+        // Also check every 5 seconds if session should be expired (safety)
+        setInterval(function() {
+            if (isSessionExpired()) {
+                // Force reload to show expired state
+                location.reload();
+            }
+        }, 5000);
     }
     
-    window.addEventListener('load', function() {
-        const qrUrlDisplay = document.getElementById('qrUrl');
-        if (qrUrlDisplay) {
-            qrUrlDisplay.textContent = window.location.origin + "/mark?session_id={{ session_id }}";
+    // ====================================================================
+    // COPY URL FUNCTION
+    // ====================================================================
+    
+    function copyUrl() {
+        const urlEl = document.getElementById('qrUrl');
+        if (urlEl) {
+            const url = urlEl.textContent.trim();
+            navigator.clipboard.writeText(url).then(function() {
+                alert('✅ URL copied to clipboard!');
+            }).catch(function() {
+                // Fallback
+                const textArea = document.createElement('textarea');
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('✅ URL copied to clipboard!');
+            });
         }
-        const now = new Date();
-        if (now >= endTime) {
-            countdownElement.innerHTML = "00:00";
-            countdownElement.classList.add('warning');
-            statusTextSpan.innerHTML = "SESSION EXPIRED";
-            activeMessageSpan.innerHTML = "Session has expired. Please create a new session.";
-        }
-    });
-</script>
-
-<script>
+    }
+    
+    // ====================================================================
+    // SIDEBAR FUNCTIONS
+    // ====================================================================
+    
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');

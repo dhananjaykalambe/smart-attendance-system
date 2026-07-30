@@ -22,33 +22,35 @@
     }
     .verification-input input {
         text-align: center;
-        font-size: 1.2rem;
-        letter-spacing: 4px;
+        font-size: 1.5rem;
+        letter-spacing: 8px;
         font-family: monospace;
         padding: 12px;
         width: 200px;
         margin: 0 auto;
         display: block;
         border: 2px solid var(--primary);
+        border-radius: var(--radius-sm);
+        background: white;
     }
     .verification-input input:focus {
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(26, 58, 107, 0.15);
+        box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
+        outline: none;
+    }
+    .verification-input input.error {
+        border-color: var(--danger);
+        box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15);
+    }
+    .verification-input input.success {
+        border-color: var(--success);
+        box-shadow: 0 0 0 3px rgba(0, 210, 160, 0.15);
     }
     .instruction-text {
         color: var(--text-secondary);
         font-size: 13px;
         text-align: center;
         margin: 10px 0;
-    }
-    .qr-code-info {
-        background: var(--light);
-        padding: 12px;
-        border-radius: var(--radius-md);
-        margin: 10px 0;
-        text-align: left;
-        font-size: 13px;
-        border-left: 3px solid var(--primary);
     }
     .manual-form {
         margin-top: 20px;
@@ -65,15 +67,68 @@
         flex: 1;
         min-width: 150px;
         max-width: 300px;
+        text-align: center;
     }
     .manual-form button {
         width: auto;
         padding: 10px 30px;
+        margin-top: 0;
+    }
+    #reader {
+        width: 100%;
+        max-width: 400px;
+        margin: 20px auto;
+    }
+    #reader video {
+        border-radius: var(--radius-md);
+    }
+    .scan-status {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: var(--radius-md);
+        display: none;
+    }
+    .scan-status.show {
+        display: block;
+    }
+    .scan-status.success {
+        background: var(--success-soft);
+        color: var(--success-dark);
+        border-left: 4px solid var(--success);
+    }
+    .scan-status.error {
+        background: var(--danger-soft);
+        color: var(--danger-dark);
+        border-left: 4px solid var(--danger);
+    }
+    .scan-status.warning {
+        background: var(--warning-soft);
+        color: var(--warning-dark);
+        border-left: 4px solid var(--warning);
+    }
+    .location-status {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: var(--radius-md);
+        font-size: 13px;
+    }
+    .location-status.success {
+        background: var(--success-soft);
+        color: var(--success-dark);
+    }
+    .location-status.error {
+        background: var(--danger-soft);
+        color: var(--danger-dark);
+    }
+    .location-status.warning {
+        background: var(--warning-soft);
+        color: var(--warning-dark);
     }
     @media (max-width: 480px) {
-        .verification-input input { width: 150px; font-size: 1rem; }
+        .verification-input input { width: 150px; font-size: 1.2rem; letter-spacing: 4px; }
         .manual-form .form-row { flex-direction: column; align-items: center; }
         .manual-form input { max-width: 100%; width: 100%; }
+        #reader { max-width: 100%; }
     }
 </style>
 </head>
@@ -128,31 +183,36 @@
             Scan the dynamic QR code displayed by your faculty and enter the verification code
         </p>
         
-        <div id="reader" style="width: 100%; max-width: 400px; margin: 20px auto;"></div>
+        <!-- QR Reader -->
+        <div id="reader"></div>
         
         <!-- Verification Code Input -->
         <div class="verification-input">
-            <label for="verificationCode">Live Verification Code</label>
+            <label for="verificationCode">🔐 Live Verification Code</label>
             <input type="text" id="verificationCode" placeholder="Enter 6-digit code" 
-                   maxlength="6" pattern="[0-9]*" inputmode="numeric">
+                   maxlength="6" pattern="[0-9]*" inputmode="numeric" autocomplete="off">
             <p class="instruction-text">Enter the verification code shown alongside the QR code</p>
         </div>
+        
+        <!-- Scan Status -->
+        <div id="scanStatus" class="scan-status"></div>
         
         <!-- Manual Entry Form -->
         <div class="manual-form">
             <h4 style="color: var(--text-secondary); font-size: 14px;">Or enter details manually</h4>
             <form method="POST" action="/mark" id="attendanceForm">
+                <input type="hidden" name="session_id" id="sessionIdInput">
+                <input type="hidden" name="qr_data" id="qrDataInput">
+                <input type="hidden" name="verification_code" id="verificationCodeInput">
                 <div class="form-row">
-                    <input type="text" id="session_id" name="session_id" placeholder="Session ID (e.g., ABC123)" style="text-align: center;">
-                    <input type="text" id="qr_data" name="qr_data" placeholder="QR Data (or paste here)" style="text-align: center;">
+                    <input type="text" id="manualSessionId" placeholder="Session ID (e.g., ABC123)" style="text-align: center;">
                 </div>
-                <button type="submit" style="margin-top: 10px;">Mark Attendance</button>
+                <button type="button" onclick="manualSubmit()" style="margin-top: 10px;">📝 Mark Attendance Manually</button>
             </form>
         </div>
         
-        <!-- Status Messages -->
-        <div id="locationStatus" style="margin-top: 15px; padding: 10px; border-radius: var(--radius-md);"></div>
-        <div id="scanStatus" style="margin-top: 10px; padding: 10px; border-radius: var(--radius-md); display: none;"></div>
+        <!-- Location Status -->
+        <div id="locationStatus" class="location-status">📍 Detecting location...</div>
         
         <p style="margin-top: 15px; font-size: 12px; color: var(--text-muted);">
             🔒 Your location, IP, and device fingerprint are recorded for security
@@ -162,53 +222,75 @@
 
 <script>
 // ====================================================================
-// GEOLOCATION
+// GEOLOCATION - FIXED
 // ====================================================================
 
-if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(position) {
-        document.getElementById('locationStatus').innerHTML = '📍 Location detected';
-        document.getElementById('locationStatus').style.background = 'var(--success-soft)';
-        document.getElementById('locationStatus').style.color = 'var(--success)';
-    }, function(error) {
-        let message = '';
-        switch(error.code) {
-            case error.PERMISSION_DENIED:
-                message = '⚠️ Location access denied. Please enable GPS for accurate marking.';
-                break;
-            case error.POSITION_UNAVAILABLE:
-                message = '⚠️ Location information unavailable.';
-                break;
-            case error.TIMEOUT:
-                message = '⚠️ Location request timed out.';
-                break;
-        }
-        document.getElementById('locationStatus').innerHTML = message;
-        document.getElementById('locationStatus').style.background = 'var(--warning-soft)';
-        document.getElementById('locationStatus').style.color = 'var(--warning)';
-    });
-} else {
-    document.getElementById('locationStatus').innerHTML = '⚠️ Geolocation not supported by your browser';
-    document.getElementById('locationStatus').style.background = 'var(--danger-soft)';
-    document.getElementById('locationStatus').style.color = 'var(--danger)';
-}
+(function initLocation() {
+    const statusEl = document.getElementById('locationStatus');
+    
+    if (!navigator.geolocation) {
+        statusEl.textContent = '⚠️ Geolocation not supported by your browser';
+        statusEl.className = 'location-status error';
+        return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            statusEl.textContent = '📍 Location detected ✓';
+            statusEl.className = 'location-status success';
+        },
+        function(error) {
+            let message = '';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    message = '⚠️ Location access denied. Please enable GPS for accurate marking.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message = '⚠️ Location information unavailable.';
+                    break;
+                case error.TIMEOUT:
+                    message = '⚠️ Location request timed out.';
+                    break;
+                default:
+                    message = '⚠️ Location detection failed.';
+            }
+            statusEl.textContent = message;
+            statusEl.className = 'location-status warning';
+        },
+        { timeout: 10000, enableHighAccuracy: true }
+    );
+})();
 
 // ====================================================================
-// QR SCANNER
+// QR SCANNER - FIXED
 // ====================================================================
 
 let scanner = null;
 let isProcessing = false;
 
+function showScanStatus(message, type) {
+    const statusEl = document.getElementById('scanStatus');
+    statusEl.textContent = message;
+    statusEl.className = 'scan-status show ' + type;
+}
+
+function hideScanStatus() {
+    const statusEl = document.getElementById('scanStatus');
+    statusEl.className = 'scan-status';
+    statusEl.textContent = '';
+}
+
 function onScanSuccess(decodedText) {
     if (isProcessing) return;
     isProcessing = true;
     
+    showScanStatus('⏳ Processing QR code...', 'warning');
+    
     try {
-        // Check if it's a dynamic QR code (contains '|')
         let sessionId = '';
         let qrData = decodedText;
         
+        // Parse dynamic QR format: sessionId|data
         if (decodedText.includes('|')) {
             const parts = decodedText.split('|');
             if (parts.length >= 2) {
@@ -220,8 +302,9 @@ function onScanSuccess(decodedText) {
         } else {
             // Legacy QR format - try to parse URL
             try {
-                let url = new URL(decodedText);
-                sessionId = url.searchParams.get("session_id") || decodedText;
+                const url = new URL(decodedText);
+                sessionId = url.searchParams.get('session_id') || decodedText;
+                qrData = decodedText;
             } catch(e) {
                 sessionId = decodedText;
             }
@@ -231,124 +314,209 @@ function onScanSuccess(decodedText) {
         const verificationCode = document.getElementById('verificationCode').value.trim();
         
         if (!verificationCode) {
-            showScanStatus('Please enter the verification code before scanning.', 'warning');
+            showScanStatus('⚠️ Please enter the verification code before scanning.', 'warning');
             isProcessing = false;
             return;
         }
         
-        // Submit attendance
-        const form = document.getElementById('attendanceForm');
-        document.getElementById('session_id').value = sessionId;
-        document.getElementById('qr_data').value = qrData;
+        if (verificationCode.length < 4) {
+            showScanStatus('⚠️ Verification code must be at least 4 digits.', 'warning');
+            isProcessing = false;
+            return;
+        }
         
-        // Add verification code as hidden field
-        const vcInput = document.createElement('input');
-        vcInput.type = 'hidden';
-        vcInput.name = 'verification_code';
-        vcInput.value = verificationCode;
-        form.appendChild(vcInput);
+        // Update form
+        document.getElementById('sessionIdInput').value = sessionId;
+        document.getElementById('qrDataInput').value = qrData;
+        document.getElementById('verificationCodeInput').value = verificationCode;
         
         showScanStatus('✅ Verifying attendance... Please wait.', 'success');
         
-        // Stop scanner before submitting
+        // Stop scanner
         if (scanner) {
-            scanner.clear();
-            scanner = null;
+            scanner.clear().then(() => {
+                scanner = null;
+            }).catch(() => {});
         }
         
-        form.submit();
+        // Submit form
+        setTimeout(function() {
+            document.getElementById('attendanceForm').submit();
+        }, 500);
         
     } catch(e) {
         console.error('Scan error:', e);
-        showScanStatus('Error processing QR code: ' + e.message, 'danger');
+        showScanStatus('❌ Error processing QR code: ' + e.message, 'error');
         isProcessing = false;
     }
-}
-
-function showScanStatus(message, type) {
-    const statusEl = document.getElementById('scanStatus');
-    statusEl.style.display = 'block';
-    statusEl.innerHTML = message;
-    statusEl.className = 'alert alert-' + type;
 }
 
 // Initialize scanner
 function initScanner() {
     if (scanner) {
-        scanner.clear();
-        scanner = null;
+        scanner.clear().then(() => {
+            scanner = null;
+            createScanner();
+        }).catch(() => {
+            scanner = null;
+            createScanner();
+        });
+    } else {
+        createScanner();
     }
-    
+}
+
+function createScanner() {
     try {
         scanner = new Html5QrcodeScanner("reader", { 
             fps: 10, 
             qrbox: { width: 250, height: 250 }, 
-            aspectRatio: 1.0
+            aspectRatio: 1.0,
+            formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ]
         });
         scanner.render(onScanSuccess);
+        showScanStatus('📷 Camera ready. Scan the QR code.', 'warning');
     } catch(e) {
         console.error('Scanner init error:', e);
         document.getElementById('reader').innerHTML = 
-            '<div class="alert alert-warning">Camera access denied or not available. Please use manual entry below.</div>';
+            '<div class="alert alert-warning" style="padding:20px;">⚠️ Camera access denied or not available. Please use manual entry below.</div>';
+        showScanStatus('⚠️ Camera not available. Use manual entry.', 'warning');
     }
 }
 
-// Auto-submit on verification code entry (optional)
-document.getElementById('verificationCode').addEventListener('keypress', function(e) {
+// ====================================================================
+// VERIFICATION CODE VALIDATION
+// ====================================================================
+
+const vcInput = document.getElementById('verificationCode');
+
+vcInput.addEventListener('input', function(e) {
+    // Only allow digits
+    this.value = this.value.replace(/[^0-9]/g, '');
+    // Limit to 6 digits
+    if (this.value.length > 6) {
+        this.value = this.value.slice(0, 6);
+    }
+    // Update styling
+    if (this.value.length >= 4) {
+        this.className = 'success';
+    } else if (this.value.length > 0) {
+        this.className = '';
+    } else {
+        this.className = '';
+    }
+});
+
+// Enter key on verification code triggers scan (if scanner active)
+vcInput.addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
-        // If scanner is active, try to scan
+        e.preventDefault();
+        // Try to trigger scan - but scanner handles it automatically
         if (scanner) {
-            // You could trigger a scan here, but it's better to let user scan QR first
+            showScanStatus('📷 Please scan the QR code now.', 'warning');
         }
     }
 });
 
-// Allow only digits in verification code
-document.getElementById('verificationCode').addEventListener('input', function(e) {
-    this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+// ====================================================================
+// MANUAL SUBMIT - FIXED
+// ====================================================================
+
+function manualSubmit() {
+    const sessionId = document.getElementById('manualSessionId').value.trim();
+    const verificationCode = document.getElementById('verificationCode').value.trim();
+    
+    if (!sessionId) {
+        showScanStatus('⚠️ Please enter a Session ID.', 'warning');
+        return;
+    }
+    
+    if (!verificationCode) {
+        showScanStatus('⚠️ Please enter the verification code.', 'warning');
+        return;
+    }
+    
+    if (verificationCode.length < 4) {
+        showScanStatus('⚠️ Verification code must be at least 4 digits.', 'warning');
+        return;
+    }
+    
+    document.getElementById('sessionIdInput').value = sessionId;
+    document.getElementById('qrDataInput').value = sessionId;
+    document.getElementById('verificationCodeInput').value = verificationCode;
+    
+    showScanStatus('✅ Submitting attendance...', 'success');
+    
+    setTimeout(function() {
+        document.getElementById('attendanceForm').submit();
+    }, 500);
+}
+
+// ====================================================================
+// KEYBOARD SHORTCUTS
+// ====================================================================
+
+document.addEventListener('keydown', function(e) {
+    // Ctrl+M for manual submit
+    if (e.ctrlKey && e.key === 'm') {
+        e.preventDefault();
+        manualSubmit();
+    }
+    // Escape to clear status
+    if (e.key === 'Escape') {
+        hideScanStatus();
+    }
 });
 
-// Initialize on load
+// ====================================================================
+// INITIALIZATION
+// ====================================================================
+
+// Initialize scanner when page loads
 window.addEventListener('load', function() {
-    // Small delay to ensure DOM is ready
-    setTimeout(initScanner, 500);
+    setTimeout(initScanner, 800);
 });
 
 // Cleanup on page unload
 window.addEventListener('beforeunload', function() {
     if (scanner) {
-        scanner.clear();
+        scanner.clear().catch(() => {});
         scanner = null;
     }
 });
-</script>
 
-<script>
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const menuBtn = document.querySelector('.menu-toggle');
-        if (sidebar) {
-            sidebar.classList.toggle('open');
-            if (overlay) overlay.classList.toggle('active');
-            if (menuBtn) menuBtn.classList.toggle('open');
-        }
+// ====================================================================
+// SIDEBAR FUNCTIONS
+// ====================================================================
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const menuBtn = document.querySelector('.menu-toggle');
+    if (sidebar) {
+        sidebar.classList.toggle('open');
+        if (overlay) overlay.classList.toggle('active');
+        if (menuBtn) menuBtn.classList.toggle('open');
     }
-    function closeSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const menuBtn = document.querySelector('.menu-toggle');
-        if (sidebar) {
-            sidebar.classList.remove('open');
-            if (overlay) overlay.classList.remove('active');
-            if (menuBtn) menuBtn.classList.remove('open');
-        }
+}
+
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const menuBtn = document.querySelector('.menu-toggle');
+    if (sidebar) {
+        sidebar.classList.remove('open');
+        if (overlay) overlay.classList.remove('active');
+        if (menuBtn) menuBtn.classList.remove('open');
     }
-    document.querySelectorAll('.sidebar a').forEach(link => {
-        link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
-    });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && window.innerWidth <= 768) closeSidebar(); });
-    window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+}
+
+document.querySelectorAll('.sidebar a').forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
+});
+
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && window.innerWidth <= 768) closeSidebar(); });
+window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 </script>
 </body>
 </html>
