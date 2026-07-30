@@ -14,6 +14,8 @@ import hmac
 import logging
 from logging.handlers import RotatingFileHandler
 import time
+from dateutil import parser
+from urllib.parse import urlparse, parse_qs
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -64,7 +66,7 @@ def before_request():
     if settings.get('maintenance_mode') and not request.path.startswith('/admin'):
         return render_template('maintenance.html'), 503
     
-    # Session security
+    # Session security - extend session if user is active
     if 'user_id' in session:
         session.permanent = True
 
@@ -143,7 +145,6 @@ def login():
                 session['role'] = 'admin'
                 session['email'] = admin['email']
                 log_activity('admin_login', user_id, ip_address, 'Successful login')
-                # Redirect to original destination or dashboard
                 if redirect_to:
                     return redirect(redirect_to)
                 return redirect(url_for('admin_dashboard'))
@@ -252,12 +253,11 @@ def student_dashboard():
     # Recent attendance records - show local time
     recent_attendance = list(db.attendance.find({"student_id": student_id}).sort("time", -1).limit(10))
     
-    # Convert UTC to IST for display
+    # Convert UTC to IST for display - optimized
     from datetime import timedelta
     for record in recent_attendance:
         if record.get('time'):
             if isinstance(record['time'], str):
-                from dateutil import parser
                 utc_time = parser.parse(record['time'])
             else:
                 utc_time = record['time']
@@ -368,9 +368,14 @@ def create_session():
         timestamp = int(datetime.now().timestamp())
         qr_hash = generate_secure_qr_hash(session_id, timestamp)
         
-        # Create QR code directory
+        # Create QR code directory - ensure it exists
         qr_folder = os.path.join("static", "qr_codes")
-        os.makedirs(qr_folder, exist_ok=True)
+        try:
+            os.makedirs(qr_folder, exist_ok=True)
+        except OSError as e:
+            app.logger.error(f"Failed to create QR directory: {e}")
+            flash('Error creating session. Please try again.', 'error')
+            return redirect(url_for('create_session'))
         
         # Generate QR code URL
         BASE_URL = os.getenv("BASE_URL", request.url_root.rstrip('/'))
@@ -378,8 +383,13 @@ def create_session():
         
         qr_filename = f"qr_{session_id}.png"
         qr_path = os.path.join(qr_folder, qr_filename)
-        img = qrcode.make(url)
-        img.save(qr_path)
+        try:
+            img = qrcode.make(url)
+            img.save(qr_path)
+        except Exception as e:
+            app.logger.error(f"Failed to generate QR code: {e}")
+            flash('Error generating QR code. Please try again.', 'error')
+            return redirect(url_for('create_session'))
         
         start_time = datetime.now()
         end_time = start_time + timedelta(minutes=duration)
@@ -475,7 +485,7 @@ def add_student():
                           settings=settings)
 
 # ====================================================================
-# FACULTY BULK UPLOAD - FIXED VERSION
+# FACULTY BULK UPLOAD
 # ====================================================================
 
 @app.route('/faculty_bulk_upload', methods=['POST'])
@@ -506,10 +516,10 @@ def faculty_bulk_upload():
         else:
             df = pd.read_excel(file)
         
-        # Normalize column names - handle common variations
+        # Normalize column names
         df.columns = [str(col).strip().lower().replace(' ', '_') for col in df.columns]
         
-        # Expected columns mapping (handle variations)
+        # Find required columns
         roll_no_col = None
         name_col = None
         branch_col = None
@@ -522,7 +532,6 @@ def faculty_bulk_upload():
             if 'branch' in col or 'dept' in col:
                 branch_col = col
         
-        # Check required columns
         if not roll_no_col:
             flash('Missing required column: roll number column', 'error')
             return redirect(url_for('add_student'))
@@ -543,7 +552,6 @@ def faculty_bulk_upload():
                 name = str(row[name_col]).strip()
                 branch = str(row[branch_col]).strip().upper()
                 
-                # Skip empty rows or invalid data
                 if not roll_no or not name or not branch or roll_no == 'NAN' or name == 'NAN':
                     continue
                 
@@ -559,14 +567,11 @@ def faculty_bulk_upload():
                 elif 'ce' in branch.lower() or 'civil' in branch.lower():
                     branch = 'CE'
                 
-                # Check if student already exists
-                existing = db.students.find_one({"roll_no": roll_no})
-                if existing:
+                if db.students.find_one({"roll_no": roll_no}):
                     error_count += 1
                     errors.append(f"Row {idx+2}: Roll number {roll_no} already exists")
                     continue
                 
-                # Get optional values
                 email = ''
                 if 'email' in df.columns and pd.notna(row['email']):
                     email = str(row['email']).strip()
@@ -654,7 +659,6 @@ def mark():
     # If user is not logged in, store session_id and redirect to login
     if 'user_id' not in session:
         flash('Please login to mark attendance', 'warning')
-        # Build the redirect URL with the current request parameters
         redirect_url = request.url
         return redirect(url_for('login', redirect=redirect_url))
     
@@ -672,14 +676,12 @@ def mark():
             current_time = int(datetime.now().timestamp())
             qr_expiry = settings.get("qr_expiry_seconds", 60)
             
-            # Check if QR code has expired
             if current_time - timestamp_int > qr_expiry:
                 return render_template("message.html",
                                       title="QR Code Expired",
                                       message="The QR code has expired. Please scan a fresh QR code.",
                                       type="error")
             
-            # Verify the hash
             if not verify_qr_hash(session_id, qr_timestamp, qr_hash):
                 app.logger.warning(f"Invalid QR hash for session {session_id}")
                 return render_template("message.html",
@@ -687,7 +689,6 @@ def mark():
                                       message="Invalid QR code detected. Please scan a valid QR code.",
                                       type="error")
                 
-            # Hash is valid, proceed with this session_id
             app.logger.info(f"QR verified for session {session_id}")
             
         except ValueError as e:
@@ -705,7 +706,6 @@ def mark():
     
     # Case 2: POST from scanner (dynamic QR)
     elif request.method == 'POST' and qr_data:
-        # Parse dynamic QR format: sessionId|data
         if '|' in qr_data:
             parts = qr_data.split('|')
             if len(parts) >= 2:
@@ -713,9 +713,7 @@ def mark():
             else:
                 session_id = qr_data
         else:
-            # Try to parse as URL
             try:
-                from urllib.parse import urlparse, parse_qs
                 parsed = urlparse(qr_data)
                 if parsed.query:
                     params = parse_qs(parsed.query)
@@ -732,14 +730,12 @@ def mark():
         session_id = post_session_id
         app.logger.info(f"POST form submission for session {session_id}")
     
-    # Validate session_id
     if not session_id:
         return render_template("message.html",
                               title="Invalid Session",
                               message="Session ID is required.",
                               type="error")
     
-    # Validate session exists
     session_data = db.sessions.find_one({"session_id": session_id})
     if not session_data:
         app.logger.warning(f"Session not found: {session_id}")
@@ -748,7 +744,6 @@ def mark():
                               message="This session does not exist.",
                               type="error")
     
-    # Check if session is active
     now = datetime.now()
     end_time = session_data.get('end_time')
     
@@ -759,14 +754,12 @@ def mark():
                               message="This attendance session has expired.",
                               type="error")
     
-    # Check if session is marked as inactive
     if session_data.get('is_active') is False:
         return render_template("message.html",
                               title="Session Closed",
                               message="This attendance session is closed.",
                               type="error")
     
-    # Check if already marked
     existing = db.attendance.find_one({"student_id": student_id, "session_id": session_id})
     if existing:
         return render_template("message.html",
@@ -781,7 +774,7 @@ def mark():
         "student_id": student_id,
         "session_id": session_id,
         "subject": session_data['subject'],
-        "time": now_utc,  # Store in UTC
+        "time": now_utc,
         "ip_address": client_ip,
         "user_agent": request.headers.get('User-Agent', ''),
         "marked_at": now_utc
@@ -817,16 +810,12 @@ def attendance():
     for record in records:
         student = db.students.find_one({"roll_no": record['student_id']})
         
-        # Convert UTC time to local time (IST - UTC+5:30)
         if record.get('time'):
-            # Parse the time (if it's a string) or use as is
             if isinstance(record['time'], str):
-                from dateutil import parser
                 utc_time = parser.parse(record['time'])
             else:
                 utc_time = record['time']
             
-            # Convert UTC to IST (UTC+5:30)
             from datetime import timedelta
             local_time = utc_time + timedelta(hours=5, minutes=30)
             time_str = local_time.strftime('%Y-%m-%d %H:%M:%S')
@@ -861,7 +850,6 @@ def students_report():
     students_list = list(db.students.find({}))
     all_sessions = list(db.sessions.find({}))
     
-    # Calculate total sessions per subject
     total_sessions_dict = {}
     for session_item in all_sessions:
         subject = session_item['subject']
@@ -1327,7 +1315,7 @@ def admin_delete_notice(notice_id):
     return redirect(url_for('admin_dashboard'))
 
 # ====================================================================
-# ADMIN BULK UPLOAD - FIXED VERSION
+# ADMIN BULK UPLOAD
 # ====================================================================
 
 import pandas as pd
@@ -1352,16 +1340,13 @@ def admin_bulk_upload_students():
         return redirect(url_for('admin_manage_students'))
     
     try:
-        # Read file based on extension
         if file.filename.endswith('.csv'):
             df = pd.read_csv(file)
         else:
             df = pd.read_excel(file)
         
-        # Normalize column names - remove spaces, convert to lowercase
         df.columns = [str(col).strip().lower().replace(' ', '_') for col in df.columns]
         
-        # Expected columns mapping - handle variations
         roll_no_col = None
         name_col = None
         branch_col = None
@@ -1394,11 +1379,9 @@ def admin_bulk_upload_students():
                 name = str(row[name_col]).strip()
                 branch = str(row[branch_col]).strip().upper()
                 
-                # Skip empty rows
                 if not roll_no or not name or not branch or roll_no == 'NAN' or name == 'NAN':
                     continue
                 
-                # Clean branch names
                 if 'cse' in branch.lower() or 'computer' in branch.lower():
                     branch = 'CSE'
                 elif 'it' in branch.lower():
@@ -1410,14 +1393,11 @@ def admin_bulk_upload_students():
                 elif 'ce' in branch.lower() or 'civil' in branch.lower():
                     branch = 'CE'
                 
-                # Check if student already exists
-                existing = db.students.find_one({"roll_no": roll_no})
-                if existing:
+                if db.students.find_one({"roll_no": roll_no}):
                     error_count += 1
                     errors.append(f"Row {idx+2}: Roll number {roll_no} already exists")
                     continue
                 
-                # Get optional values
                 email = ''
                 if 'email' in df.columns and pd.notna(row['email']):
                     email = str(row['email']).strip()
