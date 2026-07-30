@@ -610,12 +610,12 @@ def delete_student(roll_no):
     return redirect(url_for('add_student'))
 
 # ====================================================================
-# MARK ATTENDANCE - UPDATED (Verification Code Removed)
+# MARK ATTENDANCE - QR ONLY (No Manual Entry)
 # ====================================================================
 
 @app.route('/mark', methods=['GET', 'POST'])
 def mark():
-    """Mark attendance via QR code scan"""
+    """Mark attendance via QR code scan only"""
     session_id = request.args.get('session_id') or request.form.get('session_id')
     qr_timestamp = request.args.get('t')
     qr_hash = request.args.get('h')
