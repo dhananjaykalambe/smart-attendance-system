@@ -119,6 +119,9 @@ def login():
     sidebar_links = get_sidebar_links()
     college_header = get_college_header()
     
+    # Get redirect parameter if present (for QR scan)
+    redirect_to = request.args.get('redirect', '')
+    
     if request.method == 'POST':
         user_id = request.form['user_id'].strip()
         role = request.form.get('role', 'student')
@@ -140,6 +143,9 @@ def login():
                 session['role'] = 'admin'
                 session['email'] = admin['email']
                 log_activity('admin_login', user_id, ip_address, 'Successful login')
+                # Redirect to original destination or dashboard
+                if redirect_to:
+                    return redirect(redirect_to)
                 return redirect(url_for('admin_dashboard'))
                 
         elif role == 'faculty':
@@ -158,6 +164,8 @@ def login():
                 session['department'] = faculty.get('department', '')
                 session['email'] = faculty.get('email', '')
                 log_activity('faculty_login', user_id, ip_address, 'Successful login')
+                if redirect_to:
+                    return redirect(redirect_to)
                 return redirect(url_for('faculty_dashboard'))
                 
         else:  # student
@@ -173,9 +181,12 @@ def login():
                 session['branch'] = student.get('branch', '')
                 session['email'] = student.get('email', '')
                 log_activity('student_login', user_id, ip_address, 'Successful login')
+                if redirect_to:
+                    return redirect(redirect_to)
                 return redirect(url_for('student_dashboard'))
     
-    return render_template("login.html", error=error, sidebar_links=sidebar_links, college_header=college_header)
+    return render_template("login.html", error=error, sidebar_links=sidebar_links, 
+                          college_header=college_header, redirect_to=redirect_to)
 
 @app.route('/logout')
 def logout():
@@ -238,8 +249,22 @@ def student_dashboard():
     # Check for low attendance alerts
     alerts = check_low_attendance(student_id)
     
-    # Recent attendance records
+    # Recent attendance records - show local time
     recent_attendance = list(db.attendance.find({"student_id": student_id}).sort("time", -1).limit(10))
+    
+    # Convert UTC to IST for display
+    from datetime import timedelta
+    for record in recent_attendance:
+        if record.get('time'):
+            if isinstance(record['time'], str):
+                from dateutil import parser
+                utc_time = parser.parse(record['time'])
+            else:
+                utc_time = record['time']
+            local_time = utc_time + timedelta(hours=5, minutes=30)
+            record['time_display'] = local_time.strftime('%d %b %Y, %H:%M')
+        else:
+            record['time_display'] = 'N/A'
     
     # Today's active sessions
     today_sessions = list(db.sessions.find({
@@ -622,9 +647,12 @@ def mark():
     qr_hash = request.args.get('h')
     qr_data = request.form.get('qr_data')
     
+    # If user is not logged in, store session_id and redirect to login
     if 'user_id' not in session:
         flash('Please login to mark attendance', 'warning')
-        return redirect(url_for('login'))
+        # Build the redirect URL with the current request parameters
+        redirect_url = request.url
+        return redirect(url_for('login', redirect=redirect_url))
     
     student_id = session['user_id']
     settings = get_settings()
@@ -707,16 +735,17 @@ def mark():
                               message="You have already marked attendance for this session.",
                               type="warning")
     
-    # Mark attendance
+    # Mark attendance - Store time in UTC
     client_ip = get_client_ip()
+    now_utc = datetime.utcnow()
     attendance_record = {
         "student_id": student_id,
         "session_id": session_id,
         "subject": session_data['subject'],
-        "time": datetime.now(),
+        "time": now_utc,  # Store in UTC
         "ip_address": client_ip,
         "user_agent": request.headers.get('User-Agent', ''),
-        "marked_at": datetime.now()
+        "marked_at": now_utc
     }
     db.attendance.insert_one(attendance_record)
     
@@ -748,13 +777,30 @@ def attendance():
     enriched_records = []
     for record in records:
         student = db.students.find_one({"roll_no": record['student_id']})
+        
+        # Convert UTC time to local time (IST - UTC+5:30)
+        if record.get('time'):
+            # Parse the time (if it's a string) or use as is
+            if isinstance(record['time'], str):
+                from dateutil import parser
+                utc_time = parser.parse(record['time'])
+            else:
+                utc_time = record['time']
+            
+            # Convert UTC to IST (UTC+5:30)
+            from datetime import timedelta
+            local_time = utc_time + timedelta(hours=5, minutes=30)
+            time_str = local_time.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            time_str = 'N/A'
+        
         enriched_records.append({
             "roll_no": record['student_id'],
             "name": student['name'] if student else 'Unknown',
             "branch": student['branch'] if student else 'Unknown',
             "session_id": record['session_id'],
             "subject": record['subject'],
-            "time": record['time'].strftime('%Y-%m-%d %H:%M:%S') if record['time'] else 'N/A',
+            "time": time_str,
             "ip_address": record.get('ip_address', 'N/A')
         })
     
