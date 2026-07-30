@@ -217,44 +217,18 @@ function onScanSuccess(decodedText) {
     showScanStatus('⏳ Processing QR code...', 'warning');
     
     try {
-        let sessionId = '';
-        let qrData = decodedText;
+        console.log('QR Code scanned:', decodedText);
         
-        // Parse QR format
-        if (decodedText.includes('|')) {
-            const parts = decodedText.split('|');
-            if (parts.length >= 2) {
-                sessionId = parts[0];
-                qrData = parts[1];
-            } else {
-                sessionId = decodedText;
-            }
-        } else {
-            // Try to parse URL
-            try {
-                const url = new URL(decodedText);
-                sessionId = url.searchParams.get('session_id') || decodedText;
-                qrData = decodedText;
-            } catch(e) {
-                sessionId = decodedText;
-            }
-        }
-        
-        // Create form and submit
+        // Send the raw QR data to server
+        // The server will parse it and extract session_id
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '/mark';
         
-        const sessionInput = document.createElement('input');
-        sessionInput.type = 'hidden';
-        sessionInput.name = 'session_id';
-        sessionInput.value = sessionId;
-        form.appendChild(sessionInput);
-        
         const qrInput = document.createElement('input');
         qrInput.type = 'hidden';
         qrInput.name = 'qr_data';
-        qrInput.value = qrData;
+        qrInput.value = decodedText;
         form.appendChild(qrInput);
         
         document.body.appendChild(form);
@@ -268,7 +242,7 @@ function onScanSuccess(decodedText) {
             }).catch(() => {});
         }
         
-        // Submit form
+        // Submit form after a short delay
         setTimeout(function() {
             form.submit();
         }, 500);
