@@ -44,13 +44,9 @@ DEFAULT_SETTINGS = {
     "enable_ip_tracking": True,
     "maintenance_mode": False,
     "max_login_attempts": 5,
-    "session_timeout_minutes": 30,
-    # NEW SETTINGS
-    "qr_refresh_interval": 15,           # QR code refresh interval in seconds
-    "enable_verification_code": True,    # Enable verification code feature
-    "verification_code_length": 6,       # Length of verification code
-    "enable_device_fingerprinting": True # Enable device fingerprinting
+    "session_timeout_minutes": 30
 }
+
 # ====================================================================
 # APP CONFIGURATION
 # ====================================================================
@@ -66,21 +62,21 @@ SESSION_COOKIE_SAMESITE = "Lax"
 # Rate limiting
 RATE_LIMIT = "100 per minute"
 
-# Color Theme - Modern Dark/Light Hybrid
+# Single Color Vibrant Theme - Deep Blue/Indigo
 THEME = {
-    "primary": "#1a1a2e",
-    "primary-dark": "#0f0f1a",
-    "primary-light": "#16213e",
-    "accent": "#e94560",
-    "accent-success": "#0f3460",
-    "success": "#00b4d8",
-    "warning": "#f4a261",
-    "danger": "#e76f51",
-    "info": "#48cae4",
-    "dark": "#0a0a0a",
-    "light": "#f8f9fa",
-    "gray": "#6c757d",
-    "card-bg": "#1e1e2e",
-    "text-primary": "#e0e0e0",
-    "text-secondary": "#a0a0a0"
+    "primary": "#1a237e",
+    "primary-dark": "#0d1445",
+    "primary-light": "#283593",
+    "primary-soft": "#e8eaf6",
+    "accent": "#3f51b5",
+    "success": "#1a237e",
+    "warning": "#283593",
+    "danger": "#1a237e",
+    "info": "#3f51b5",
+    "dark": "#0d1445",
+    "light": "#f5f6fa",
+    "gray": "#757575",
+    "card-bg": "#ffffff",
+    "text-primary": "#1a237e",
+    "text-secondary": "#424242"
 }
