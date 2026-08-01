@@ -3,7 +3,7 @@
 # SMART ATTENDANCE SYSTEM - MAIN APPLICATION (PRODUCTION READY)
 # ====================================================================
 
-from flask import Flask, render_template, request, session, redirect, url_for, jsonify, send_file, flash, g
+from flask import Flask, render_template, request, session, redirect, url_for, jsonify, send_file, flash, g, Response, stream_with_context
 from config import SECRET_KEY, SESSION_COOKIE_SECURE, SESSION_COOKIE_HTTPONLY, SESSION_COOKIE_SAMESITE, THEME
 from datetime import datetime, timedelta
 from functools import wraps
@@ -14,6 +14,7 @@ import hmac
 import logging
 from logging.handlers import RotatingFileHandler
 import time
+import json
 from dateutil import parser
 from urllib.parse import urlparse, parse_qs
 
@@ -51,6 +52,57 @@ from utils.pdf_export import (
 
 # Initialize database
 init_db(app)
+
+# ====================================================================
+# REAL-TIME ATTENDANCE DASHBOARD - HELPER FUNCTIONS
+# ====================================================================
+
+def get_session_attendance(session_id):
+    """Get current attendance data for a session"""
+    session_data = db.sessions.find_one({"session_id": session_id})
+    if not session_data:
+        return None
+    
+    total_students = db.students.count_documents({})
+    present_count = db.attendance.count_documents({"session_id": session_id})
+    
+    # Get recent attendees (last 10)
+    recent_attendees = list(db.attendance.find(
+        {"session_id": session_id}
+    ).sort("time", -1).limit(10))
+    
+    attendees_list = []
+    for record in recent_attendees:
+        student = db.students.find_one({"roll_no": record['student_id']})
+        if student:
+            if record.get('time'):
+                if isinstance(record['time'], str):
+                    utc_time = parser.parse(record['time'])
+                else:
+                    utc_time = record['time']
+                local_time = utc_time + timedelta(hours=5, minutes=30)
+                time_str = local_time.strftime('%H:%M:%S')
+            else:
+                time_str = 'N/A'
+            
+            attendees_list.append({
+                'roll_no': student['roll_no'],
+                'name': student['name'],
+                'branch': student['branch'],
+                'time': time_str
+            })
+    
+    return {
+        'session_id': session_id,
+        'subject': session_data.get('subject', 'Unknown'),
+        'total_students': total_students,
+        'present_count': present_count,
+        'absent_count': total_students - present_count,
+        'percentage': round((present_count / total_students) * 100, 2) if total_students > 0 else 0,
+        'recent_attendees': attendees_list,
+        'is_active': session_data.get('is_active', False),
+        'end_time': session_data.get('end_time').isoformat() if session_data.get('end_time') else None
+    }
 
 # ====================================================================
 # MIDDLEWARE
@@ -1455,6 +1507,115 @@ def admin_bulk_upload_students():
     return redirect(url_for('admin_manage_students'))
 
 # ====================================================================
+# REAL-TIME LIVE ATTENDANCE DASHBOARD ROUTES
+# ====================================================================
+
+@app.route('/live_attendance/<session_id>')
+@login_required
+@faculty_required
+def live_attendance(session_id):
+    """Real-time attendance dashboard for faculty"""
+    session_data = db.sessions.find_one({"session_id": session_id})
+    if not session_data:
+        flash('Session not found', 'error')
+        return redirect(url_for('faculty_dashboard'))
+    
+    sidebar_links = get_sidebar_links()
+    college_header = get_college_header()
+    settings = get_settings()
+    
+    # Get initial attendance data
+    attendance_data = get_session_attendance(session_id)
+    
+    return render_template("live_attendance.html",
+                          session_id=session_id,
+                          session_data=session_data,
+                          attendance_data=attendance_data,
+                          sidebar_links=sidebar_links,
+                          college_header=college_header,
+                          settings=settings)
+
+@app.route('/api/attendance_stream/<session_id>')
+@login_required
+@faculty_required
+def attendance_stream(session_id):
+    """SSE endpoint for real-time attendance updates"""
+    def generate():
+        last_count = -1
+        last_attendees = []
+        
+        while True:
+            # Check if session exists and is active
+            session_data = db.sessions.find_one({"session_id": session_id})
+            if not session_data:
+                yield f"data: {json.dumps({'event': 'session_ended', 'message': 'Session not found'})}\n\n"
+                break
+            
+            # Get current attendance data
+            attendance_data = get_session_attendance(session_id)
+            if not attendance_data:
+                yield f"data: {json.dumps({'event': 'error', 'message': 'Failed to get attendance data'})}\n\n"
+                break
+            
+            # Check if session has expired
+            if session_data.get('end_time') and datetime.now() > session_data['end_time']:
+                if session_data.get('is_active'):
+                    db.sessions.update_one({"session_id": session_id}, {"$set": {"is_active": False}})
+                attendance_data['is_active'] = False
+                yield f"data: {json.dumps({'event': 'session_expired', 'data': attendance_data})}\n\n"
+                break
+            
+            # Check if there are new attendees
+            current_count = attendance_data['present_count']
+            current_attendees = attendance_data['recent_attendees']
+            
+            # Check for new attendees
+            new_attendees = []
+            if current_attendees:
+                prev_roll_nos = [a['roll_no'] for a in last_attendees]
+                for attendee in current_attendees:
+                    if attendee['roll_no'] not in prev_roll_nos:
+                        new_attendees.append(attendee)
+            
+            # Send update if there are changes
+            if current_count != last_count or new_attendees:
+                last_count = current_count
+                last_attendees = current_attendees
+                
+                data = {
+                    'event': 'attendance_update',
+                    'data': attendance_data,
+                    'new_attendees': new_attendees,
+                    'timestamp': datetime.now().isoformat()
+                }
+                yield f"data: {json.dumps(data)}\n\n"
+            
+            # Keep connection alive with ping
+            yield f"data: {json.dumps({'event': 'ping', 'timestamp': datetime.now().isoformat()})}\n\n"
+            
+            # Wait before checking again
+            time.sleep(2)
+    
+    return Response(
+        stream_with_context(generate()),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no'
+        }
+    )
+
+@app.route('/api/session_status/<session_id>')
+@login_required
+@faculty_required
+def api_session_status(session_id):
+    """API endpoint to get session status"""
+    attendance_data = get_session_attendance(session_id)
+    if not attendance_data:
+        return jsonify({'error': 'Session not found'}), 404
+    return jsonify(attendance_data)
+
+# ====================================================================
 # STATIC PAGES
 # ====================================================================
 
@@ -1497,6 +1658,7 @@ if __name__ == "__main__":
     print("   Admin:   ADMIN001 / admin123")
     print("   Faculty: FAC001 / faculty123")
     print("   Student: CS001 (no password)")
+    print("\n📡 Live Attendance Dashboard: /live_attendance/<session_id>")
     print("\n" + "=" * 60 + "\n")
     
     app.run(debug=debug_mode, host='0.0.0.0', port=port)
