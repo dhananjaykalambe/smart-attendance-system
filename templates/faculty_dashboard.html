@@ -14,10 +14,40 @@
     .btn-red { background: linear-gradient(135deg, var(--danger), var(--danger-dark)); }
     .btn-green { background: linear-gradient(135deg, var(--success), var(--success-dark)); }
     .btn-orange { background: linear-gradient(135deg, var(--warning), var(--warning-dark)); }
+    .btn-live { background: linear-gradient(135deg, #e74c3c, #c0392b); }
     .subject-select { padding: 10px 15px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 14px; background: var(--card-bg); color: var(--text-primary); cursor: pointer; }
     .quick-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
     .quick-stat-card { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; padding: 20px; border-radius: var(--radius-lg); text-align: center; }
     .quick-stat-card h3 { font-size: 2rem; margin-bottom: 10px; }
+    .live-monitor-card {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+        padding: 20px;
+        border-radius: var(--radius-lg);
+        text-align: center;
+        margin-bottom: 25px;
+        box-shadow: var(--shadow-md);
+    }
+    .live-monitor-card h3 { font-size: 1.5rem; margin-bottom: 10px; }
+    .live-monitor-card .sub-text { opacity: 0.9; font-size: 14px; }
+    .live-monitor-card .btn-live-big {
+        background: white;
+        color: #c0392b;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: bold;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 10px;
+    }
+    .live-monitor-card .btn-live-big:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .live-session-select { padding: 10px 15px; border-radius: var(--radius-md); border: 1px solid white; font-size: 14px; background: rgba(255,255,255,0.2); color: white; cursor: pointer; }
+    .live-session-select option { color: #333; }
 </style>
 </head>
 <body>
@@ -64,6 +94,27 @@
 
 <div class="main">
     <div class="header">Welcome, {{ name }}! | Faculty Dashboard</div>
+
+    <!-- Live Attendance Monitor - NEW CARD -->
+    <div class="live-monitor-card">
+        <h3>📡 Live Attendance Monitor</h3>
+        <p class="sub-text">Monitor attendance in real-time as students scan QR codes</p>
+        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 15px;">
+            <select id="liveSessionSelect" class="live-session-select">
+                <option value="">-- Select Active Session --</option>
+                {% for session in recent_sessions %}
+                    {% if session.end_time and session.end_time > now %}
+                        <option value="{{ session.session_id }}">{{ session.subject }} ({{ session.session_id }})</option>
+                    {% endif %}
+                {% endfor %}
+                {% if recent_sessions|selectattr('end_time', 'gt', now)|list|length == 0 %}
+                    <option value="">No active sessions</option>
+                {% endif %}
+            </select>
+            <button onclick="openLiveDashboard()" class="btn-live-big">🚀 Open Live Dashboard</button>
+        </div>
+        <p style="font-size: 12px; opacity: 0.8; margin-top: 10px;">💡 Select a session and click the button to start monitoring</p>
+    </div>
 
     <div class="quick-stats">
         <div class="quick-stat-card"><h3>{{ total_students }}</h3><p>Total Students</p></div>
@@ -136,7 +187,29 @@
         data: { labels: {{ subject_stats|map(attribute='subject')|list|tojson }}, datasets: [{ label: 'Attendance Percentage (%)', data: {{ subject_stats|map(attribute='percentage')|list|tojson }}, backgroundColor: ['#2563eb', '#10b981', '#06b6d4', '#f59e0b', '#ef4444', '#8b5cf6'], borderRadius: 8 }] },
         options: { responsive: true, scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: 'Percentage (%)' } } } }
     });
-    function exportSubjectReport() { const subject = document.getElementById('subjectSelectExport').value; if (subject) { window.location.href = '/export_subject_pdf/' + subject; } else { alert('Please select a subject first'); } }
+    
+    function exportSubjectReport() { 
+        const subject = document.getElementById('subjectSelectExport').value; 
+        if (subject) { 
+            window.location.href = '/export_subject_pdf/' + subject; 
+        } else { 
+            alert('Please select a subject first'); 
+        } 
+    }
+    
+    // ====================================================================
+    // LIVE DASHBOARD - NEW FUNCTION
+    // ====================================================================
+    
+    function openLiveDashboard() {
+        const select = document.getElementById('liveSessionSelect');
+        const sessionId = select.value;
+        if (!sessionId) {
+            alert('Please select an active session first.');
+            return;
+        }
+        window.open(`/live_attendance/${sessionId}`, '_blank');
+    }
 </script>
 
 <script>

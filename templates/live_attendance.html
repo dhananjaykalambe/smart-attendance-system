@@ -1,0 +1,855 @@
+<!-- live_attendance.html -->
+<!DOCTYPE html>
+<html>
+<head>
+<title>Live Attendance - {{ session_data.subject }}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+    .live-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .live-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .live-header h2 {
+        margin: 0;
+        color: var(--primary);
+    }
+    
+    .live-status {
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .live-status.active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .live-status.inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .live-status .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        animation: pulse-dot 1.5s infinite;
+    }
+    
+    .live-status.active .dot {
+        background: #28a745;
+    }
+    
+    .live-status.inactive .dot {
+        background: #dc3545;
+        animation: none;
+    }
+    
+    @keyframes pulse-dot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    
+    .stats-grid-live {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    
+    .stat-card-live {
+        background: var(--card-bg);
+        padding: 20px;
+        border-radius: var(--radius-lg);
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+    }
+    
+    .stat-card-live:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .stat-card-live .number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card-live .number.pulse {
+        animation: number-pulse 0.5s ease;
+    }
+    
+    @keyframes number-pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); color: #28a745; }
+        100% { transform: scale(1); }
+    }
+    
+    .stat-card-live .label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 5px;
+    }
+    
+    .stat-card-live .sub-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+    
+    .live-list-container {
+        background: var(--card-bg);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        margin-bottom: 25px;
+    }
+    
+    .live-list-header {
+        padding: 15px 20px;
+        background: var(--primary-soft);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .live-list-header h3 {
+        margin: 0;
+        font-size: 1rem;
+        color: var(--primary);
+    }
+    
+    .live-list-header .count-badge {
+        background: var(--primary);
+        color: white;
+        padding: 2px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .live-list {
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 10px;
+    }
+    
+    .live-list::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .live-list::-webkit-scrollbar-track {
+        background: var(--gray-light);
+        border-radius: 10px;
+    }
+    
+    .live-list::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 10px;
+    }
+    
+    .attendee-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        border-bottom: 1px solid var(--border-color);
+        animation: slide-in 0.3s ease;
+        transition: background 0.2s;
+    }
+    
+    .attendee-item:hover {
+        background: var(--primary-soft);
+    }
+    
+    .attendee-item:last-child {
+        border-bottom: none;
+    }
+    
+    .attendee-item.new {
+        background: #d4edda;
+        border-left: 4px solid #28a745;
+    }
+    
+    @keyframes slide-in {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    .attendee-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .attendee-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 14px;
+    }
+    
+    .attendee-name {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    .attendee-roll {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+    
+    .attendee-time {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+    
+    .attendee-badge {
+        font-size: 11px;
+        padding: 2px 10px;
+        border-radius: 12px;
+        background: var(--success-soft);
+        color: var(--success);
+        font-weight: 600;
+    }
+    
+    .notification-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 350px;
+        width: 100%;
+    }
+    
+    .notification {
+        background: white;
+        padding: 15px 20px;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        border-left: 4px solid #28a745;
+        animation: slide-in-right 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .notification .icon {
+        font-size: 24px;
+    }
+    
+    .notification .content {
+        flex: 1;
+    }
+    
+    .notification .title {
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--text-primary);
+    }
+    
+    .notification .subtitle {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+    
+    .notification .close-btn {
+        cursor: pointer;
+        color: var(--text-muted);
+        font-size: 16px;
+        background: none;
+        border: none;
+        padding: 0 4px;
+    }
+    
+    @keyframes slide-in-right {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    .connection-status {
+        font-size: 12px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .connection-status .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+    
+    .connection-status .status-dot.connected {
+        background: #28a745;
+    }
+    
+    .connection-status .status-dot.disconnected {
+        background: #dc3545;
+        animation: none;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-muted);
+    }
+    
+    .empty-state .icon {
+        font-size: 48px;
+        display: block;
+        margin-bottom: 15px;
+    }
+    
+    @media (max-width: 768px) {
+        .stats-grid-live {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .stat-card-live .number {
+            font-size: 1.8rem;
+        }
+        
+        .live-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .notification-container {
+            max-width: 90%;
+            right: 5%;
+            top: 10px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .stats-grid-live {
+            grid-template-columns: 1fr;
+        }
+        
+        .live-list-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+</head>
+<body>
+
+<button class="menu-toggle" onclick="toggleSidebar()">
+    <div class="hamburger-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</button>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h2>Smart Attendance</h2>
+        <p>{{ settings.get('college_name', 'Attendance System')[:30] if settings else 'Attendance System' }}</p>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">MAIN MENU</div>
+        <a href="/faculty_dashboard">Dashboard</a>
+        <a href="/create_session">Create Session</a>
+        <a href="/add_student">Manage Students</a>
+        <a href="/students_report">Reports</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">GENERAL</div>
+        <a href="/attendance">All Attendance</a>
+        <a href="/subject_details">Subjects</a>
+        <a href="/about">About</a>
+    </div>
+    
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">ACCOUNT</div>
+        <a href="/logout">Logout</a>
+    </div>
+</div>
+
+<div class="main">
+    <div class="header" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+        📡 Live Attendance Monitor
+    </div>
+
+    <div class="live-container">
+        <!-- Live Header -->
+        <div class="live-header">
+            <div>
+                <h2>{{ session_data.subject }}</h2>
+                <p style="color: var(--text-muted); margin: 5px 0 0 0; font-size: 14px;">
+                    Session ID: <code>{{ session_id }}</code>
+                </p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                <span class="live-status active" id="sessionStatus">
+                    <span class="dot"></span>
+                    <span id="statusText">Active</span>
+                </span>
+                <span class="connection-status">
+                    <span class="status-dot connected" id="connectionDot"></span>
+                    <span id="connectionText">Connected</span>
+                </span>
+                <a href="/faculty_dashboard" class="btn-small" style="width: auto; background: var(--gray); color: white; text-decoration: none; padding: 8px 16px; border-radius: var(--radius-sm);">
+                    ⬅ Back
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid-live" id="statsGrid">
+            <div class="stat-card-live">
+                <div class="number" id="presentCount">0</div>
+                <div class="label">Present</div>
+            </div>
+            <div class="stat-card-live">
+                <div class="number" id="absentCount">0</div>
+                <div class="label">Absent</div>
+            </div>
+            <div class="stat-card-live">
+                <div class="number" id="totalStudents">0</div>
+                <div class="label">Total Students</div>
+            </div>
+            <div class="stat-card-live">
+                <div class="number" id="attendancePercentage">0%</div>
+                <div class="label">Attendance %</div>
+                <div class="sub-label" id="lastUpdate">Waiting for updates...</div>
+            </div>
+        </div>
+
+        <!-- Attendee List -->
+        <div class="live-list-container">
+            <div class="live-list-header">
+                <h3>👥 Recent Attendees</h3>
+                <span class="count-badge" id="attendeeCount">0</span>
+            </div>
+            <div class="live-list" id="attendeeList">
+                <div class="empty-state">
+                    <span class="icon">📭</span>
+                    <p>No students have marked attendance yet.</p>
+                    <p style="font-size: 13px;">Waiting for students to scan the QR code...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px;">
+            <button onclick="exportAttendance()" class="btn-small" style="width: auto; background: linear-gradient(135deg, var(--success), var(--success-dark));">
+                📄 Export Report
+            </button>
+            <button onclick="refreshData()" class="btn-small" style="width: auto; background: var(--info);">
+                🔄 Refresh
+            </button>
+            <button onclick="endSession()" class="btn-small" style="width: auto; background: var(--danger);" id="endSessionBtn">
+                ⛔ End Session
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Container -->
+<div class="notification-container" id="notificationContainer"></div>
+
+<script>
+// ====================================================================
+// REAL-TIME ATTENDANCE DASHBOARD - SSE CLIENT
+// ====================================================================
+
+const sessionId = '{{ session_id }}';
+let eventSource = null;
+let isConnected = false;
+let reconnectAttempts = 0;
+const maxReconnectAttempts = 5;
+
+// DOM Elements
+const presentCount = document.getElementById('presentCount');
+const absentCount = document.getElementById('absentCount');
+const totalStudents = document.getElementById('totalStudents');
+const attendancePercentage = document.getElementById('attendancePercentage');
+const lastUpdate = document.getElementById('lastUpdate');
+const attendeeList = document.getElementById('attendeeList');
+const attendeeCount = document.getElementById('attendeeCount');
+const sessionStatus = document.getElementById('sessionStatus');
+const statusText = document.getElementById('statusText');
+const connectionDot = document.getElementById('connectionDot');
+const connectionText = document.getElementById('connectionText');
+
+// ====================================================================
+// NOTIFICATION SYSTEM
+// ====================================================================
+
+function showNotification(title, subtitle, icon = '✅') {
+    const container = document.getElementById('notificationContainer');
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.innerHTML = `
+        <span class="icon">${icon}</span>
+        <div class="content">
+            <div class="title">${title}</div>
+            <div class="subtitle">${subtitle}</div>
+        </div>
+        <button class="close-btn" onclick="this.parentElement.remove()">✕</button>
+    `;
+    container.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// ====================================================================
+// SSE CONNECTION
+// ====================================================================
+
+function connectSSE() {
+    if (eventSource) {
+        eventSource.close();
+    }
+    
+    try {
+        eventSource = new EventSource(`/api/attendance_stream/${sessionId}`);
+        
+        eventSource.onopen = function() {
+            isConnected = true;
+            reconnectAttempts = 0;
+            connectionDot.className = 'status-dot connected';
+            connectionText.textContent = 'Connected';
+            console.log('SSE connection established');
+        };
+        
+        eventSource.onmessage = function(event) {
+            try {
+                const data = JSON.parse(event.data);
+                handleSSEMessage(data);
+            } catch (e) {
+                console.error('Error parsing SSE message:', e);
+            }
+        };
+        
+        eventSource.onerror = function(event) {
+            isConnected = false;
+            connectionDot.className = 'status-dot disconnected';
+            connectionText.textContent = 'Disconnected';
+            console.error('SSE error:', event);
+            
+            reconnectAttempts++;
+            if (reconnectAttempts < maxReconnectAttempts) {
+                setTimeout(connectSSE, 3000);
+            } else {
+                showNotification('Connection Lost', 'Unable to reconnect. Please refresh the page.', '⚠️');
+            }
+        };
+        
+    } catch (e) {
+        console.error('Error creating SSE connection:', e);
+        startPolling();
+    }
+}
+
+// ====================================================================
+// HANDLE SSE MESSAGES
+// ====================================================================
+
+function handleSSEMessage(data) {
+    if (data.event === 'ping') {
+        return;
+    }
+    
+    if (data.event === 'session_expired') {
+        sessionStatus.className = 'live-status inactive';
+        statusText.textContent = 'Expired';
+        document.getElementById('endSessionBtn').disabled = true;
+        showNotification('Session Expired', 'The session has ended.', '⛔');
+        if (eventSource) {
+            eventSource.close();
+        }
+        return;
+    }
+    
+    if (data.event === 'attendance_update' && data.data) {
+        updateDashboard(data.data, data.new_attendees || []);
+        
+        if (data.new_attendees && data.new_attendees.length > 0) {
+            data.new_attendees.forEach(attendee => {
+                showNotification(
+                    `${attendee.name} marked attendance`,
+                    `Roll: ${attendee.roll_no} | ${attendee.branch}`,
+                    '✅'
+                );
+            });
+        }
+    }
+}
+
+// ====================================================================
+// UPDATE DASHBOARD
+// ====================================================================
+
+function updateDashboard(data, newAttendees) {
+    const present = data.present_count || 0;
+    const total = data.total_students || 0;
+    const absent = data.absent_count || 0;
+    const percentage = data.percentage || 0;
+    
+    updateNumber(presentCount, present);
+    updateNumber(absentCount, absent);
+    updateNumber(totalStudents, total);
+    attendancePercentage.textContent = percentage + '%';
+    
+    const now = new Date();
+    lastUpdate.textContent = `Last update: ${now.toLocaleTimeString()}`;
+    
+    updateAttendeeList(data.recent_attendees || [], newAttendees);
+    
+    if (data.is_active) {
+        sessionStatus.className = 'live-status active';
+        statusText.textContent = 'Active';
+    } else {
+        sessionStatus.className = 'live-status inactive';
+        statusText.textContent = 'Inactive';
+    }
+}
+
+function updateNumber(element, value) {
+    const current = parseInt(element.textContent) || 0;
+    if (current !== value) {
+        element.textContent = value;
+        element.className = 'number pulse';
+        setTimeout(() => {
+            element.className = 'number';
+        }, 500);
+    }
+}
+
+function updateAttendeeList(attendees, newAttendees) {
+    const container = attendeeList;
+    const newRollNos = newAttendees.map(a => a.roll_no);
+    
+    if (!attendees || attendees.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <span class="icon">📭</span>
+                <p>No students have marked attendance yet.</p>
+                <p style="font-size: 13px;">Waiting for students to scan the QR code...</p>
+            </div>
+        `;
+        attendeeCount.textContent = '0';
+        return;
+    }
+    
+    let html = '';
+    attendees.forEach(attendee => {
+        const isNew = newRollNos.includes(attendee.roll_no);
+        const initials = attendee.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        html += `
+            <div class="attendee-item ${isNew ? 'new' : ''}">
+                <div class="attendee-info">
+                    <div class="attendee-avatar">${initials}</div>
+                    <div>
+                        <div class="attendee-name">${attendee.name}</div>
+                        <div class="attendee-roll">${attendee.roll_no} • ${attendee.branch}</div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="attendee-time">${attendee.time}</span>
+                    ${isNew ? '<span class="attendee-badge">NEW</span>' : ''}
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    attendeeCount.textContent = attendees.length;
+    
+    if (newAttendees && newAttendees.length > 0) {
+        container.scrollTop = 0;
+    }
+}
+
+// ====================================================================
+// FALLBACK POLLING
+// ====================================================================
+
+function startPolling() {
+    console.log('Using polling fallback');
+    setInterval(() => {
+        fetch(`/api/session_status/${sessionId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Polling error:', data.error);
+                    return;
+                }
+                updateDashboard(data, []);
+            })
+            .catch(err => {
+                console.error('Polling fetch error:', err);
+            });
+    }, 3000);
+}
+
+// ====================================================================
+// EXPORT ATTENDANCE
+// ====================================================================
+
+function exportAttendance() {
+    window.location.href = `/export_report/${sessionId}`;
+}
+
+// ====================================================================
+// END SESSION
+// ====================================================================
+
+function endSession() {
+    if (!confirm('Are you sure you want to end this session?')) {
+        return;
+    }
+    
+    fetch(`/admin/delete_session/${sessionId}`, {
+        method: 'GET'
+    }).then(() => {
+        showNotification('Session Ended', 'The session has been closed.', '⛔');
+        sessionStatus.className = 'live-status inactive';
+        statusText.textContent = 'Ended';
+        document.getElementById('endSessionBtn').disabled = true;
+        if (eventSource) {
+            eventSource.close();
+        }
+        setTimeout(() => {
+            window.location.href = '/faculty_dashboard';
+        }, 2000);
+    }).catch(err => {
+        console.error('Error ending session:', err);
+        showNotification('Error', 'Failed to end session.', '❌');
+    });
+}
+
+// ====================================================================
+// REFRESH DATA
+// ====================================================================
+
+function refreshData() {
+    showNotification('Refreshing', 'Fetching latest attendance data...', '🔄');
+    fetch(`/api/session_status/${sessionId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showNotification('Error', data.error, '❌');
+                return;
+            }
+            updateDashboard(data, []);
+            showNotification('Updated', 'Data refreshed successfully.', '✅');
+        })
+        .catch(err => {
+            console.error('Refresh error:', err);
+            showNotification('Error', 'Failed to refresh data.', '❌');
+        });
+}
+
+// ====================================================================
+// SIDEBAR FUNCTIONS
+// ====================================================================
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const menuBtn = document.querySelector('.menu-toggle');
+    if (sidebar) {
+        sidebar.classList.toggle('open');
+        if (overlay) overlay.classList.toggle('active');
+        if (menuBtn) menuBtn.classList.toggle('open');
+    }
+}
+
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const menuBtn = document.querySelector('.menu-toggle');
+    if (sidebar) {
+        sidebar.classList.remove('open');
+        if (overlay) overlay.classList.remove('active');
+        if (menuBtn) menuBtn.classList.remove('open');
+    }
+}
+
+document.querySelectorAll('.sidebar a').forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
+});
+
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && window.innerWidth <= 768) closeSidebar(); });
+window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+
+// ====================================================================
+// INITIALIZATION
+// ====================================================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    connectSSE();
+    
+    window.addEventListener('beforeunload', function() {
+        if (eventSource) {
+            eventSource.close();
+        }
+    });
+});
+</script>
+</body>
+</html>
