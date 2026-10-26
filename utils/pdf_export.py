@@ -43,7 +43,6 @@ def get_college_info(db):
         'name': settings.get('college_name', 'Priyadarshini Bhagwati College of Engineering'),
         'location': settings.get('college_location', 'Nagpur'),
         'year': settings.get('academic_year', '2024-25'),
-        'hod': settings.get('hod_name', 'Head of Department'),
     }
 
 
@@ -278,11 +277,11 @@ def build_data_table(table_data, available_width, alignment_map=None):
     return tbl
 
 
-def build_signatures(styles, page_width, hod_name='Head of Department'):
+def build_signatures(styles, page_width):
     """
-    Role-aware signature block:
-      - Student exports  -> HOD (left)  +  "Class Incharge" (right, no name)
-      - Faculty exports  -> HOD (left)  +  Faculty name (right, "Faculty")
+    Role-aware signature block (NO HOD name shown — only labels):
+      - Student exports  -> HOD (left)  +  "Class Incharge / Faculty" (right)
+      - Faculty exports  -> HOD (left)  +  Faculty name / "Faculty" (right)
       - Admin exports    -> HOD only, centered
     """
     role = get_exporter_role()
@@ -295,8 +294,8 @@ def build_signatures(styles, page_width, hod_name='Head of Department'):
             Paragraph(
                 f'<br/><br/><br/>'
                 f'<font color="#555555">_______________________________</font><br/>'
-                f'<b>{hod_name}</b><br/>'
-                f'<font size="8" color="#777777">Head of Department</font>',
+                f'<b>Head of Department</b><br/>'
+                f'<font size="8" color="#777777">HOD</font>',
                 styles['sig_label']
             ),
             '',  # empty right
@@ -311,10 +310,10 @@ def build_signatures(styles, page_width, hod_name='Head of Department'):
         ]))
         return sig_table
 
-    # ---------------- STUDENT: HOD + Class Incharge ----------------
+    # ---------------- STUDENT: HOD + Class Incharge/Faculty ----------------
     if role == 'student':
         right_label = 'Class Incharge'
-        right_sub = 'Class Incharge'
+        right_sub = 'Faculty'
     # ---------------- FACULTY: HOD + Faculty name ----------------
     else:
         right_label = faculty_name
@@ -324,8 +323,8 @@ def build_signatures(styles, page_width, hod_name='Head of Department'):
         Paragraph(
             f'<br/><br/><br/>'
             f'<font color="#555555">_______________________________</font><br/>'
-            f'<b>{hod_name}</b><br/>'
-            f'<font size="8" color="#777777">Head of Department</font>',
+            f'<b>Head of Department</b><br/>'
+            f'<font size="8" color="#777777">HOD</font>',
             styles['sig_label']
         ),
         Paragraph(
@@ -369,7 +368,7 @@ def build_footer(styles, page_width):
 # ====================================================================
 
 def build_report(db, title, meta_lines, table_data, alignment_map, filename,
-                 landscape_mode=True, hod_name=None):
+                 landscape_mode=True):
     """
     Build a complete report with:
     - Clean header (no colors)
@@ -393,10 +392,6 @@ def build_report(db, title, meta_lines, table_data, alignment_map, filename,
 
     styles = build_styles()
     page_width = pagesize[0] - (2 * margin)
-    info = get_college_info(db)
-
-    if hod_name is None:
-        hod_name = info.get('hod', 'Head of Department')
 
     elements = []
 
@@ -411,7 +406,7 @@ def build_report(db, title, meta_lines, table_data, alignment_map, filename,
     elements.append(Spacer(1, 22))
 
     # Signatures (role-aware)
-    elements.append(build_signatures(styles, page_width, hod_name=hod_name))
+    elements.append(build_signatures(styles, page_width))
 
     elements.append(Spacer(1, 18))
 
@@ -657,8 +652,7 @@ def export_all_attendance_report(session, db):
         ])
 
     meta_lines = [
-        f'<b>Total Records:</b> {len(records)}   •   '
-        f'<b>Exported By:</b> {session.get("user_name", "N/A")} ({session.get("role", "N/A")})',
+        f'<b>Total Records:</b> {len(records)}',
     ]
 
     alignment_map = ['CENTER', 'CENTER', 'LEFT', 'CENTER', 'CENTER', 'CENTER', 'CENTER']
