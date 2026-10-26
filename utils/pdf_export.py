@@ -1,35 +1,35 @@
 # utils/pdf_export.py
 # ====================================================================
-# PDF EXPORT FUNCTIONS - PROFESSIONAL DESIGN
+# PDF EXPORT FUNCTIONS - CLEAN MONOCHROME PROFESSIONAL DESIGN
 # ====================================================================
 
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import landscape, letter, A4
+from reportlab.lib.pagesizes import A4, landscape
 from reportlab.platypus import (
     SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer,
-    PageBreak, KeepTogether
+    KeepTogether
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
 from reportlab.lib.units import inch, mm
+from reportlab.pdfbase.pdfmetrics import stringWidth
 from datetime import datetime
 import io
 from flask import send_file, session
 
+
 # ====================================================================
-# COLOR PALETTE
+# MONOCHROME PALETTE (BLACK / WHITE / GRAY ONLY)
 # ====================================================================
-PRIMARY = colors.HexColor('#1a237e')
-PRIMARY_LIGHT = colors.HexColor('#283593')
-PRIMARY_SOFT = colors.HexColor('#e8eaf6')
-ACCENT = colors.HexColor('#3f51b5')
-DARK_TEXT = colors.HexColor('#0d1445')
-GRAY_TEXT = colors.HexColor('#424242')
-MUTED = colors.HexColor('#757575')
-BORDER = colors.HexColor('#c5cae9')
-ROW_ALT = colors.HexColor('#f5f6fa')
-SUCCESS = colors.HexColor('#1b5e20')
-DANGER = colors.HexColor('#b71c1c')
+BLACK = colors.black
+DARK = colors.HexColor('#1a1a1a')
+GRAY_DARK = colors.HexColor('#333333')
+GRAY = colors.HexColor('#555555')
+GRAY_MID = colors.HexColor('#777777')
+GRAY_LIGHT = colors.HexColor('#999999')
+GRAY_FAINT = colors.HexColor('#cccccc')
+GRAY_ROW = colors.HexColor('#f2f2f2')
+WHITE = colors.white
 
 
 # ====================================================================
@@ -42,7 +42,8 @@ def get_college_info(db):
     return {
         'name': settings.get('college_name', 'Priyadarshini Bhagwati College of Engineering'),
         'location': settings.get('college_location', 'Nagpur'),
-        'year': settings.get('academic_year', '2024-25')
+        'year': settings.get('academic_year', '2024-25'),
+        'hod': settings.get('hod_name', 'Head of Department'),
     }
 
 
@@ -57,243 +58,323 @@ def create_pdf_response(buffer, filename):
 
 
 def build_styles():
-    """Build all paragraph styles used across reports"""
+    """Build all paragraph styles - clean monochrome typography"""
     styles = getSampleStyleSheet()
 
     return {
         'college': ParagraphStyle(
             'College', parent=styles['Normal'],
-            fontSize=16, alignment=TA_CENTER,
-            textColor=PRIMARY, fontName='Helvetica-Bold',
-            spaceAfter=2
+            fontSize=15, alignment=TA_CENTER,
+            textColor=BLACK, fontName='Helvetica-Bold',
+            leading=18, spaceAfter=2
         ),
         'location': ParagraphStyle(
             'Location', parent=styles['Normal'],
-            fontSize=10, alignment=TA_CENTER,
-            textColor=MUTED, fontName='Helvetica',
-            spaceAfter=8
+            fontSize=9.5, alignment=TA_CENTER,
+            textColor=GRAY, fontName='Helvetica',
+            spaceAfter=4
         ),
         'report_title': ParagraphStyle(
-            'ReportTitle', parent=styles['Heading1'],
-            fontSize=15, alignment=TA_CENTER,
-            textColor=colors.white, fontName='Helvetica-Bold',
-            spaceAfter=0, spaceBefore=0
+            'ReportTitle', parent=styles['Normal'],
+            fontSize=12, alignment=TA_CENTER,
+            textColor=BLACK, fontName='Helvetica-Bold',
+            leading=15, spaceBefore=4, spaceAfter=2
         ),
-        'section': ParagraphStyle(
-            'Section', parent=styles['Normal'],
-            fontSize=11, alignment=TA_LEFT,
-            textColor=PRIMARY, fontName='Helvetica-Bold',
-            spaceBefore=10, spaceAfter=6
-        ),
-        'body': ParagraphStyle(
-            'Body', parent=styles['Normal'],
-            fontSize=9.5, alignment=TA_LEFT,
-            textColor=GRAY_TEXT, fontName='Helvetica',
-            leading=13
-        ),
-        'body_bold': ParagraphStyle(
-            'BodyBold', parent=styles['Normal'],
-            fontSize=9.5, alignment=TA_LEFT,
-            textColor=DARK_TEXT, fontName='Helvetica-Bold',
-            leading=13
-        ),
-        'meta': ParagraphStyle(
-            'Meta', parent=styles['Normal'],
+        'meta_line': ParagraphStyle(
+            'MetaLine', parent=styles['Normal'],
             fontSize=9, alignment=TA_LEFT,
-            textColor=GRAY_TEXT, fontName='Helvetica'
+            textColor=GRAY_DARK, fontName='Helvetica',
+            leading=13
         ),
-        'timestamp': ParagraphStyle(
-            'Timestamp', parent=styles['Normal'],
-            fontSize=8, alignment=TA_RIGHT,
-            textColor=MUTED, fontName='Helvetica-Oblique'
+        'footer': ParagraphStyle(
+            'Footer', parent=styles['Normal'],
+            fontSize=7.5, alignment=TA_CENTER,
+            textColor=GRAY_MID, fontName='Helvetica-Oblique'
         ),
-        'signature_label': ParagraphStyle(
+        'sig_label': ParagraphStyle(
             'SigLabel', parent=styles['Normal'],
             fontSize=9, alignment=TA_CENTER,
-            textColor=DARK_TEXT, fontName='Helvetica-Bold'
+            textColor=BLACK, fontName='Helvetica-Bold',
+            leading=12
         ),
-        'signature_sub': ParagraphStyle(
+        'sig_sub': ParagraphStyle(
             'SigSub', parent=styles['Normal'],
             fontSize=8, alignment=TA_CENTER,
-            textColor=MUTED, fontName='Helvetica'
+            textColor=GRAY, fontName='Helvetica'
         ),
     }
 
 
-def build_header(db, title, subtitle_lines, styles):
-    """Build a consistent attractive header block"""
+# ====================================================================
+# AUTO-SIZING COLUMN WIDTHS
+# ====================================================================
+
+def auto_column_widths(table_data, available_width, font_name='Helvetica',
+                       font_size=8.5, header_size=9, padding=6):
+    """
+    Calculate optimal column widths based on actual text content.
+    Ensures every column is wide enough for both header AND data.
+    Scales proportionally to fill available_width exactly.
+    """
+    if not table_data or not table_data[0]:
+        return []
+
+    n_cols = len(table_data[0])
+    min_widths = [0] * n_cols
+
+    # Measure each cell's natural width
+    for row_idx, row in enumerate(table_data):
+        size = header_size if row_idx == 0 else font_size
+        name = 'Helvetica-Bold' if row_idx == 0 else font_name
+        for col_idx in range(n_cols):
+            cell_text = str(row[col_idx]) if col_idx < len(row) else ''
+            if not cell_text:
+                cell_text = ' '
+            text_w = stringWidth(cell_text, name, size)
+            cell_w = text_w + (padding * 2) + 2
+            if cell_w > min_widths[col_idx]:
+                min_widths[col_idx] = cell_w
+
+    # Add a small safety margin
+    min_widths = [w + 2 for w in min_widths]
+    total_min = sum(min_widths)
+
+    # Distribute remaining width proportionally
+    if total_min >= available_width:
+        # Cannot fit — scale down proportionally
+        scale = available_width / total_min
+        return [w * scale for w in min_widths]
+
+    extra = available_width - total_min
+    per_col_extra = extra / n_cols
+    return [w + per_col_extra for w in min_widths]
+
+
+# ====================================================================
+# CELL / TABLE BUILDERS
+# ====================================================================
+
+def make_cell(text, align='LEFT', bold=False, size=8.5, color=None):
+    """Create a properly aligned Paragraph for a table cell"""
+    if color is None:
+        color = DARK
+    style = ParagraphStyle(
+        'Cell', fontName='Helvetica-Bold' if bold else 'Helvetica',
+        fontSize=size, textColor=color, leading=size + 3,
+        alignment={'LEFT': TA_LEFT, 'CENTER': TA_CENTER, 'RIGHT': TA_RIGHT}[align],
+        spaceBefore=0, spaceAfter=0,
+    )
+    return Paragraph(str(text) if text is not None else '', style)
+
+
+def build_header(db, title, meta_lines, styles, page_width):
+    """Elegant monochrome header with title rule"""
     info = get_college_info(db)
     elements = []
 
-    # College name + location
+    # College name (bold, centered)
     elements.append(Paragraph(info['name'].upper(), styles['college']))
+    # Location (small gray)
     elements.append(Paragraph(info['location'], styles['location']))
 
-    # Title bar (colored strip with white text)
-    title_table = Table(
-        [[Paragraph(title, styles['report_title'])]],
-        colWidths=[7.3 * inch]
-    )
-    title_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), PRIMARY),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-        ('LEFTPADDING', (0, 0), (-1, -1), 10),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+    # Thin rule
+    rule = Table([['']], colWidths=[page_width], rowHeights=[1])
+    rule.setStyle(TableStyle([
+        ('LINEABOVE', (0, 0), (-1, -1), 1.2, BLACK),
+        ('TOPPADDING', (0, 0), (-1, -1), 0),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
     ]))
-    elements.append(title_table)
+    elements.append(rule)
+    elements.append(Spacer(1, 6))
+
+    # Report title (bold, centered, letter-spaced feel)
+    elements.append(Paragraph(title.upper(), styles['report_title']))
+
+    # Second thin rule
+    rule2 = Table([['']], colWidths=[page_width], rowHeights=[1])
+    rule2.setStyle(TableStyle([
+        ('LINEABOVE', (0, 0), (-1, -1), 0.6, GRAY_DARK),
+        ('TOPPADDING', (0, 0), (-1, -1), 0),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+    ]))
+    elements.append(rule2)
     elements.append(Spacer(1, 8))
 
-    # Meta lines (Date, Exporter, etc.)
-    meta_data = []
-    for line in subtitle_lines:
-        meta_data.append([Paragraph(line, styles['meta'])])
+    # Meta lines (Date, Subject, etc.) — plain, aligned
+    if meta_lines:
+        for line in meta_lines:
+            elements.append(Paragraph(line, styles['meta_line']))
+        elements.append(Spacer(1, 10))
 
-    if meta_data:
-        meta_table = Table(meta_data, colWidths=[7.3 * inch])
-        meta_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), PRIMARY_SOFT),
-            ('BOX', (0, 0), (-1, -1), 0.5, BORDER),
-            ('LEFTPADDING', (0, 0), (-1, -1), 10),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 10),
-            ('TOPPADDING', (0, 0), (-1, -1), 5),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-        ]))
-        elements.append(meta_table)
-
-    elements.append(Spacer(1, 12))
     return elements
 
 
-def build_data_table(table_data, col_widths, styles, header_color=PRIMARY):
-    """Build a well-styled data table with alternating rows"""
-    if len(table_data) <= 1:
-        # Only header, no data
-        tbl = Table(table_data, colWidths=col_widths, repeatRows=1)
-        tbl.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), header_color),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 9),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('GRID', (0, 0), (-1, -1), 0.5, BORDER),
-            ('TOPPADDING', (0, 0), (-1, -1), 7),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
-        ]))
-        return tbl
+def build_data_table(table_data, available_width, alignment_map=None):
+    """
+    Build a professional monochrome table.
+    - Thin black header underline
+    - No fill colors
+    - Alternating very-light gray rows for readability
+    - Proper cell alignment per column
+    """
+    if not table_data:
+        return None
 
-    tbl = Table(table_data, colWidths=col_widths, repeatRows=1)
-    style_commands = [
-        # Header row
-        ('BACKGROUND', (0, 0), (-1, 0), header_color),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 9),
-        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+    n_cols = len(table_data[0])
+    col_widths = auto_column_widths(table_data, available_width)
+
+    # Default: first column (usually '#') center, rest left; text cols left, numeric center
+    if alignment_map is None:
+        alignment_map = ['CENTER'] * n_cols
+
+    # Convert every cell to Paragraph for wrapping
+    para_rows = []
+    for row_idx, row in enumerate(table_data):
+        para_row = []
+        for col_idx, cell in enumerate(row):
+            align = alignment_map[col_idx] if col_idx < len(alignment_map) else 'LEFT'
+            is_header = (row_idx == 0)
+            para_row.append(make_cell(
+                cell,
+                align='CENTER' if is_header else align,
+                bold=is_header,
+                size=9 if is_header else 8.5,
+                color=BLACK if is_header else DARK,
+            ))
+        para_rows.append(para_row)
+
+    tbl = Table(para_rows, colWidths=col_widths, repeatRows=1)
+    style_cmds = [
+        # Header
+        ('BACKGROUND', (0, 0), (-1, 0), WHITE),
+        ('LINEBELOW', (0, 0), (-1, 0), 1.2, BLACK),
+        ('LINEABOVE', (0, 0), (-1, 0), 0.6, GRAY_DARK),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('TOPPADDING', (0, 0), (-1, 0), 9),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
 
         # Body
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 8.5),
-        ('TEXTCOLOR', (0, 1), (-1, -1), DARK_TEXT),
-        ('ALIGN', (0, 1), (-1, -1), 'CENTER'),
-        ('TOPPADDING', (0, 1), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('TOPPADDING', (0, 1), (-1, -1), 7),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 7),
         ('LEFTPADDING', (0, 0), (-1, -1), 6),
         ('RIGHTPADDING', (0, 0), (-1, -1), 6),
 
-        # Borders
-        ('GRID', (0, 0), (-1, -1), 0.4, BORDER),
-        ('LINEBELOW', (0, 0), (-1, 0), 1.2, PRIMARY),
-        ('BOX', (0, 0), (-1, -1), 0.8, PRIMARY),
+        # Thin outer border + row separators
+        ('BOX', (0, 0), (-1, -1), 0.8, BLACK),
+        ('LINEBELOW', (0, 1), (-1, -2), 0.4, GRAY_FAINT),
     ]
 
-    # Alternating row colors
-    for i in range(1, len(table_data)):
+    # Subtle zebra striping (very light gray) — no colors, just readability
+    for i in range(1, len(para_rows)):
         if i % 2 == 0:
-            style_commands.append(('BACKGROUND', (0, i), (-1, i), ROW_ALT))
+            style_cmds.append(('BACKGROUND', (0, i), (-1, i), GRAY_ROW))
 
-    tbl.setStyle(TableStyle(style_commands))
+    tbl.setStyle(TableStyle(style_cmds))
     return tbl
 
 
-def build_signatures(styles, hod_name='Head of Department', faculty_name=None):
-    """Build HOD (left) and Faculty (right) signature spots"""
-    if faculty_name is None:
-        faculty_name = get_exporter_name()
+def build_signatures(styles, page_width, hod_name='Head of Department'):
+    """HOD (left) and Faculty (right) signatures — clean, monochrome"""
+    faculty_name = get_exporter_name()
 
     sig_data = [[
-        # Left: HOD
         Paragraph(
-            f'<br/><br/><br/>__________________________<br/>'
+            f'<br/><br/><br/>'
+            f'<font color="#555555">_______________________________</font><br/>'
             f'<b>{hod_name}</b><br/>'
-            f'<font size="8" color="#757575">Head of Department</font>',
-            ParagraphStyle('HODSig', parent=styles['signature_label'],
-                           alignment=TA_CENTER, leading=14)
+            f'<font size="8" color="#777777">Head of Department</font>',
+            styles['sig_label']
         ),
-        # Right: Faculty
         Paragraph(
-            f'<br/><br/><br/>__________________________<br/>'
+            f'<br/><br/><br/>'
+            f'<font color="#555555">_______________________________</font><br/>'
             f'<b>{faculty_name}</b><br/>'
-            f'<font size="8" color="#757575">Faculty (Exporter)</font>',
-            ParagraphStyle('FacSig', parent=styles['signature_label'],
-                           alignment=TA_CENTER, leading=14)
+            f'<font size="8" color="#777777">Faculty (Exporter)</font>',
+            styles['sig_label']
         ),
     ]]
 
-    sig_table = Table(sig_data, colWidths=[3.65 * inch, 3.65 * inch])
+    half = page_width / 2
+    sig_table = Table(sig_data, colWidths=[half, half])
     sig_table.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('TOPPADDING', (0, 0), (-1, -1), 10),
+        ('TOPPADDING', (0, 0), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
     ]))
     return sig_table
 
 
-def build_footer(styles):
-    """Build the footer timestamp line"""
-    return Paragraph(
-        f'Report generated on: {datetime.now().strftime("%d %b %Y, %I:%M %p")}  |  '
-        f'Smart Attendance System',
-        styles['timestamp']
+def build_footer(styles, page_width):
+    """Bottom timestamp footer with hairline above"""
+    rule = Table([['']], colWidths=[page_width], rowHeights=[1])
+    rule.setStyle(TableStyle([
+        ('LINEABOVE', (0, 0), (-1, -1), 0.5, GRAY_FAINT),
+        ('TOPPADDING', (0, 0), (-1, -1), 0),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+    ]))
+    timestamp = Paragraph(
+        f'Generated on {datetime.now().strftime("%d %b %Y, %I:%M %p")} '
+        f'&nbsp;•&nbsp; Smart Attendance System',
+        styles['footer']
     )
+    return [rule, Spacer(1, 4), timestamp]
 
 
-def build_report(db, title, subtitle_lines, table_data, col_widths,
-                 filename, hod_name='Head of Department'):
-    """Generic report builder - used by all report types"""
+# ====================================================================
+# GENERIC REPORT BUILDER
+# ====================================================================
+
+def build_report(db, title, meta_lines, table_data, alignment_map, filename,
+                 landscape_mode=True, hod_name=None):
+    """
+    Build a complete report with:
+    - Clean header (no colors)
+    - Auto-sized table
+    - HOD + Faculty signatures
+    - Timestamp footer
+    """
     buffer = io.BytesIO()
+    pagesize = landscape(A4) if landscape_mode else A4
+    margin = 0.5 * inch
+
     doc = SimpleDocTemplate(
         buffer,
-        pagesize=landscape(A4),
-        leftMargin=0.5 * inch,
-        rightMargin=0.5 * inch,
-        topMargin=0.5 * inch,
-        bottomMargin=0.5 * inch,
+        pagesize=pagesize,
+        leftMargin=margin,
+        rightMargin=margin,
+        topMargin=margin,
+        bottomMargin=margin,
         title=title,
     )
+
     styles = build_styles()
+    page_width = pagesize[0] - (2 * margin)
+    info = get_college_info(db)
+
+    if hod_name is None:
+        hod_name = info.get('hod', 'Head of Department')
+
     elements = []
 
     # Header
-    elements.extend(build_header(db, title, subtitle_lines, styles))
+    elements.extend(build_header(db, title, meta_lines, styles, page_width))
 
-    # Data table
-    elements.append(build_data_table(table_data, col_widths, styles))
+    # Table
+    tbl = build_data_table(table_data, page_width, alignment_map)
+    if tbl is not None:
+        elements.append(tbl)
 
-    elements.append(Spacer(1, 24))
+    elements.append(Spacer(1, 22))
 
     # Signatures
-    elements.append(build_signatures(styles, hod_name=hod_name))
+    elements.append(build_signatures(styles, page_width, hod_name=hod_name))
 
-    elements.append(Spacer(1, 16))
+    elements.append(Spacer(1, 18))
 
     # Footer
-    elements.append(build_footer(styles))
+    elements.extend(build_footer(styles, page_width))
 
     doc.build(elements)
     return create_pdf_response(buffer, filename)
@@ -304,15 +385,15 @@ def build_report(db, title, subtitle_lines, table_data, col_widths,
 # ====================================================================
 
 def export_attendance_report(session_id, db):
-    """Export session attendance as PDF"""
+    """Session attendance report"""
     session_data = db.sessions.find_one({"session_id": session_id})
     if not session_data:
         return "Session not found"
 
-    attendance_records = list(db.attendance.find({"session_id": session_id}).sort("time", 1))
+    records = list(db.attendance.find({"session_id": session_id}).sort("time", 1))
 
     table_data = [['#', 'Roll No', 'Name', 'Branch', 'Time', 'IP Address']]
-    for idx, record in enumerate(attendance_records, 1):
+    for idx, record in enumerate(records, 1):
         student = db.students.find_one({"roll_no": record['student_id']})
         time_str = record['time'].strftime('%I:%M %p') if record.get('time') else 'N/A'
         table_data.append([
@@ -324,33 +405,35 @@ def export_attendance_report(session_id, db):
             record.get('ip_address', 'N/A'),
         ])
 
-    info = get_college_info(db)
-    subtitle_lines = [
-        f'<b>Session ID:</b> {session_id}  &nbsp;&nbsp;  '
-        f'<b>Subject:</b> {session_data["subject"]}  &nbsp;&nbsp;  '
+    meta_lines = [
+        f'<b>Session ID:</b> {session_id}   •   '
+        f'<b>Subject:</b> {session_data["subject"]}   •   '
         f'<b>Date:</b> {session_data["start_time"].strftime("%d %b %Y")}',
-        f'<b>Start Time:</b> {session_data["start_time"].strftime("%I:%M %p")}  &nbsp;&nbsp;  '
-        f'<b>Duration:</b> {session_data.get("duration", "N/A")} min  &nbsp;&nbsp;  '
-        f'<b>Total Present:</b> {len(attendance_records)}',
+        f'<b>Start Time:</b> {session_data["start_time"].strftime("%I:%M %p")}   •   '
+        f'<b>Duration:</b> {session_data.get("duration", "N/A")} min   •   '
+        f'<b>Total Present:</b> {len(records)}',
     ]
+
+    # #(center) Roll(center) Name(left) Branch(center) Time(center) IP(left)
+    alignment_map = ['CENTER', 'CENTER', 'LEFT', 'CENTER', 'CENTER', 'CENTER']
 
     return build_report(
         db,
-        title=f'ATTENDANCE REPORT — {session_data["subject"]}',
-        subtitle_lines=subtitle_lines,
+        title=f'Attendance Report — {session_data["subject"]}',
+        meta_lines=meta_lines,
         table_data=table_data,
-        col_widths=[0.4 * inch, 1.0 * inch, 1.8 * inch, 0.9 * inch, 1.1 * inch, 1.6 * inch],
+        alignment_map=alignment_map,
         filename=f'attendance_{session_id}.pdf',
     )
 
 
 def export_student_report(roll_no, db):
-    """Export individual student report as PDF"""
+    """Individual student report"""
     student = db.students.find_one({"roll_no": roll_no})
     if not student:
         return "Student not found"
 
-    attendance_records = list(db.attendance.find({"student_id": roll_no}))
+    attendance = list(db.attendance.find({"student_id": roll_no}))
     all_sessions = list(db.sessions.find({}))
 
     subject_stats = {}
@@ -360,158 +443,162 @@ def export_student_report(roll_no, db):
             subject_stats.setdefault(subj, {"total": 0, "attended": 0})
             subject_stats[subj]["total"] += 1
 
-    for record in attendance_records:
+    for record in attendance:
         subj = record.get("subject")
         if subj in subject_stats:
             subject_stats[subj]["attended"] += 1
 
-    for subj, d in subject_stats.items():
-        d["percentage"] = round((d["attended"] / d["total"]) * 100, 2) if d["total"] > 0 else 0
+    for d in subject_stats.values():
+        d["percentage"] = round((d["attended"] / d["total"]) * 100, 2) if d["total"] else 0
 
-    total_attended = len(attendance_records)
+    total_attended = len(attendance)
     total_sessions = len(all_sessions)
-    overall = round((total_attended / total_sessions) * 100, 2) if total_sessions > 0 else 0
+    overall = round((total_attended / total_sessions) * 100, 2) if total_sessions else 0
 
     table_data = [['#', 'Subject', 'Attended', 'Total', 'Percentage', 'Status']]
     for idx, (subj, d) in enumerate(subject_stats.items(), 1):
         status = 'Good' if d['percentage'] >= 85 else ('Average' if d['percentage'] >= 75 else 'Needs Improvement')
         table_data.append([
             str(idx), subj, str(d['attended']), str(d['total']),
-            f"{d['percentage']}%", status
+            f"{d['percentage']}%", status,
         ])
-    table_data.append(['', 'OVERALL', str(total_attended), str(total_sessions), f"{overall}%", ''])
+    # Total row
+    table_data.append(['', 'OVERALL', str(total_attended), str(total_sessions), f'{overall}%', '—'])
 
-    subtitle_lines = [
-        f'<b>Name:</b> {student["name"]}  &nbsp;&nbsp;  '
-        f'<b>Roll No:</b> {student["roll_no"]}  &nbsp;&nbsp;  '
+    meta_lines = [
+        f'<b>Name:</b> {student["name"]}   •   '
+        f'<b>Roll No:</b> {student["roll_no"]}   •   '
         f'<b>Branch:</b> {student["branch"]}',
-        f'<b>Overall Attendance:</b> {overall}%  &nbsp;&nbsp;  '
+        f'<b>Overall Attendance:</b> {overall}%   •   '
         f'<b>Classes Attended:</b> {total_attended} / {total_sessions}',
     ]
 
+    alignment_map = ['CENTER', 'LEFT', 'CENTER', 'CENTER', 'CENTER', 'CENTER']
+
     return build_report(
         db,
-        title='STUDENT ATTENDANCE REPORT',
-        subtitle_lines=subtitle_lines,
+        title='Student Attendance Report',
+        meta_lines=meta_lines,
         table_data=table_data,
-        col_widths=[0.5 * inch, 2.0 * inch, 1.0 * inch, 1.0 * inch, 1.2 * inch, 1.8 * inch],
+        alignment_map=alignment_map,
         filename=f'student_{roll_no}_report.pdf',
+        landscape_mode=False,
     )
 
 
 def export_all_students_report(db):
-    """Export all students report as PDF"""
-    students_list = list(db.students.find({}))
+    """All students report"""
+    students_list = list(db.students.find({}).sort("roll_no", 1))
     all_sessions = list(db.sessions.find({}))
 
-    total_sessions_dict = {}
+    totals = {}
     for s in all_sessions:
         subj = s.get('subject')
-        total_sessions_dict[subj] = total_sessions_dict.get(subj, 0) + 1
+        totals[subj] = totals.get(subj, 0) + 1
 
     table_data = [['#', 'Roll No', 'Name', 'Branch', 'Attended', 'Total', 'Overall %', 'Performance']]
     for idx, student in enumerate(students_list, 1):
-        attended_total = 0
-        possible_total = 0
-        for subj, total in total_sessions_dict.items():
-            attended_total += db.attendance.count_documents(
-                {"student_id": student['roll_no'], "subject": subj}
-            )
-            possible_total += total
-        overall = round((attended_total / possible_total) * 100, 2) if possible_total > 0 else 0
+        att = 0
+        pos = 0
+        for subj, t in totals.items():
+            att += db.attendance.count_documents({"student_id": student['roll_no'], "subject": subj})
+            pos += t
+        overall = round((att / pos) * 100, 2) if pos else 0
         perf = 'Excellent' if overall >= 85 else ('Good' if overall >= 75 else 'Needs Improvement')
         table_data.append([
             str(idx), student['roll_no'], student['name'], student['branch'],
-            str(attended_total), str(possible_total), f"{overall}%", perf
+            str(att), str(pos), f'{overall}%', perf,
         ])
 
-    subtitle_lines = [
-        f'<b>Total Students:</b> {len(students_list)}  &nbsp;&nbsp;  '
+    meta_lines = [
+        f'<b>Total Students:</b> {len(students_list)}   •   '
         f'<b>Total Sessions:</b> {len(all_sessions)}',
     ]
 
+    alignment_map = ['CENTER', 'CENTER', 'LEFT', 'CENTER', 'CENTER', 'CENTER', 'CENTER', 'CENTER']
+
     return build_report(
         db,
-        title='COMPLETE STUDENT ATTENDANCE REPORT',
-        subtitle_lines=subtitle_lines,
+        title='Complete Student Attendance Report',
+        meta_lines=meta_lines,
         table_data=table_data,
-        col_widths=[0.4 * inch, 0.9 * inch, 1.7 * inch, 0.9 * inch, 0.8 * inch, 0.7 * inch, 0.9 * inch, 1.5 * inch],
+        alignment_map=alignment_map,
         filename='all_students_report.pdf',
     )
 
 
 def export_subject_report(subject, db):
-    """Export subject-wise report as PDF"""
+    """Subject-wise report"""
     sessions_list = list(db.sessions.find({"subject": subject}))
-    students_list = list(db.students.find({}))
+    students_list = list(db.students.find({}).sort("roll_no", 1))
 
     table_data = [['#', 'Roll No', 'Name', 'Branch', 'Attended', 'Total', 'Percentage', 'Status']]
     for idx, student in enumerate(students_list, 1):
-        attended = db.attendance.count_documents(
-            {"student_id": student['roll_no'], "subject": subject}
-        )
-        percent = round((attended / len(sessions_list)) * 100, 2) if sessions_list else 0
-        status = 'Good' if percent >= 85 else ('Average' if percent >= 75 else 'Low')
+        att = db.attendance.count_documents({"student_id": student['roll_no'], "subject": subject})
+        pct = round((att / len(sessions_list)) * 100, 2) if sessions_list else 0
+        status = 'Good' if pct >= 85 else ('Average' if pct >= 75 else 'Low')
         table_data.append([
             str(idx), student['roll_no'], student['name'], student['branch'],
-            str(attended), str(len(sessions_list)), f"{percent}%", status
+            str(att), str(len(sessions_list)), f'{pct}%', status,
         ])
 
-    subtitle_lines = [
-        f'<b>Subject:</b> {subject}  &nbsp;&nbsp;  '
-        f'<b>Total Sessions:</b> {len(sessions_list)}  &nbsp;&nbsp;  '
+    meta_lines = [
+        f'<b>Subject:</b> {subject}   •   '
+        f'<b>Total Sessions:</b> {len(sessions_list)}   •   '
         f'<b>Total Students:</b> {len(students_list)}',
     ]
 
+    alignment_map = ['CENTER', 'CENTER', 'LEFT', 'CENTER', 'CENTER', 'CENTER', 'CENTER', 'CENTER']
+
     return build_report(
         db,
-        title=f'SUBJECT REPORT — {subject}',
-        subtitle_lines=subtitle_lines,
+        title=f'Subject Report — {subject}',
+        meta_lines=meta_lines,
         table_data=table_data,
-        col_widths=[0.4 * inch, 0.9 * inch, 1.7 * inch, 0.9 * inch, 0.8 * inch, 0.7 * inch, 1.0 * inch, 1.4 * inch],
+        alignment_map=alignment_map,
         filename=f'{subject}_report.pdf',
     )
 
 
 def export_overall_report(db):
-    """Export overall report as PDF"""
+    """Overall subject report"""
     subjects = ["CNS", "RM", "M.Com", "OE-2", "SFT", "SEM"]
-    subject_stats = []
-    for subject in subjects:
-        sessions_count = db.sessions.count_documents({"subject": subject})
-        attended_count = db.attendance.count_documents({"subject": subject})
-        percent = round((attended_count / sessions_count) * 100, 2) if sessions_count > 0 else 0
-        subject_stats.append({
-            "subject": subject, "total": sessions_count,
-            "attended": attended_count, "percentage": percent
-        })
+    stats = []
+    for subj in subjects:
+        sc = db.sessions.count_documents({"subject": subj})
+        ac = db.attendance.count_documents({"subject": subj})
+        pct = round((ac / sc) * 100, 2) if sc else 0
+        stats.append({"subject": subj, "total": sc, "attended": ac, "percentage": pct})
 
     table_data = [['#', 'Subject', 'Total Sessions', 'Total Attendance', 'Percentage', 'Performance']]
-    for idx, stat in enumerate(subject_stats, 1):
-        perf = 'Good' if stat['percentage'] >= 85 else ('Average' if stat['percentage'] >= 75 else 'Low')
+    for idx, s in enumerate(stats, 1):
+        perf = 'Good' if s['percentage'] >= 85 else ('Average' if s['percentage'] >= 75 else 'Low')
         table_data.append([
-            str(idx), stat['subject'], str(stat['total']),
-            str(stat['attended']), f"{stat['percentage']}%", perf
+            str(idx), s['subject'], str(s['total']),
+            str(s['attended']), f"{s['percentage']}%", perf,
         ])
 
-    subtitle_lines = [
-        f'<b>Total Students:</b> {db.students.count_documents({})}  &nbsp;&nbsp;  '
-        f'<b>Total Sessions:</b> {db.sessions.count_documents({})}  &nbsp;&nbsp;  '
+    meta_lines = [
+        f'<b>Total Students:</b> {db.students.count_documents({})}   •   '
+        f'<b>Total Sessions:</b> {db.sessions.count_documents({})}   •   '
         f'<b>Subjects:</b> {len(subjects)}',
     ]
 
+    alignment_map = ['CENTER', 'LEFT', 'CENTER', 'CENTER', 'CENTER', 'CENTER']
+
     return build_report(
         db,
-        title='OVERALL ATTENDANCE REPORT',
-        subtitle_lines=subtitle_lines,
+        title='Overall Attendance Report',
+        meta_lines=meta_lines,
         table_data=table_data,
-        col_widths=[0.5 * inch, 1.5 * inch, 1.3 * inch, 1.5 * inch, 1.2 * inch, 1.5 * inch],
+        alignment_map=alignment_map,
         filename='overall_report.pdf',
+        landscape_mode=False,
     )
 
 
 def export_all_attendance_report(session, db):
-    """Export all attendance records as PDF"""
+    """All attendance records"""
     if session.get('role') == 'student':
         records = list(db.attendance.find({"student_id": session['user_id']}).sort("time", -1))
     else:
@@ -520,79 +607,79 @@ def export_all_attendance_report(session, db):
     table_data = [['#', 'Roll No', 'Name', 'Branch', 'Session ID', 'Subject', 'Date & Time']]
     for idx, record in enumerate(records, 1):
         student = db.students.find_one({"roll_no": record['student_id']})
-        time_str = record['time'].strftime('%d-%m-%Y %I:%M %p') if record.get('time') else 'N/A'
+        t = record['time'].strftime('%d-%m-%Y %I:%M %p') if record.get('time') else 'N/A'
         table_data.append([
-            str(idx),
-            record['student_id'],
+            str(idx), record['student_id'],
             student['name'] if student else 'Unknown',
             student['branch'] if student else '-',
-            record['session_id'],
-            record['subject'],
-            time_str,
+            record['session_id'], record['subject'], t,
         ])
 
-    subtitle_lines = [
-        f'<b>Total Records:</b> {len(records)}  &nbsp;&nbsp;  '
+    meta_lines = [
+        f'<b>Total Records:</b> {len(records)}   •   '
         f'<b>Exported By:</b> {session.get("user_name", "N/A")} ({session.get("role", "N/A")})',
     ]
 
+    alignment_map = ['CENTER', 'CENTER', 'LEFT', 'CENTER', 'CENTER', 'CENTER', 'CENTER']
+
     return build_report(
         db,
-        title='COMPLETE ATTENDANCE RECORDS',
-        subtitle_lines=subtitle_lines,
+        title='Complete Attendance Records',
+        meta_lines=meta_lines,
         table_data=table_data,
-        col_widths=[0.4 * inch, 0.9 * inch, 1.6 * inch, 0.8 * inch, 1.0 * inch, 0.9 * inch, 1.6 * inch],
+        alignment_map=alignment_map,
         filename='all_attendance_records.pdf',
     )
 
 
 def export_faculty_report(db):
-    """Export faculty list as PDF"""
+    """Faculty directory"""
     faculties = list(db.faculty.find({}).sort("faculty_id", 1))
 
     table_data = [['#', 'Faculty ID', 'Name', 'Email', 'Department', 'Created Date']]
-    for idx, faculty in enumerate(faculties, 1):
-        created = faculty['created_at'].strftime('%d-%m-%Y') if faculty.get('created_at') else 'N/A'
+    for idx, f in enumerate(faculties, 1):
+        created = f['created_at'].strftime('%d-%m-%Y') if f.get('created_at') else 'N/A'
         table_data.append([
-            str(idx), faculty['faculty_id'], faculty['name'],
-            faculty['email'], faculty['department'], created
+            str(idx), f['faculty_id'], f['name'], f['email'],
+            f['department'], created,
         ])
 
-    subtitle_lines = [f'<b>Total Faculty Members:</b> {len(faculties)}']
+    meta_lines = [f'<b>Total Faculty Members:</b> {len(faculties)}']
+
+    alignment_map = ['CENTER', 'CENTER', 'LEFT', 'LEFT', 'CENTER', 'CENTER']
 
     return build_report(
         db,
-        title='FACULTY DIRECTORY',
-        subtitle_lines=subtitle_lines,
+        title='Faculty Directory',
+        meta_lines=meta_lines,
         table_data=table_data,
-        col_widths=[0.4 * inch, 1.0 * inch, 1.6 * inch, 2.0 * inch, 1.1 * inch, 1.2 * inch],
+        alignment_map=alignment_map,
         filename='faculty_list.pdf',
     )
 
 
 def export_students_directory(db):
-    """Export students directory as PDF"""
+    """Students directory"""
     students_list = list(db.students.find({}).sort("roll_no", 1))
 
     table_data = [['#', 'Roll No', 'Name', 'Branch', 'Email', 'Year', 'Semester']]
-    for idx, student in enumerate(students_list, 1):
+    for idx, s in enumerate(students_list, 1):
         table_data.append([
-            str(idx),
-            student['roll_no'],
-            student['name'],
-            student['branch'],
-            student.get('email', 'N/A'),
-            f"Year {student.get('year', 'N/A')}",
-            f"Sem {student.get('semester', 'N/A')}",
+            str(idx), s['roll_no'], s['name'], s['branch'],
+            s.get('email', 'N/A'),
+            f"Year {s.get('year', 'N/A')}",
+            f"Sem {s.get('semester', 'N/A')}",
         ])
 
-    subtitle_lines = [f'<b>Total Students:</b> {len(students_list)}']
+    meta_lines = [f'<b>Total Students:</b> {len(students_list)}']
+
+    alignment_map = ['CENTER', 'CENTER', 'LEFT', 'CENTER', 'LEFT', 'CENTER', 'CENTER']
 
     return build_report(
         db,
-        title='STUDENT DIRECTORY',
-        subtitle_lines=subtitle_lines,
+        title='Student Directory',
+        meta_lines=meta_lines,
         table_data=table_data,
-        col_widths=[0.4 * inch, 0.9 * inch, 1.6 * inch, 0.8 * inch, 2.0 * inch, 0.8 * inch, 0.8 * inch],
+        alignment_map=alignment_map,
         filename='student_list.pdf',
     )
