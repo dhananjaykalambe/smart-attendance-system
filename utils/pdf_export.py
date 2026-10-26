@@ -48,8 +48,13 @@ def get_college_info(db):
 
 
 def get_exporter_name():
-    """Get current logged-in faculty name from session"""
+    """Get current logged-in user's name from session"""
     return session.get('user_name', 'Faculty')
+
+
+def get_exporter_role():
+    """Get current logged-in user's role from session"""
+    return session.get('role', 'faculty')
 
 
 def create_pdf_response(buffer, filename):
@@ -187,7 +192,7 @@ def build_header(db, title, meta_lines, styles, page_width):
     elements.append(rule)
     elements.append(Spacer(1, 6))
 
-    # Report title (bold, centered, letter-spaced feel)
+    # Report title (bold, centered)
     elements.append(Paragraph(title.upper(), styles['report_title']))
 
     # Second thin rule
@@ -200,7 +205,7 @@ def build_header(db, title, meta_lines, styles, page_width):
     elements.append(rule2)
     elements.append(Spacer(1, 8))
 
-    # Meta lines (Date, Subject, etc.) — plain, aligned
+    # Meta lines
     if meta_lines:
         for line in meta_lines:
             elements.append(Paragraph(line, styles['meta_line']))
@@ -223,7 +228,6 @@ def build_data_table(table_data, available_width, alignment_map=None):
     n_cols = len(table_data[0])
     col_widths = auto_column_widths(table_data, available_width)
 
-    # Default: first column (usually '#') center, rest left; text cols left, numeric center
     if alignment_map is None:
         alignment_map = ['CENTER'] * n_cols
 
@@ -265,7 +269,7 @@ def build_data_table(table_data, available_width, alignment_map=None):
         ('LINEBELOW', (0, 1), (-1, -2), 0.4, GRAY_FAINT),
     ]
 
-    # Subtle zebra striping (very light gray) — no colors, just readability
+    # Subtle zebra striping (very light gray)
     for i in range(1, len(para_rows)):
         if i % 2 == 0:
             style_cmds.append(('BACKGROUND', (0, i), (-1, i), GRAY_ROW))
@@ -275,8 +279,46 @@ def build_data_table(table_data, available_width, alignment_map=None):
 
 
 def build_signatures(styles, page_width, hod_name='Head of Department'):
-    """HOD (left) and Faculty (right) signatures — clean, monochrome"""
+    """
+    Role-aware signature block:
+      - Student exports  -> HOD (left)  +  "Class Incharge" (right, no name)
+      - Faculty exports  -> HOD (left)  +  Faculty name (right, "Faculty")
+      - Admin exports    -> HOD only, centered
+    """
+    role = get_exporter_role()
     faculty_name = get_exporter_name()
+
+    # ---------------- ADMIN: HOD only, centered ----------------
+    if role == 'admin':
+        sig_data = [[
+            '',  # empty left
+            Paragraph(
+                f'<br/><br/><br/>'
+                f'<font color="#555555">_______________________________</font><br/>'
+                f'<b>{hod_name}</b><br/>'
+                f'<font size="8" color="#777777">Head of Department</font>',
+                styles['sig_label']
+            ),
+            '',  # empty right
+        ]]
+        third = page_width / 3
+        sig_table = Table(sig_data, colWidths=[third, third, third])
+        sig_table.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('TOPPADDING', (0, 0), (-1, -1), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ]))
+        return sig_table
+
+    # ---------------- STUDENT: HOD + Class Incharge ----------------
+    if role == 'student':
+        right_label = 'Class Incharge'
+        right_sub = 'Class Incharge'
+    # ---------------- FACULTY: HOD + Faculty name ----------------
+    else:
+        right_label = faculty_name
+        right_sub = 'Faculty'
 
     sig_data = [[
         Paragraph(
@@ -289,8 +331,8 @@ def build_signatures(styles, page_width, hod_name='Head of Department'):
         Paragraph(
             f'<br/><br/><br/>'
             f'<font color="#555555">_______________________________</font><br/>'
-            f'<b>{faculty_name}</b><br/>'
-            f'<font size="8" color="#777777">Faculty (Exporter)</font>',
+            f'<b>{right_label}</b><br/>'
+            f'<font size="8" color="#777777">{right_sub}</font>',
             styles['sig_label']
         ),
     ]]
@@ -332,7 +374,7 @@ def build_report(db, title, meta_lines, table_data, alignment_map, filename,
     Build a complete report with:
     - Clean header (no colors)
     - Auto-sized table
-    - HOD + Faculty signatures
+    - Role-aware signatures
     - Timestamp footer
     """
     buffer = io.BytesIO()
@@ -368,7 +410,7 @@ def build_report(db, title, meta_lines, table_data, alignment_map, filename,
 
     elements.append(Spacer(1, 22))
 
-    # Signatures
+    # Signatures (role-aware)
     elements.append(build_signatures(styles, page_width, hod_name=hod_name))
 
     elements.append(Spacer(1, 18))
@@ -414,7 +456,6 @@ def export_attendance_report(session_id, db):
         f'<b>Total Present:</b> {len(records)}',
     ]
 
-    # #(center) Roll(center) Name(left) Branch(center) Time(center) IP(left)
     alignment_map = ['CENTER', 'CENTER', 'LEFT', 'CENTER', 'CENTER', 'CENTER']
 
     return build_report(
