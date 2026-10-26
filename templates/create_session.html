@@ -148,16 +148,16 @@
             <label style="font-weight: 600; color: var(--text-secondary);">Select Subject:</label>
             <div class="subject-grid">
                 <button type="button" value="CNS" class="subject-card" onclick="selectSubject(this, 'CNS')">
-                    Cryptography <br><small>CNS</small>
+                    Cryptography & Network Security<br><small>CNS</small>
                 </button>
                 <button type="button" value="RM" class="subject-card" onclick="selectSubject(this, 'RM')">
-                    Research Methadology<br><small>RM</small>
+                    Research Methodology<br><small>RM</small>
                 </button>
                 <button type="button" value="M.Com" class="subject-card" onclick="selectSubject(this, 'M.Com')">
                     Mobile Computing<br><small>M.Com</small>
                 </button>
                 <button type="button" value="OE-2" class="subject-card" onclick="selectSubject(this, 'OE-2')">
-                    Waste Management<br><small>OE-2</small>
+                    Open Elective-2<br><small>OE-2</small>
                 </button>
                 <button type="button" value="SFT" class="subject-card" onclick="selectSubject(this, 'SFT')">
                     Salesforce Technology<br><small>SFT</small>
@@ -222,12 +222,12 @@ function selectSubject(button, subject) {
     var displayEl = document.getElementById('selectedDisplay');
     var nameEl = document.getElementById('selectedSubjectName');
     var subjectNames = {
-        'ML': 'Machine Learning',
-        'DS': 'Data Structures',
-        'CD': 'Compiler Design',
-        'IPR': 'Intellectual Property Rights',
-        'EOII': 'Economics in IT Industry',
-        'OE-1': 'Environmental Engineering'
+        'CNS': 'Cryptography & Network Security',
+        'RM': 'Research Methodology',
+        'M.Com': 'Mobile Computing',
+        'OE-2': 'Open Elective-2',
+        'SFT': 'Salesforce Technology',
+        'SEM': 'Seminar'
     };
     nameEl.textContent = subjectNames[subject] || subject;
     displayEl.classList.add('show');
