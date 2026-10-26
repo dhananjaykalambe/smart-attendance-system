@@ -274,7 +274,7 @@ def export_subject_report(subject, db):
 
 def export_overall_report(db):
     """Export overall report as PDF"""
-    subjects = ["ML", "DS", "CD", "IPR", "EOII", "OE-1"]
+    subjects = ["CNS", "RM", "M.Com", "OE-2", "SFT", "SEM"]
     subject_stats = []
     for subject in subjects:
         sessions_count = db.sessions.count_documents({"subject": subject})
